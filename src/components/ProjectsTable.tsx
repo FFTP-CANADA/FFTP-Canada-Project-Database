@@ -1,0 +1,202 @@
+
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Mail, FileText, Filter } from "lucide-react";
+import { Project } from "@/hooks/useProjectData";
+import { useToast } from "@/hooks/use-toast";
+
+interface ProjectsTableProps {
+  projects: Project[];
+}
+
+const ProjectsTable = ({ projects }: ProjectsTableProps) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [countryFilter, setCountryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [impactAreaFilter, setImpactAreaFilter] = useState("all");
+  const { toast } = useToast();
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "On-Track": return "bg-green-100 text-green-800 border-green-200";
+      case "Delayed": return "bg-red-100 text-red-800 border-red-200";
+      case "Pending Start": return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "Completed": return "bg-blue-100 text-blue-800 border-blue-200";
+      case "Cancelled": return "bg-gray-100 text-gray-800 border-gray-200";
+      case "Needs Attention": return "bg-orange-100 text-orange-800 border-orange-200";
+      default: return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const filteredProjects = projects.filter(project => {
+    const matchesSearch = project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         project.partnerName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCountry = countryFilter === "all" || project.country === countryFilter;
+    const matchesStatus = statusFilter === "all" || project.status === statusFilter;
+    const matchesImpactArea = impactAreaFilter === "all" || project.impactArea === impactAreaFilter;
+    
+    return matchesSearch && matchesCountry && matchesStatus && matchesImpactArea;
+  });
+
+  const handleSendFollowUp = (project: Project) => {
+    // Simulate sending follow-up email
+    toast({
+      title: "Follow-up Email Sent",
+      description: `Follow-up email sent for project: ${project.projectName}`,
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-blue-600" />
+          <span className="text-sm font-medium text-blue-700">Filters:</span>
+        </div>
+        
+        <Input
+          placeholder="Search projects..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-xs border-blue-200 focus:border-blue-400"
+        />
+
+        <Select value={countryFilter} onValueChange={setCountryFilter}>
+          <SelectTrigger className="w-[140px] border-blue-200 focus:border-blue-400">
+            <SelectValue placeholder="Country" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Countries</SelectItem>
+            <SelectItem value="Jamaica">Jamaica</SelectItem>
+            <SelectItem value="Guyana">Guyana</SelectItem>
+            <SelectItem value="Haiti">Haiti</SelectItem>
+            <SelectItem value="Honduras">Honduras</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[140px] border-blue-200 focus:border-blue-400">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="On-Track">On-Track</SelectItem>
+            <SelectItem value="Delayed">Delayed</SelectItem>
+            <SelectItem value="Pending Start">Pending Start</SelectItem>
+            <SelectItem value="Completed">Completed</SelectItem>
+            <SelectItem value="Cancelled">Cancelled</SelectItem>
+            <SelectItem value="Needs Attention">Needs Attention</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={impactAreaFilter} onValueChange={setImpactAreaFilter}>
+          <SelectTrigger className="w-[180px] border-blue-200 focus:border-blue-400">
+            <SelectValue placeholder="Impact Area" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Impact Areas</SelectItem>
+            <SelectItem value="Food Security">Food Security</SelectItem>
+            <SelectItem value="Education">Education</SelectItem>
+            <SelectItem value="Housing & Community">Housing & Community</SelectItem>
+            <SelectItem value="Health">Health</SelectItem>
+            <SelectItem value="Economic Empowerment">Economic Empowerment</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Table */}
+      <div className="border border-blue-200 rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader className="bg-blue-600">
+            <TableRow>
+              <TableHead className="text-white">Project Name</TableHead>
+              <TableHead className="text-white">Country</TableHead>
+              <TableHead className="text-white">Impact Area</TableHead>
+              <TableHead className="text-white">Status</TableHead>
+              <TableHead className="text-white">Total Cost</TableHead>
+              <TableHead className="text-white">Disbursed</TableHead>
+              <TableHead className="text-white">Progress</TableHead>
+              <TableHead className="text-white">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredProjects.map((project) => (
+              <TableRow key={project.id} className="hover:bg-blue-50">
+                <TableCell className="font-medium text-blue-900">
+                  {project.projectName}
+                  {project.followUpNeeded && (
+                    <Badge variant="outline" className="ml-2 text-orange-600 border-orange-300">
+                      Follow-up needed
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell className="text-blue-700">{project.country}</TableCell>
+                <TableCell className="text-blue-700">{project.impactArea}</TableCell>
+                <TableCell>
+                  <Badge className={getStatusColor(project.status)}>
+                    {project.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-blue-900">
+                  {project.currency} ${project.totalCost.toLocaleString()}
+                </TableCell>
+                <TableCell className="text-blue-900">
+                  {project.currency} ${project.amountDisbursed.toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  <div className="w-full bg-blue-100 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all"
+                      style={{ 
+                        width: `${Math.min((project.amountDisbursed / project.totalCost) * 100, 100)}%` 
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs text-blue-600 mt-1">
+                    {Math.round((project.amountDisbursed / project.totalCost) * 100)}%
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                    >
+                      <FileText className="w-4 h-4 mr-1" />
+                      Notes
+                    </Button>
+                    {project.followUpNeeded && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                        onClick={() => handleSendFollowUp(project)}
+                      >
+                        <Mail className="w-4 h-4 mr-1" />
+                        Follow-up
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {filteredProjects.length === 0 && (
+        <div className="text-center py-8 text-blue-600">
+          No projects found matching your criteria.
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ProjectsTable;

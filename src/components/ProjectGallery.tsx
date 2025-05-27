@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -6,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, X, Camera, Trash2, Edit } from "lucide-react";
 import { ProjectPhoto } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface ProjectGalleryProps {
   projectId: string;
@@ -149,44 +151,52 @@ const ProjectGallery = ({
                   <p className="text-sm">Upload some photos to showcase your project</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {photos.map((photo) => (
-                    <div key={photo.id} className="group relative">
-                      <div 
-                        className="relative cursor-pointer"
-                        onClick={() => setSelectedPhoto(photo.photoUrl)}
-                      >
-                        <img
-                          src={photo.photoUrl}
-                          alt={photo.caption || "Project photo"}
-                          className="w-full h-48 object-cover rounded-lg hover:opacity-90 transition-opacity"
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg" />
-                      </div>
-                      {photo.caption && (
-                        <p className="mt-2 text-sm text-blue-700 line-clamp-2">{photo.caption}</p>
-                      )}
-                      <p className="text-xs text-blue-500 mt-1">
-                        {new Date(photo.uploadDate).toLocaleDateString()}
-                      </p>
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600 text-white"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                <div className="relative px-12">
+                  <Carousel className="w-full">
+                    <CarouselContent>
+                      {photos.map((photo) => (
+                        <CarouselItem key={photo.id} className="md:basis-1/2 lg:basis-1/3">
+                          <div className="group relative">
+                            <div 
+                              className="relative cursor-pointer"
+                              onClick={() => setSelectedPhoto(photo.photoUrl)}
+                            >
+                              <img
+                                src={photo.photoUrl}
+                                alt={photo.caption || "Project photo"}
+                                className="w-full h-64 object-cover rounded-lg hover:opacity-90 transition-opacity"
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg" />
+                            </div>
+                            {photo.caption && (
+                              <p className="mt-2 text-sm text-blue-700 line-clamp-2">{photo.caption}</p>
+                            )}
+                            <p className="text-xs text-blue-500 mt-1">
+                              {new Date(photo.uploadDate).toLocaleDateString()}
+                            </p>
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600 text-white"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                  </Carousel>
                 </div>
               )}
             </div>

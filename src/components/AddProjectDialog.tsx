@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Upload, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Project } from "@/hooks/useProjectData";
@@ -36,17 +36,40 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
     endDate: undefined as Date | undefined,
     status: "",
     followUpNeeded: false,
+    program: "",
   });
 
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [photos, setPhotos] = useState<File[]>([]);
+
   const { toast } = useToast();
+
+  const handleFileUpload = (files: FileList | null, type: 'attachments' | 'photos') => {
+    if (!files) return;
+    
+    const fileArray = Array.from(files);
+    if (type === 'attachments') {
+      setAttachments(prev => [...prev, ...fileArray]);
+    } else {
+      setPhotos(prev => [...prev, ...fileArray]);
+    }
+  };
+
+  const removeFile = (index: number, type: 'attachments' | 'photos') => {
+    if (type === 'attachments') {
+      setAttachments(prev => prev.filter((_, i) => i !== index));
+    } else {
+      setPhotos(prev => prev.filter((_, i) => i !== index));
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.projectName || !formData.country || !formData.impactArea || !formData.status || !formData.startDate || !formData.endDate) {
+    if (!formData.projectName || !formData.impactArea || !formData.status || !formData.startDate) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields (Project Name, Impact Area, Status, Start Date)",
         variant: "destructive",
       });
       return;
@@ -54,19 +77,20 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
 
     const project: Omit<Project, "id"> = {
       projectName: formData.projectName,
-      country: formData.country as Project["country"],
-      partnerName: formData.partnerName || `Food For The Poor - ${formData.country}`,
+      country: formData.country ? formData.country as Project["country"] : undefined,
+      partnerName: formData.partnerName || undefined,
       impactArea: formData.impactArea as Project["impactArea"],
       fundType: formData.fundType as Project["fundType"],
       isDesignated: formData.isDesignated,
       currency: formData.currency as Project["currency"],
-      totalCost: parseFloat(formData.totalCost) || 0,
+      totalCost: formData.totalCost ? parseFloat(formData.totalCost) : undefined,
       amountDisbursed: parseFloat(formData.amountDisbursed) || 0,
       reportedSpend: parseFloat(formData.reportedSpend) || 0,
       startDate: format(formData.startDate, "yyyy-MM-dd"),
-      endDate: format(formData.endDate, "yyyy-MM-dd"),
+      endDate: formData.endDate ? format(formData.endDate, "yyyy-MM-dd") : undefined,
       status: formData.status as Project["status"],
       followUpNeeded: formData.followUpNeeded,
+      program: formData.program || undefined,
     };
 
     onAddProject(project);
@@ -87,7 +111,10 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
       endDate: undefined,
       status: "",
       followUpNeeded: false,
+      program: "",
     });
+    setAttachments([]);
+    setPhotos([]);
     
     onOpenChange(false);
     
@@ -103,7 +130,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
         <DialogHeader>
           <DialogTitle className="text-blue-900">Add New Project</DialogTitle>
           <DialogDescription className="text-blue-600">
-            Create a new charitable project to track across your programs.
+            Create a new charitable project to track across your programs. Fields marked with * are required.
           </DialogDescription>
         </DialogHeader>
 
@@ -117,19 +144,21 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
                 onChange={(e) => setFormData(prev => ({ ...prev, projectName: e.target.value }))}
                 className="border-blue-200 focus:border-blue-400"
                 placeholder="Enter project name"
+                required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="country" className="text-blue-900">Country *</Label>
+              <Label htmlFor="country" className="text-blue-900">Country</Label>
               <Select 
                 value={formData.country} 
                 onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
               >
                 <SelectTrigger className="border-blue-200 focus:border-blue-400">
-                  <SelectValue placeholder="Select country" />
+                  <SelectValue placeholder="Select country (optional)" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="Canada">Canada</SelectItem>
                   <SelectItem value="Jamaica">Jamaica</SelectItem>
                   <SelectItem value="Guyana">Guyana</SelectItem>
                   <SelectItem value="Haiti">Haiti</SelectItem>
@@ -145,7 +174,18 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
                 value={formData.partnerName}
                 onChange={(e) => setFormData(prev => ({ ...prev, partnerName: e.target.value }))}
                 className="border-blue-200 focus:border-blue-400"
-                placeholder="Auto-filled based on country"
+                placeholder="Enter partner name (optional)"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="program" className="text-blue-900">Program</Label>
+              <Input
+                id="program"
+                value={formData.program}
+                onChange={(e) => setFormData(prev => ({ ...prev, program: e.target.value }))}
+                className="border-blue-200 focus:border-blue-400"
+                placeholder="Enter program name (optional)"
               />
             </div>
 
@@ -208,7 +248,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
                 value={formData.totalCost}
                 onChange={(e) => setFormData(prev => ({ ...prev, totalCost: e.target.value }))}
                 className="border-blue-200 focus:border-blue-400"
-                placeholder="0"
+                placeholder="0 (optional)"
               />
             </div>
 
@@ -264,7 +304,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
             </div>
 
             <div className="space-y-2">
-              <Label className="text-blue-900">End Date *</Label>
+              <Label className="text-blue-900">End Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -275,7 +315,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.endDate ? format(formData.endDate, "PPP") : "Pick end date"}
+                    {formData.endDate ? format(formData.endDate, "PPP") : "Pick end date (optional)"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -308,6 +348,86 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
                   <SelectItem value="Needs Attention">Needs Attention</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          {/* File Upload Sections */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-blue-900">Project Documents</Label>
+              <div className="border-2 border-dashed border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-center">
+                  <label className="cursor-pointer flex flex-col items-center">
+                    <Upload className="w-8 h-8 text-blue-400 mb-2" />
+                    <span className="text-sm text-blue-600">Upload documents (optional)</span>
+                    <input
+                      type="file"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e.target.files, 'attachments')}
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+                    />
+                  </label>
+                </div>
+                {attachments.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {attachments.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between bg-blue-50 p-2 rounded">
+                        <span className="text-sm text-blue-700">{file.name}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(index, 'attachments')}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-blue-900">Project Photos</Label>
+              <div className="border-2 border-dashed border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-center">
+                  <label className="cursor-pointer flex flex-col items-center">
+                    <Upload className="w-8 h-8 text-blue-400 mb-2" />
+                    <span className="text-sm text-blue-600">Upload photos (optional)</span>
+                    <input
+                      type="file"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e.target.files, 'photos')}
+                      accept="image/*"
+                    />
+                  </label>
+                </div>
+                {photos.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {photos.map((file, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="w-full h-20 object-cover rounded"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute top-0 right-0 h-6 w-6 p-0 bg-red-500 hover:bg-red-600 text-white"
+                          onClick={() => removeFile(index, 'photos')}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

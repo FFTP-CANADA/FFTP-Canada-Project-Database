@@ -4,19 +4,20 @@ import { useState } from "react";
 export interface Project {
   id: string;
   projectName: string;
-  country: "Jamaica" | "Guyana" | "Haiti" | "Honduras";
-  partnerName: string;
+  country?: "Jamaica" | "Guyana" | "Haiti" | "Honduras" | "Canada";
+  partnerName?: string;
   impactArea: "Food Security" | "Education" | "Housing & Community" | "Health" | "Economic Empowerment";
   fundType: "Designated" | "Undesignated";
   isDesignated: boolean;
   currency: "CAD" | "USD";
-  totalCost: number;
+  totalCost?: number;
   amountDisbursed: number;
   reportedSpend: number;
   startDate: string;
-  endDate: string;
+  endDate?: string;
   status: "On-Track" | "Delayed" | "Pending Start" | "Completed" | "Cancelled" | "Needs Attention";
   followUpNeeded: boolean;
+  program?: string;
 }
 
 export interface ProjectNote {
@@ -24,6 +25,24 @@ export interface ProjectNote {
   projectId: string;
   content: string;
   dateOfNote: string;
+}
+
+export interface ProjectAttachment {
+  id: string;
+  projectId: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  uploadDate: string;
+  fileType: string;
+}
+
+export interface ProjectPhoto {
+  id: string;
+  projectId: string;
+  photoUrl: string;
+  caption?: string;
+  uploadDate: string;
 }
 
 const initialProjects: Project[] = [
@@ -100,6 +119,8 @@ const initialProjects: Project[] = [
 export const useProjectData = () => {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [notes, setNotes] = useState<ProjectNote[]>([]);
+  const [attachments, setAttachments] = useState<ProjectAttachment[]>([]);
+  const [photos, setPhotos] = useState<ProjectPhoto[]>([]);
 
   const addProject = (project: Omit<Project, "id">) => {
     const newProject: Project = {
@@ -125,12 +146,42 @@ export const useProjectData = () => {
     return notes.filter(note => note.projectId === projectId);
   };
 
+  const addAttachment = (attachment: Omit<ProjectAttachment, "id">) => {
+    const newAttachment: ProjectAttachment = {
+      ...attachment,
+      id: Date.now().toString(),
+    };
+    setAttachments(prev => [...prev, newAttachment]);
+  };
+
+  const getAttachmentsForProject = (projectId: string) => {
+    return attachments.filter(attachment => attachment.projectId === projectId);
+  };
+
+  const addPhoto = (photo: Omit<ProjectPhoto, "id">) => {
+    const newPhoto: ProjectPhoto = {
+      ...photo,
+      id: Date.now().toString(),
+    };
+    setPhotos(prev => [...prev, newPhoto]);
+  };
+
+  const getPhotosForProject = (projectId: string) => {
+    return photos.filter(photo => photo.projectId === projectId);
+  };
+
   return {
     projects,
     notes,
+    attachments,
+    photos,
     addProject,
     updateProject,
     addNote,
     getNotesForProject,
+    addAttachment,
+    getAttachmentsForProject,
+    addPhoto,
+    getPhotosForProject,
   };
 };

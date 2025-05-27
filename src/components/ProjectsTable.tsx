@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Mail, FileText, Filter } from "lucide-react";
+import { Mail, FileText, Filter, Paperclip, Camera } from "lucide-react";
 import { Project } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,6 +18,7 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
   const [countryFilter, setCountryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [impactAreaFilter, setImpactAreaFilter] = useState("all");
+  const [programFilter, setProgramFilter] = useState("all");
   const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
@@ -34,21 +35,24 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.partnerName.toLowerCase().includes(searchTerm.toLowerCase());
+                         (project.partnerName?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+                         (project.program?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
     const matchesCountry = countryFilter === "all" || project.country === countryFilter;
     const matchesStatus = statusFilter === "all" || project.status === statusFilter;
     const matchesImpactArea = impactAreaFilter === "all" || project.impactArea === impactAreaFilter;
+    const matchesProgram = programFilter === "all" || project.program === programFilter;
     
-    return matchesSearch && matchesCountry && matchesStatus && matchesImpactArea;
+    return matchesSearch && matchesCountry && matchesStatus && matchesImpactArea && matchesProgram;
   });
 
   const handleSendFollowUp = (project: Project) => {
-    // Simulate sending follow-up email
     toast({
       title: "Follow-up Email Sent",
       description: `Follow-up email sent for project: ${project.projectName}`,
     });
   };
+
+  const uniquePrograms = [...new Set(projects.map(p => p.program).filter(Boolean))];
 
   return (
     <div className="space-y-4">
@@ -60,7 +64,7 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
         </div>
         
         <Input
-          placeholder="Search projects..."
+          placeholder="Search projects, partners, programs..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-xs border-blue-200 focus:border-blue-400"
@@ -72,6 +76,7 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Countries</SelectItem>
+            <SelectItem value="Canada">Canada</SelectItem>
             <SelectItem value="Jamaica">Jamaica</SelectItem>
             <SelectItem value="Guyana">Guyana</SelectItem>
             <SelectItem value="Haiti">Haiti</SelectItem>
@@ -107,6 +112,18 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
             <SelectItem value="Economic Empowerment">Economic Empowerment</SelectItem>
           </SelectContent>
         </Select>
+
+        <Select value={programFilter} onValueChange={setProgramFilter}>
+          <SelectTrigger className="w-[140px] border-blue-200 focus:border-blue-400">
+            <SelectValue placeholder="Program" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Programs</SelectItem>
+            {uniquePrograms.map(program => (
+              <SelectItem key={program} value={program!}>{program}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}
@@ -115,6 +132,7 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
           <TableHeader className="bg-blue-600">
             <TableRow>
               <TableHead className="text-white">Project Name</TableHead>
+              <TableHead className="text-white">Program</TableHead>
               <TableHead className="text-white">Country</TableHead>
               <TableHead className="text-white">Impact Area</TableHead>
               <TableHead className="text-white">Status</TableHead>
@@ -135,7 +153,8 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
                     </Badge>
                   )}
                 </TableCell>
-                <TableCell className="text-blue-700">{project.country}</TableCell>
+                <TableCell className="text-blue-700">{project.program || "N/A"}</TableCell>
+                <TableCell className="text-blue-700">{project.country || "N/A"}</TableCell>
                 <TableCell className="text-blue-700">{project.impactArea}</TableCell>
                 <TableCell>
                   <Badge className={getStatusColor(project.status)}>
@@ -143,23 +162,29 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-blue-900">
-                  {project.currency} ${project.totalCost.toLocaleString()}
+                  {project.totalCost ? `${project.currency} $${project.totalCost.toLocaleString()}` : "N/A"}
                 </TableCell>
                 <TableCell className="text-blue-900">
                   {project.currency} ${project.amountDisbursed.toLocaleString()}
                 </TableCell>
                 <TableCell>
-                  <div className="w-full bg-blue-100 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all"
-                      style={{ 
-                        width: `${Math.min((project.amountDisbursed / project.totalCost) * 100, 100)}%` 
-                      }}
-                    />
-                  </div>
-                  <span className="text-xs text-blue-600 mt-1">
-                    {Math.round((project.amountDisbursed / project.totalCost) * 100)}%
-                  </span>
+                  {project.totalCost ? (
+                    <>
+                      <div className="w-full bg-blue-100 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all"
+                          style={{ 
+                            width: `${Math.min((project.amountDisbursed / project.totalCost) * 100, 100)}%` 
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs text-blue-600 mt-1">
+                        {Math.round((project.amountDisbursed / project.totalCost) * 100)}%
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-xs text-blue-600">No total cost</span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
@@ -170,6 +195,22 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
                     >
                       <FileText className="w-4 h-4 mr-1" />
                       Notes
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                    >
+                      <Paperclip className="w-4 h-4 mr-1" />
+                      Files
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-green-300 text-green-600 hover:bg-green-50"
+                    >
+                      <Camera className="w-4 h-4 mr-1" />
+                      Gallery
                     </Button>
                     {project.followUpNeeded && (
                       <Button

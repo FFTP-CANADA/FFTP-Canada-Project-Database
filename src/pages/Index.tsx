@@ -7,11 +7,33 @@ import { Plus, BarChart3, Users, DollarSign, AlertCircle } from "lucide-react";
 import ProjectsTable from "@/components/ProjectsTable";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import AddProjectDialog from "@/components/AddProjectDialog";
+import ProjectAttachments from "@/components/ProjectAttachments";
+import ProjectGallery from "@/components/ProjectGallery";
 import { useProjectData } from "@/hooks/useProjectData";
 
 const Index = () => {
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
-  const { projects, addProject } = useProjectData();
+  const [attachmentsDialog, setAttachmentsDialog] = useState<{ open: boolean; projectId: string; projectName: string }>({
+    open: false,
+    projectId: "",
+    projectName: ""
+  });
+  const [galleryDialog, setGalleryDialog] = useState<{ open: boolean; projectId: string; projectName: string }>({
+    open: false,
+    projectId: "",
+    projectName: ""
+  });
+
+  const { 
+    projects, 
+    addProject, 
+    attachments,
+    photos,
+    addAttachment,
+    getAttachmentsForProject,
+    addPhoto,
+    getPhotosForProject
+  } = useProjectData();
 
   const stats = {
     totalProjects: projects.length,
@@ -128,6 +150,24 @@ const Index = () => {
         open={isAddProjectOpen}
         onOpenChange={setIsAddProjectOpen}
         onAddProject={addProject}
+      />
+
+      <ProjectAttachments
+        projectId={attachmentsDialog.projectId}
+        projectName={attachmentsDialog.projectName}
+        open={attachmentsDialog.open}
+        onOpenChange={(open) => setAttachmentsDialog(prev => ({ ...prev, open }))}
+        attachments={getAttachmentsForProject(attachmentsDialog.projectId)}
+        onAddAttachment={addAttachment}
+      />
+
+      <ProjectGallery
+        projectId={galleryDialog.projectId}
+        projectName={galleryDialog.projectName}
+        open={galleryDialog.open}
+        onOpenChange={(open) => setGalleryDialog(prev => ({ ...prev, open }))}
+        photos={getPhotosForProject(galleryDialog.projectId)}
+        onAddPhoto={addPhoto}
       />
     </div>
   );

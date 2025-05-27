@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 
 export interface Project {
@@ -136,6 +135,9 @@ export const useProjectData = () => {
   const [notes, setNotes] = useState<ProjectNote[]>([]);
   const [attachments, setAttachments] = useState<ProjectAttachment[]>([]);
   const [photos, setPhotos] = useState<ProjectPhoto[]>([]);
+  const [customPrograms, setCustomPrograms] = useState<string[]>([]);
+
+  const allPrograms = [...PROGRAM_OPTIONS, ...customPrograms];
 
   const addProject = (project: Omit<Project, "id">) => {
     const newProject: Project = {
@@ -185,11 +187,29 @@ export const useProjectData = () => {
     return photos.filter(photo => photo.projectId === projectId);
   };
 
+  const addProgram = (program: string) => {
+    if (!allPrograms.includes(program)) {
+      setCustomPrograms(prev => [...prev, program]);
+    }
+  };
+
+  const deleteProgram = (program: string) => {
+    // Only allow deletion of custom programs, not default ones
+    if (customPrograms.includes(program)) {
+      setCustomPrograms(prev => prev.filter(p => p !== program));
+      // Remove program from projects that use it
+      setProjects(prev => prev.map(p => 
+        p.program === program ? { ...p, program: undefined } : p
+      ));
+    }
+  };
+
   return {
     projects,
     notes,
     attachments,
     photos,
+    allPrograms,
     addProject,
     updateProject,
     addNote,
@@ -198,5 +218,7 @@ export const useProjectData = () => {
     getAttachmentsForProject,
     addPhoto,
     getPhotosForProject,
+    addProgram,
+    deleteProgram,
   };
 };

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,10 +8,23 @@ import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import AddProjectDialog from "@/components/AddProjectDialog";
 import ProjectAttachments from "@/components/ProjectAttachments";
 import ProjectGallery from "@/components/ProjectGallery";
+import ProjectEditDialog from "@/components/ProjectEditDialog";
+import ProgramManagementDialog from "@/components/ProgramManagementDialog";
+import ProjectNotesDialog from "@/components/ProjectNotesDialog";
 import { useProjectData } from "@/hooks/useProjectData";
 
 const Index = () => {
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
+  const [editProject, setEditProject] = useState<{ open: boolean; project: any }>({
+    open: false,
+    project: null
+  });
+  const [programManagementOpen, setProgramManagementOpen] = useState(false);
+  const [notesDialog, setNotesDialog] = useState<{ open: boolean; projectId: string; projectName: string }>({
+    open: false,
+    projectId: "",
+    projectName: ""
+  });
   const [attachmentsDialog, setAttachmentsDialog] = useState<{ open: boolean; projectId: string; projectName: string }>({
     open: false,
     projectId: "",
@@ -27,12 +39,19 @@ const Index = () => {
   const { 
     projects, 
     addProject, 
+    updateProject,
     attachments,
     photos,
+    notes,
+    allPrograms,
     addAttachment,
     getAttachmentsForProject,
     addPhoto,
-    getPhotosForProject
+    getPhotosForProject,
+    addNote,
+    getNotesForProject,
+    addProgram,
+    deleteProgram
   } = useProjectData();
 
   const stats = {
@@ -48,6 +67,14 @@ const Index = () => {
 
   const handleOpenGallery = (projectId: string, projectName: string) => {
     setGalleryDialog({ open: true, projectId, projectName });
+  };
+
+  const handleEditProject = (project: any) => {
+    setEditProject({ open: true, project });
+  };
+
+  const handleOpenNotes = (projectId: string, projectName: string) => {
+    setNotesDialog({ open: true, projectId, projectName });
   };
 
   return (
@@ -144,9 +171,13 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <ProjectsTable 
-                  projects={projects} 
+                  projects={projects}
+                  availablePrograms={allPrograms}
                   onOpenAttachments={handleOpenAttachments}
                   onOpenGallery={handleOpenGallery}
+                  onOpenNotes={handleOpenNotes}
+                  onEditProject={handleEditProject}
+                  onManagePrograms={() => setProgramManagementOpen(true)}
                 />
               </CardContent>
             </Card>
@@ -162,6 +193,22 @@ const Index = () => {
         open={isAddProjectOpen}
         onOpenChange={setIsAddProjectOpen}
         onAddProject={addProject}
+      />
+
+      <ProjectEditDialog
+        project={editProject.project}
+        open={editProject.open}
+        onOpenChange={(open) => setEditProject(prev => ({ ...prev, open }))}
+        onUpdateProject={updateProject}
+        availablePrograms={allPrograms}
+      />
+
+      <ProgramManagementDialog
+        open={programManagementOpen}
+        onOpenChange={setProgramManagementOpen}
+        programs={allPrograms}
+        onAddProgram={addProgram}
+        onDeleteProgram={deleteProgram}
       />
 
       <ProjectAttachments
@@ -180,6 +227,15 @@ const Index = () => {
         onOpenChange={(open) => setGalleryDialog(prev => ({ ...prev, open }))}
         photos={getPhotosForProject(galleryDialog.projectId)}
         onAddPhoto={addPhoto}
+      />
+
+      <ProjectNotesDialog
+        projectId={notesDialog.projectId}
+        projectName={notesDialog.projectName}
+        open={notesDialog.open}
+        onOpenChange={(open) => setNotesDialog(prev => ({ ...prev, open }))}
+        notes={getNotesForProject(notesDialog.projectId)}
+        onAddNote={addNote}
       />
     </div>
   );

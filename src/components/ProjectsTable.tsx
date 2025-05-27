@@ -1,21 +1,32 @@
-
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Mail, FileText, Filter, Paperclip, Camera } from "lucide-react";
-import { Project, PROGRAM_OPTIONS } from "@/hooks/useProjectData";
+import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings } from "lucide-react";
+import { Project } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProjectsTableProps {
   projects: Project[];
+  availablePrograms: string[];
   onOpenAttachments?: (projectId: string, projectName: string) => void;
   onOpenGallery?: (projectId: string, projectName: string) => void;
+  onOpenNotes?: (projectId: string, projectName: string) => void;
+  onEditProject?: (project: Project) => void;
+  onManagePrograms?: () => void;
 }
 
-const ProjectsTable = ({ projects, onOpenAttachments, onOpenGallery }: ProjectsTableProps) => {
+const ProjectsTable = ({ 
+  projects, 
+  availablePrograms,
+  onOpenAttachments, 
+  onOpenGallery,
+  onOpenNotes,
+  onEditProject,
+  onManagePrograms
+}: ProjectsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [countryFilter, setCountryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -53,8 +64,6 @@ const ProjectsTable = ({ projects, onOpenAttachments, onOpenGallery }: ProjectsT
       description: `Follow-up email sent for project: ${project.projectName}`,
     });
   };
-
-  const availablePrograms = [...new Set(projects.map(p => p.program).filter(Boolean))];
 
   return (
     <div className="space-y-4">
@@ -122,10 +131,19 @@ const ProjectsTable = ({ projects, onOpenAttachments, onOpenGallery }: ProjectsT
           <SelectContent>
             <SelectItem value="all">All Programs</SelectItem>
             {availablePrograms.map(program => (
-              <SelectItem key={program} value={program!}>{program}</SelectItem>
+              <SelectItem key={program} value={program}>{program}</SelectItem>
             ))}
           </SelectContent>
         </Select>
+
+        <Button
+          variant="outline"
+          onClick={onManagePrograms}
+          className="border-blue-300 text-blue-600 hover:bg-blue-50"
+        >
+          <Settings className="w-4 h-4 mr-2" />
+          Manage Programs
+        </Button>
       </div>
 
       {/* Table */}
@@ -189,12 +207,21 @@ const ProjectsTable = ({ projects, onOpenAttachments, onOpenGallery }: ProjectsT
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Button
                       size="sm"
                       variant="outline"
                       className="border-blue-300 text-blue-600 hover:bg-blue-50"
-                      onClick={() => toast({ title: "Notes", description: "Notes feature coming soon" })}
+                      onClick={() => onEditProject?.(project)}
+                    >
+                      <Edit className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                      onClick={() => onOpenNotes?.(project.id, project.projectName)}
                     >
                       <FileText className="w-4 h-4 mr-1" />
                       Notes

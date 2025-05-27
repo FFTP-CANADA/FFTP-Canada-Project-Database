@@ -6,14 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Mail, FileText, Filter, Paperclip, Camera } from "lucide-react";
-import { Project } from "@/hooks/useProjectData";
+import { Project, PROGRAM_OPTIONS } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProjectsTableProps {
   projects: Project[];
+  onOpenAttachments?: (projectId: string, projectName: string) => void;
+  onOpenGallery?: (projectId: string, projectName: string) => void;
 }
 
-const ProjectsTable = ({ projects }: ProjectsTableProps) => {
+const ProjectsTable = ({ projects, onOpenAttachments, onOpenGallery }: ProjectsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [countryFilter, setCountryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -52,7 +54,7 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
     });
   };
 
-  const uniquePrograms = [...new Set(projects.map(p => p.program).filter(Boolean))];
+  const availablePrograms = [...new Set(projects.map(p => p.program).filter(Boolean))];
 
   return (
     <div className="space-y-4">
@@ -119,7 +121,7 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Programs</SelectItem>
-            {uniquePrograms.map(program => (
+            {availablePrograms.map(program => (
               <SelectItem key={program} value={program!}>{program}</SelectItem>
             ))}
           </SelectContent>
@@ -192,6 +194,7 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
                       size="sm"
                       variant="outline"
                       className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                      onClick={() => toast({ title: "Notes", description: "Notes feature coming soon" })}
                     >
                       <FileText className="w-4 h-4 mr-1" />
                       Notes
@@ -200,6 +203,7 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
                       size="sm"
                       variant="outline"
                       className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                      onClick={() => onOpenAttachments?.(project.id, project.projectName)}
                     >
                       <Paperclip className="w-4 h-4 mr-1" />
                       Files
@@ -208,6 +212,7 @@ const ProjectsTable = ({ projects }: ProjectsTableProps) => {
                       size="sm"
                       variant="outline"
                       className="border-green-300 text-green-600 hover:bg-green-50"
+                      onClick={() => onOpenGallery?.(project.id, project.projectName)}
                     >
                       <Camera className="w-4 h-4 mr-1" />
                       Gallery

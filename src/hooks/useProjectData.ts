@@ -45,6 +45,17 @@ export interface ProjectPhoto {
   uploadDate: string;
 }
 
+export const PROGRAM_OPTIONS = [
+  "Emergency Response",
+  "Community Development",
+  "Education Initiative",
+  "Healthcare Support",
+  "Housing Development",
+  "Food Security Program",
+  "Economic Empowerment",
+  "Infrastructure Development"
+];
+
 const initialProjects: Project[] = [
   {
     id: "1",
@@ -62,6 +73,7 @@ const initialProjects: Project[] = [
     endDate: "2024-12-15",
     status: "On-Track",
     followUpNeeded: false,
+    program: "Food Security Program",
   },
   {
     id: "2",
@@ -79,6 +91,7 @@ const initialProjects: Project[] = [
     endDate: "2025-01-31",
     status: "Delayed",
     followUpNeeded: true,
+    program: "Education Initiative",
   },
   {
     id: "3",
@@ -96,6 +109,7 @@ const initialProjects: Project[] = [
     endDate: "2024-11-30",
     status: "On-Track",
     followUpNeeded: false,
+    program: "Healthcare Support",
   },
   {
     id: "4",
@@ -113,6 +127,7 @@ const initialProjects: Project[] = [
     endDate: "2024-09-30",
     status: "Completed",
     followUpNeeded: false,
+    program: "Housing Development",
   },
 ];
 

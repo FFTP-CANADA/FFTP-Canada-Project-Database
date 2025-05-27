@@ -42,6 +42,14 @@ const Index = () => {
     needsFollowUp: projects.filter(p => p.followUpNeeded).length,
   };
 
+  const handleOpenAttachments = (projectId: string, projectName: string) => {
+    setAttachmentsDialog({ open: true, projectId, projectName });
+  };
+
+  const handleOpenGallery = (projectId: string, projectName: string) => {
+    setGalleryDialog({ open: true, projectId, projectName });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       {/* Header */}
@@ -135,7 +143,11 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ProjectsTable projects={projects} />
+                <ProjectsTable 
+                  projects={projects} 
+                  onOpenAttachments={handleOpenAttachments}
+                  onOpenGallery={handleOpenGallery}
+                />
               </CardContent>
             </Card>
           </TabsContent>

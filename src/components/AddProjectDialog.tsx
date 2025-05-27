@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -11,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Upload, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Project } from "@/hooks/useProjectData";
+import { Project, PROGRAM_OPTIONS } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddProjectDialogProps {
@@ -149,6 +148,23 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="program" className="text-blue-900">Program</Label>
+              <Select 
+                value={formData.program} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, program: value }))}
+              >
+                <SelectTrigger className="border-blue-200 focus:border-blue-400">
+                  <SelectValue placeholder="Select program (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PROGRAM_OPTIONS.map(program => (
+                    <SelectItem key={program} value={program}>{program}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="country" className="text-blue-900">Country</Label>
               <Select 
                 value={formData.country} 
@@ -175,17 +191,6 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
                 onChange={(e) => setFormData(prev => ({ ...prev, partnerName: e.target.value }))}
                 className="border-blue-200 focus:border-blue-400"
                 placeholder="Enter partner name (optional)"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="program" className="text-blue-900">Program</Label>
-              <Input
-                id="program"
-                value={formData.program}
-                onChange={(e) => setFormData(prev => ({ ...prev, program: e.target.value }))}
-                className="border-blue-200 focus:border-blue-400"
-                placeholder="Enter program name (optional)"
               />
             </div>
 

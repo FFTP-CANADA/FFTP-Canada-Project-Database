@@ -105,7 +105,11 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-blue-900">Food For The Poor Canada</h1>
+              <img 
+                src="/lovable-uploads/af3d9a60-0267-4a1b-bf2d-e92b594a9ba7.png" 
+                alt="Food For The Poor Canada" 
+                className="h-16 w-auto"
+              />
               <p className="text-blue-600 mt-1">Project Tracker & Analytics Dashboard</p>
             </div>
             <Button 

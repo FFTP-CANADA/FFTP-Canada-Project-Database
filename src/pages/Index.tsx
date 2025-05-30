@@ -14,10 +14,12 @@ import ProjectNotesDialog from "@/components/ProjectNotesDialog";
 import ProjectMilestonesDialog from "@/components/ProjectMilestonesDialog";
 import ProjectGanttDialog from "@/components/ProjectGanttDialog";
 import StatusReportDialog from "@/components/StatusReportDialog";
+import AutoFollowUpManager from "@/components/AutoFollowUpManager";
 import { useProjectData } from "@/hooks/useProjectData";
 import { Project } from "@/types/project";
 import ExchangeRateDisplay from "@/components/ExchangeRateDisplay";
 import { convertUsdToCad, formatWithExchange } from "@/utils/currencyUtils";
+import { useAutoFollowUp } from "@/hooks/useAutoFollowUp";
 
 const Index = () => {
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
@@ -68,8 +70,17 @@ const Index = () => {
     addProgram,
     deleteProgram,
     milestones,
-    getMilestonesForProject
+    getMilestonesForProject,
+    addMilestone,
+    updateMilestone,
+    deleteMilestone
   } = useProjectData();
+
+  const {
+    followUpEmails,
+    markFollowUpSent,
+    dismissFollowUp
+  } = useAutoFollowUp(projects, milestones, notes);
 
   const stats = {
     totalProjects: projects.length,
@@ -183,6 +194,17 @@ const Index = () => {
 
           <ExchangeRateDisplay />
         </div>
+
+        {/* Auto Follow-up Manager */}
+        {followUpEmails.length > 0 && (
+          <div className="mb-8">
+            <AutoFollowUpManager
+              followUpEmails={followUpEmails}
+              onMarkSent={markFollowUpSent}
+              onDismiss={dismissFollowUp}
+            />
+          </div>
+        )}
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="projects" className="space-y-6">

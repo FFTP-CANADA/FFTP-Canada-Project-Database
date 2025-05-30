@@ -1,3 +1,4 @@
+
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartGantt } from "lucide-react";
@@ -7,6 +8,38 @@ interface ProjectGanttChartProps {
   project: Project;
   milestones: ProjectMilestone[];
 }
+
+const getProjectColor = (status: Project["status"]) => {
+  switch (status) {
+    case "Completed":
+      return "bg-green-500";
+    case "On-Track":
+      return "bg-blue-500";
+    case "Delayed":
+      return "bg-red-500";
+    case "Pending Start":
+      return "bg-yellow-500";
+    case "Cancelled":
+      return "bg-gray-500";
+    case "Needs Attention":
+      return "bg-orange-500";
+    default:
+      return "bg-gray-400";
+  }
+};
+
+const getMilestoneColor = (status: ProjectMilestone["status"]) => {
+  switch (status) {
+    case "Completed":
+      return "bg-green-600";
+    case "In Progress":
+      return "bg-blue-600";
+    case "Overdue":
+      return "bg-red-600";
+    default:
+      return "bg-gray-600";
+  }
+};
 
 const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
   const chartData = useMemo(() => {
@@ -41,38 +74,6 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
 
     return { items, projectStart, projectEnd, totalDays };
   }, [project, milestones]);
-
-  const getProjectColor = (status: Project["status"]) => {
-    switch (status) {
-      case "Completed":
-        return "bg-green-500";
-      case "On-Track":
-        return "bg-blue-500";
-      case "Delayed":
-        return "bg-red-500";
-      case "Pending Start":
-        return "bg-yellow-500";
-      case "Cancelled":
-        return "bg-gray-500";
-      case "Needs Attention":
-        return "bg-orange-500";
-      default:
-        return "bg-gray-400";
-    }
-  };
-
-  const getMilestoneColor = (status: ProjectMilestone["status"]) => {
-    switch (status) {
-      case "Completed":
-        return "bg-green-600";
-      case "In Progress":
-        return "bg-blue-600";
-      case "Overdue":
-        return "bg-red-600";
-      default:
-        return "bg-gray-600";
-    }
-  };
 
   const calculatePosition = (date: Date) => {
     const daysDiff = Math.ceil((date.getTime() - chartData.projectStart.getTime()) / (1000 * 60 * 60 * 24));

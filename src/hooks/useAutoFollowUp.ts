@@ -126,20 +126,34 @@ joannt@foodforthepoor.ca`;
   };
 
   const checkAndGenerateFollowUps = () => {
+    console.log("=== FOLLOW-UP GENERATION DEBUG ===");
+    console.log("Total projects:", projects.length);
+    console.log("Total milestones:", milestones.length);
+    console.log("Projects with followUpNeeded:", projects.filter(p => p.followUpNeeded).length);
+    
     const today = new Date();
     const tenDaysFromNow = new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000);
+    console.log("Today:", today.toISOString());
+    console.log("Ten days from now:", tenDaysFromNow.toISOString());
     
     const newFollowUps: FollowUpEmail[] = [];
 
     projects
       .filter(project => project.followUpNeeded)
       .forEach(project => {
+        console.log(`\n--- Processing project: ${project.projectName} ---`);
         const projectMilestones = milestones.filter(m => m.projectId === project.id);
         const projectNotes = notes.filter(n => n.projectId === project.id);
+        console.log(`Project milestones found: ${projectMilestones.length}`);
+        console.log(`Project notes found: ${projectNotes.length}`);
         
         // Check for milestone-based follow-ups
         projectMilestones.forEach(milestone => {
           const milestoneDate = new Date(milestone.dueDate);
+          console.log(`Checking milestone: ${milestone.title}, due: ${milestone.dueDate}, status: ${milestone.status}`);
+          console.log(`Milestone date: ${milestoneDate.toISOString()}`);
+          console.log(`Is milestone in range? ${milestoneDate >= today && milestoneDate <= tenDaysFromNow}`);
+          console.log(`Is milestone not completed? ${milestone.status !== "Completed"}`);
           
           // Check if milestone is within 10 days and hasn't been completed
           if (milestoneDate >= today && 
@@ -153,7 +167,10 @@ joannt@foodforthepoor.ca`;
                       email.trigger === "milestone"
             );
             
+            console.log(`Existing follow-up found: ${!!existingFollowUp}`);
+            
             if (!existingFollowUp) {
+              console.log(`Generating milestone follow-up for: ${milestone.title}`);
               const draftEmail = generateFollowUpEmail(project, milestone, projectNotes, "milestone");
               
               newFollowUps.push({
@@ -178,6 +195,8 @@ joannt@foodforthepoor.ca`;
           return noteDate >= todayStart;
         });
 
+        console.log(`Recent notes (today): ${recentNotes.length}`);
+
         recentNotes.forEach(note => {
           // Find the next upcoming milestone for this project
           const upcomingMilestone = projectMilestones
@@ -185,6 +204,7 @@ joannt@foodforthepoor.ca`;
             .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
 
           if (upcomingMilestone) {
+            console.log(`Found upcoming milestone for note: ${upcomingMilestone.title}`);
             // Check if we haven't already generated a note-based follow-up for this note
             const existingNoteFollowUp = followUpEmails.find(
               email => email.projectId === project.id && 
@@ -193,6 +213,7 @@ joannt@foodforthepoor.ca`;
             );
 
             if (!existingNoteFollowUp) {
+              console.log(`Generating note follow-up for note: ${note.content.substring(0, 50)}...`);
               const draftEmail = generateFollowUpEmail(project, upcomingMilestone, projectNotes, "note", note);
               
               newFollowUps.push({
@@ -208,9 +229,14 @@ joannt@foodforthepoor.ca`;
                 noteContent: note.content
               });
             }
+          } else {
+            console.log(`No upcoming milestone found for note follow-up`);
           }
         });
       });
+
+    console.log(`Total new follow-ups generated: ${newFollowUps.length}`);
+    console.log("=== END FOLLOW-UP GENERATION DEBUG ===");
 
     if (newFollowUps.length > 0) {
       setFollowUpEmails(prev => [...prev, ...newFollowUps]);

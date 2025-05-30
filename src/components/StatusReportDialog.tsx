@@ -188,9 +188,9 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
     // Add company logo
     const logoImg = new Image();
     logoImg.onload = function() {
-      // Add centered logo to PDF with slightly smaller dimensions for better clarity
+      // Add centered logo to PDF with optimized dimensions for better clarity
       const logoWidth = 70;
-      const logoHeight = 22;
+      const logoHeight = 18;
       const pageWidth = doc.internal.pageSize.getWidth();
       const logoX = (pageWidth - logoWidth) / 2;
       
@@ -198,11 +198,11 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
       
       // Title (adjusted position to account for centered logo)
       doc.setFontSize(16);
-      doc.text('COMPREHENSIVE PROJECT STATUS REPORT', 105, 50, { align: 'center' });
+      doc.text('COMPREHENSIVE PROJECT STATUS REPORT', 105, 45, { align: 'center' });
       doc.setFontSize(12);
-      doc.text(`Generated: ${reportDate}`, 105, 60, { align: 'center' });
+      doc.text(`Generated: ${reportDate}`, 105, 55, { align: 'center' });
 
-      let yPosition = 80;
+      let yPosition = 75;
 
       // Executive Summary
       doc.setFontSize(14);

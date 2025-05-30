@@ -15,6 +15,7 @@ import ProjectMilestonesDialog from "@/components/ProjectMilestonesDialog";
 import ProjectGanttDialog from "@/components/ProjectGanttDialog";
 import StatusReportDialog from "@/components/StatusReportDialog";
 import AutoFollowUpManager from "@/components/AutoFollowUpManager";
+import NotificationsAlert from "@/components/NotificationsAlert";
 import { useProjectData } from "@/hooks/useProjectData";
 import { Project } from "@/types/project";
 import ExchangeRateDisplay from "@/components/ExchangeRateDisplay";
@@ -148,6 +149,13 @@ const Index = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Notifications Alert */}
+        <NotificationsAlert 
+          projects={projects} 
+          milestones={milestones} 
+          notes={notes} 
+        />
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">

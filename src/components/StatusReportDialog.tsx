@@ -188,9 +188,9 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
     // Add company logo
     const logoImg = new Image();
     logoImg.onload = function() {
-      // Add centered logo to PDF with reduced height for better proportions
-      const logoWidth = 80;
-      const logoHeight = 25;
+      // Add centered logo to PDF with slightly smaller dimensions for better clarity
+      const logoWidth = 70;
+      const logoHeight = 22;
       const pageWidth = doc.internal.pageSize.getWidth();
       const logoX = (pageWidth - logoWidth) / 2;
       

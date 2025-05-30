@@ -1,8 +1,18 @@
 
-export const USD_TO_CAD_RATE = 1.44;
+let currentRate = 1.44;
+
+export const USD_TO_CAD_RATE = currentRate;
+
+export const setExchangeRate = (newRate: number): void => {
+  currentRate = newRate;
+};
+
+export const getExchangeRate = (): number => {
+  return currentRate;
+};
 
 export const convertUsdToCad = (usdAmount: number): number => {
-  return usdAmount * USD_TO_CAD_RATE;
+  return usdAmount * currentRate;
 };
 
 export const formatCurrency = (amount: number, currency: 'USD' | 'CAD'): string => {

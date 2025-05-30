@@ -1,9 +1,27 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProjectMilestone } from "@/types/project";
 
 export const useProjectMilestones = () => {
   const [milestones, setMilestones] = useState<ProjectMilestone[]>([]);
+
+  // Load milestones from localStorage on component mount
+  useEffect(() => {
+    const savedMilestones = localStorage.getItem("project-milestones");
+    if (savedMilestones) {
+      try {
+        const parsedMilestones = JSON.parse(savedMilestones);
+        setMilestones(parsedMilestones);
+      } catch (error) {
+        console.error("Error loading milestones from localStorage:", error);
+      }
+    }
+  }, []);
+
+  // Save milestones to localStorage whenever milestones change
+  useEffect(() => {
+    localStorage.setItem("project-milestones", JSON.stringify(milestones));
+  }, [milestones]);
 
   const addMilestone = (milestone: Omit<ProjectMilestone, "id">) => {
     const newMilestone: ProjectMilestone = {

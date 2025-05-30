@@ -1,6 +1,6 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import ProjectMilestones from "./ProjectMilestones";
+import FFTPMilestoneManager from "./FFTPMilestoneManager";
 import { useProjectData } from "@/hooks/useProjectData";
 
 interface ProjectMilestonesDialogProps {
@@ -27,11 +27,11 @@ const ProjectMilestonesDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Milestones - {projectName}</DialogTitle>
+          <DialogTitle>FFTP-Canada Monitoring Milestones - {projectName}</DialogTitle>
         </DialogHeader>
-        <ProjectMilestones
+        <FFTPMilestoneManager
           projectId={projectId}
           milestones={milestones}
           onAddMilestone={addMilestone}

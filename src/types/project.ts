@@ -18,11 +18,25 @@ export interface Project {
   program?: string;
 }
 
+export type FFTPMilestoneType = 
+  | "MOU Signed"
+  | "First Disbursement Sent"
+  | "Receipts Received & Verified (First Tranche)"
+  | "Second Disbursement Sent"
+  | "Receipts Received & Verified (Second Tranche)"
+  | "Third Disbursement Sent"
+  | "Receipts Received & Verified (Third Tranche)"
+  | "Final Disbursement Sent"
+  | "Final Report Pending (Due within 6 months)"
+  | "Final Report Submitted to Partnerships & Donor Engagement Officer";
+
 export interface ProjectMilestone {
   id: string;
   projectId: string;
   title: string;
+  milestoneType?: FFTPMilestoneType;
   description?: string;
+  startDate: string;
   dueDate: string;
   completedDate?: string;
   status: "Not Started" | "In Progress" | "Completed" | "Overdue";

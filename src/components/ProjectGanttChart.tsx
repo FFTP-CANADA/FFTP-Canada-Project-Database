@@ -1,8 +1,7 @@
-
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartGantt } from "lucide-react";
-import { Project, ProjectMilestone } from "@/hooks/useProjectData";
+import { Project, ProjectMilestone } from "@/types/project";
 
 interface ProjectGanttChartProps {
   project: Project;

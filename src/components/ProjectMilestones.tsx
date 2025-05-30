@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Milestone, Plus, Calendar, CheckCircle2 } from "lucide-react";
-import { ProjectMilestone } from "@/hooks/useProjectData";
+import { ProjectMilestone } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProjectMilestonesProps {

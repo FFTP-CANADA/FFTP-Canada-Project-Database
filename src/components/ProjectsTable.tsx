@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings } from "lucide-react";
+import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt } from "lucide-react";
 import { Project } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
 
@@ -14,6 +15,8 @@ interface ProjectsTableProps {
   onOpenAttachments?: (projectId: string, projectName: string) => void;
   onOpenGallery?: (projectId: string, projectName: string) => void;
   onOpenNotes?: (projectId: string, projectName: string) => void;
+  onOpenMilestones?: (projectId: string, projectName: string) => void;
+  onOpenGantt?: (project: Project) => void;
   onEditProject?: (project: Project) => void;
   onManagePrograms?: () => void;
 }
@@ -24,6 +27,8 @@ const ProjectsTable = ({
   onOpenAttachments, 
   onOpenGallery,
   onOpenNotes,
+  onOpenMilestones,
+  onOpenGantt,
   onEditProject,
   onManagePrograms
 }: ProjectsTableProps) => {
@@ -225,6 +230,24 @@ const ProjectsTable = ({
                     >
                       <FileText className="w-4 h-4 mr-1" />
                       Notes
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+                      onClick={() => onOpenMilestones?.(project.id, project.projectName)}
+                    >
+                      <Milestone className="w-4 h-4 mr-1" />
+                      Milestones
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-violet-300 text-violet-600 hover:bg-violet-50"
+                      onClick={() => onOpenGantt?.(project)}
+                    >
+                      <ChartGantt className="w-4 h-4 mr-1" />
+                      Timeline
                     </Button>
                     <Button
                       size="sm"

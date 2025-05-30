@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +12,10 @@ import ProjectGallery from "@/components/ProjectGallery";
 import ProjectEditDialog from "@/components/ProjectEditDialog";
 import ProgramManagementDialog from "@/components/ProgramManagementDialog";
 import ProjectNotesDialog from "@/components/ProjectNotesDialog";
+import ProjectMilestonesDialog from "@/components/ProjectMilestonesDialog";
+import ProjectGanttDialog from "@/components/ProjectGanttDialog";
 import { useProjectData } from "@/hooks/useProjectData";
+import { Project } from "@/types/project";
 
 const Index = () => {
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
@@ -24,6 +28,15 @@ const Index = () => {
     open: false,
     projectId: "",
     projectName: ""
+  });
+  const [milestonesDialog, setMilestonesDialog] = useState<{ open: boolean; projectId: string; projectName: string }>({
+    open: false,
+    projectId: "",
+    projectName: ""
+  });
+  const [ganttDialog, setGanttDialog] = useState<{ open: boolean; project: Project | null }>({
+    open: false,
+    project: null
   });
   const [attachmentsDialog, setAttachmentsDialog] = useState<{ open: boolean; projectId: string; projectName: string }>({
     open: false,
@@ -75,6 +88,14 @@ const Index = () => {
 
   const handleOpenNotes = (projectId: string, projectName: string) => {
     setNotesDialog({ open: true, projectId, projectName });
+  };
+
+  const handleOpenMilestones = (projectId: string, projectName: string) => {
+    setMilestonesDialog({ open: true, projectId, projectName });
+  };
+
+  const handleOpenGantt = (project: Project) => {
+    setGanttDialog({ open: true, project });
   };
 
   return (
@@ -176,6 +197,8 @@ const Index = () => {
                   onOpenAttachments={handleOpenAttachments}
                   onOpenGallery={handleOpenGallery}
                   onOpenNotes={handleOpenNotes}
+                  onOpenMilestones={handleOpenMilestones}
+                  onOpenGantt={handleOpenGantt}
                   onEditProject={handleEditProject}
                   onManagePrograms={() => setProgramManagementOpen(true)}
                 />
@@ -236,6 +259,19 @@ const Index = () => {
         onOpenChange={(open) => setNotesDialog(prev => ({ ...prev, open }))}
         notes={getNotesForProject(notesDialog.projectId)}
         onAddNote={addNote}
+      />
+
+      <ProjectMilestonesDialog
+        projectId={milestonesDialog.projectId}
+        projectName={milestonesDialog.projectName}
+        open={milestonesDialog.open}
+        onOpenChange={(open) => setMilestonesDialog(prev => ({ ...prev, open }))}
+      />
+
+      <ProjectGanttDialog
+        project={ganttDialog.project}
+        open={ganttDialog.open}
+        onOpenChange={(open) => setGanttDialog(prev => ({ ...prev, open }))}
       />
     </div>
   );

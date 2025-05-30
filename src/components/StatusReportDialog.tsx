@@ -188,18 +188,21 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
     // Add company logo
     const logoImg = new Image();
     logoImg.onload = function() {
-      // Add logo to PDF
-      doc.addImage(logoImg, 'PNG', 20, 15, 40, 20);
+      // Add centered logo to PDF with better sizing
+      const logoWidth = 60;
+      const logoHeight = 30;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const logoX = (pageWidth - logoWidth) / 2;
       
-      // Title (adjusted position to account for logo)
-      doc.setFontSize(20);
-      doc.text('FOOD FOR THE POOR CANADA', 105, 25, { align: 'center' });
+      doc.addImage(logoImg, 'PNG', logoX, 15, logoWidth, logoHeight);
+      
+      // Title (adjusted position to account for centered logo)
       doc.setFontSize(16);
-      doc.text('COMPREHENSIVE PROJECT STATUS REPORT', 105, 35, { align: 'center' });
+      doc.text('COMPREHENSIVE PROJECT STATUS REPORT', 105, 55, { align: 'center' });
       doc.setFontSize(12);
-      doc.text(`Generated: ${reportDate}`, 105, 45, { align: 'center' });
+      doc.text(`Generated: ${reportDate}`, 105, 65, { align: 'center' });
 
-      let yPosition = 65;
+      let yPosition = 85;
 
       // Executive Summary
       doc.setFontSize(14);
@@ -309,8 +312,6 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
       console.warn('Logo failed to load, generating PDF without logo');
       
       // Title without logo
-      doc.setFontSize(20);
-      doc.text('FOOD FOR THE POOR CANADA', 105, 20, { align: 'center' });
       doc.setFontSize(16);
       doc.text('COMPREHENSIVE PROJECT STATUS REPORT', 105, 30, { align: 'center' });
       doc.setFontSize(12);

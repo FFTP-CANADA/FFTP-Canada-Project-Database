@@ -1,11 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Project, PROGRAM_OPTIONS } from "@/hooks/useProjectData";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProjectEditDialogProps {
   project: Project | null;
@@ -23,12 +24,43 @@ const ProjectEditDialog = ({
   availablePrograms 
 }: ProjectEditDialogProps) => {
   const [formData, setFormData] = useState<Partial<Project>>({});
+  const { toast } = useToast();
+
+  // Initialize form data when project changes
+  useEffect(() => {
+    if (project) {
+      setFormData({
+        projectName: project.projectName,
+        partnerName: project.partnerName,
+        country: project.country,
+        program: project.program,
+        impactArea: project.impactArea,
+        status: project.status,
+        currency: project.currency,
+        totalCost: project.totalCost,
+        amountDisbursed: project.amountDisbursed,
+        startDate: project.startDate,
+        endDate: project.endDate,
+        followUpNeeded: project.followUpNeeded
+      });
+    }
+  }, [project]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (project) {
-      onUpdateProject(project.id, formData);
+      // Filter out undefined values
+      const updates = Object.fromEntries(
+        Object.entries(formData).filter(([_, value]) => value !== undefined)
+      );
+      
+      onUpdateProject(project.id, updates);
       onOpenChange(false);
+      
+      toast({
+        title: "Project Updated",
+        description: `${project.projectName} has been updated successfully.`,
+      });
     }
   };
 
@@ -47,8 +79,9 @@ const ProjectEditDialog = ({
               <Label htmlFor="projectName">Project Name</Label>
               <Input
                 id="projectName"
-                defaultValue={project.projectName}
+                value={formData.projectName || ""}
                 onChange={(e) => setFormData(prev => ({ ...prev, projectName: e.target.value }))}
+                required
               />
             </div>
             
@@ -56,7 +89,7 @@ const ProjectEditDialog = ({
               <Label htmlFor="partnerName">Partner Name (Optional)</Label>
               <Input
                 id="partnerName"
-                defaultValue={project.partnerName || ""}
+                value={formData.partnerName || ""}
                 onChange={(e) => setFormData(prev => ({ ...prev, partnerName: e.target.value }))}
               />
             </div>
@@ -66,7 +99,7 @@ const ProjectEditDialog = ({
             <div>
               <Label htmlFor="country">Country (Optional)</Label>
               <Select
-                defaultValue={project.country || ""}
+                value={formData.country || ""}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, country: value as any }))}
               >
                 <SelectTrigger>
@@ -86,7 +119,7 @@ const ProjectEditDialog = ({
             <div>
               <Label htmlFor="program">Program (Optional)</Label>
               <Select
-                defaultValue={project.program || ""}
+                value={formData.program || ""}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, program: value }))}
               >
                 <SelectTrigger>
@@ -106,11 +139,11 @@ const ProjectEditDialog = ({
             <div>
               <Label htmlFor="impactArea">Impact Area</Label>
               <Select
-                defaultValue={project.impactArea}
+                value={formData.impactArea || ""}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, impactArea: value as any }))}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select impact area" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Food Security">Food Security</SelectItem>
@@ -125,11 +158,11 @@ const ProjectEditDialog = ({
             <div>
               <Label htmlFor="status">Status</Label>
               <Select
-                defaultValue={project.status}
+                value={formData.status || ""}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as any }))}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="On-Track">On-Track</SelectItem>
@@ -147,11 +180,11 @@ const ProjectEditDialog = ({
             <div>
               <Label htmlFor="currency">Currency</Label>
               <Select
-                defaultValue={project.currency}
+                value={formData.currency || ""}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value as any }))}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="CAD">CAD</SelectItem>
@@ -165,7 +198,7 @@ const ProjectEditDialog = ({
               <Input
                 id="totalCost"
                 type="number"
-                defaultValue={project.totalCost || ""}
+                value={formData.totalCost || ""}
                 onChange={(e) => setFormData(prev => ({ ...prev, totalCost: e.target.value ? Number(e.target.value) : undefined }))}
               />
             </div>
@@ -175,7 +208,7 @@ const ProjectEditDialog = ({
               <Input
                 id="amountDisbursed"
                 type="number"
-                defaultValue={project.amountDisbursed}
+                value={formData.amountDisbursed || ""}
                 onChange={(e) => setFormData(prev => ({ ...prev, amountDisbursed: Number(e.target.value) }))}
                 required
               />
@@ -188,7 +221,7 @@ const ProjectEditDialog = ({
               <Input
                 id="startDate"
                 type="date"
-                defaultValue={project.startDate}
+                value={formData.startDate || ""}
                 onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
                 required
               />
@@ -199,7 +232,7 @@ const ProjectEditDialog = ({
               <Input
                 id="endDate"
                 type="date"
-                defaultValue={project.endDate || ""}
+                value={formData.endDate || ""}
                 onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
               />
             </div>
@@ -209,7 +242,7 @@ const ProjectEditDialog = ({
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                defaultChecked={project.followUpNeeded}
+                checked={formData.followUpNeeded || false}
                 onChange={(e) => setFormData(prev => ({ ...prev, followUpNeeded: e.target.checked }))}
               />
               <span>Follow-up needed</span>

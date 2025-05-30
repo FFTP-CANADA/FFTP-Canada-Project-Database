@@ -49,9 +49,12 @@ const ProjectEditDialog = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (project) {
-      // Filter out undefined values
+      // Convert "none" values back to undefined for optional fields
       const updates = Object.fromEntries(
-        Object.entries(formData).filter(([_, value]) => value !== undefined)
+        Object.entries(formData).filter(([_, value]) => value !== undefined).map(([key, value]) => [
+          key, 
+          (key === 'country' || key === 'program') && value === 'none' ? undefined : value
+        ])
       );
       
       onUpdateProject(project.id, updates);
@@ -99,14 +102,14 @@ const ProjectEditDialog = ({
             <div>
               <Label htmlFor="country">Country (Optional)</Label>
               <Select
-                value={formData.country || ""}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, country: value as any }))}
+                value={formData.country || "none"}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, country: value === "none" ? undefined : value as any }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select country" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No country</SelectItem>
+                  <SelectItem value="none">No country</SelectItem>
                   <SelectItem value="Canada">Canada</SelectItem>
                   <SelectItem value="Jamaica">Jamaica</SelectItem>
                   <SelectItem value="Guyana">Guyana</SelectItem>
@@ -119,14 +122,14 @@ const ProjectEditDialog = ({
             <div>
               <Label htmlFor="program">Program (Optional)</Label>
               <Select
-                value={formData.program || ""}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, program: value }))}
+                value={formData.program || "none"}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, program: value === "none" ? undefined : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select program" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No program</SelectItem>
+                  <SelectItem value="none">No program</SelectItem>
                   {availablePrograms.map(program => (
                     <SelectItem key={program} value={program}>{program}</SelectItem>
                   ))}

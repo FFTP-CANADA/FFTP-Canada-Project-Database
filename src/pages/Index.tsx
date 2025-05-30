@@ -14,7 +14,6 @@ import ProjectNotesDialog from "@/components/ProjectNotesDialog";
 import ProjectMilestonesDialog from "@/components/ProjectMilestonesDialog";
 import ProjectGanttDialog from "@/components/ProjectGanttDialog";
 import StatusReportDialog from "@/components/StatusReportDialog";
-import BiweeklyReportDialog from "@/components/BiweeklyReportDialog";
 import { useProjectData } from "@/hooks/useProjectData";
 import { Project } from "@/types/project";
 import ExchangeRateDisplay from "@/components/ExchangeRateDisplay";
@@ -124,11 +123,6 @@ const Index = () => {
               <p className="text-blue-600 mt-1">Project Tracker & Analytics Dashboard</p>
             </div>
             <div className="flex gap-3">
-              <BiweeklyReportDialog 
-                projects={projects} 
-                notes={notes} 
-                milestones={milestones}
-              />
               <StatusReportDialog projects={projects} notes={notes} />
               <Button 
                 onClick={() => setIsAddProjectOpen(true)}

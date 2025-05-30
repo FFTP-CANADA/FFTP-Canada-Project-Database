@@ -12,6 +12,8 @@ export interface FollowUpEmail {
   draftEmail: string;
   generated: string;
   priority: "High" | "Medium" | "Low";
+  trigger: "milestone" | "note";
+  noteContent?: string;
 }
 
 export const useAutoFollowUp = (
@@ -20,11 +22,14 @@ export const useAutoFollowUp = (
   notes: ProjectNote[]
 ) => {
   const [followUpEmails, setFollowUpEmails] = useState<FollowUpEmail[]>([]);
+  const [lastNoteCount, setLastNoteCount] = useState(0);
 
   const generateFollowUpEmail = (
     project: Project,
     milestone: ProjectMilestone,
-    projectNotes: ProjectNote[]
+    projectNotes: ProjectNote[],
+    trigger: "milestone" | "note" = "milestone",
+    triggerNote?: ProjectNote
   ): string => {
     const totalCostCAD = project.currency === 'USD' 
       ? convertUsdToCad(project.totalCost || 0)
@@ -53,11 +58,17 @@ export const useAutoFollowUp = (
       ? `\n\nThis follow-up is regarding the upcoming milestone: "${milestone.milestoneType}"`
       : '';
 
-    return `Subject: Follow-up Required: ${project.projectName} - ${milestone.title}
+    const triggerContext = trigger === "note" && triggerNote
+      ? `\n\nThis follow-up was triggered by a new project note added on ${new Date(triggerNote.dateOfNote).toLocaleDateString('en-CA')}:\n"${triggerNote.content}"\n\nPlease review this update and provide any necessary clarification or response.`
+      : '';
+
+    const subjectPrefix = trigger === "note" ? "Action Required - New Update:" : "Follow-up Required:";
+
+    return `Subject: ${subjectPrefix} ${project.projectName} - ${milestone.title}
 
 Dear ${project.partnerName || 'Partner'},
 
-I hope this email finds you well. I am writing to follow up on the ${project.projectName} project as we approach an important milestone.
+I hope this email finds you well. ${trigger === "note" ? "I am writing to follow up on a recent update regarding" : "I am writing to follow up on"} the ${project.projectName} project${trigger === "milestone" ? " as we approach an important milestone" : ""}.
 
 PROJECT DETAILS:
 • Project: ${project.projectName}
@@ -71,17 +82,18 @@ FINANCIAL SUMMARY:
 • Reported Spend: ${formatCurrency(reportedSpendCAD, 'CAD')}
 • Outstanding Amount: ${formatCurrency(outstandingAmount, 'CAD')}
 
-UPCOMING MILESTONE:
+${trigger === "milestone" ? `UPCOMING MILESTONE:
 • Milestone: ${milestone.title}
 • Due Date: ${new Date(milestone.dueDate).toLocaleDateString('en-CA', { 
     year: 'numeric', 
     month: 'long', 
     day: 'numeric' 
   })}
-• Priority: ${milestone.priority}${milestoneTypeContext}
+• Priority: ${milestone.priority}${milestoneTypeContext}` : ''}${triggerContext}
 
 ACTION REQUIRED:
-To ensure we stay on track with this milestone, please provide the following:
+${trigger === "note" ? "Please review the recent update and provide any necessary response or clarification. Additionally, to ensure we stay on track with project milestones, please provide the following:" :
+"To ensure we stay on track with this milestone, please provide the following:"}
 
 ${milestone.milestoneType?.includes('Disbursement') ? 
   '• Confirmation of readiness to receive the next disbursement\n• Updated bank account information if needed\n• Any changes to project implementation plans' :
@@ -125,6 +137,7 @@ joannt@foodforthepoor.ca`;
         const projectMilestones = milestones.filter(m => m.projectId === project.id);
         const projectNotes = notes.filter(n => n.projectId === project.id);
         
+        // Check for milestone-based follow-ups
         projectMilestones.forEach(milestone => {
           const milestoneDate = new Date(milestone.dueDate);
           
@@ -136,21 +149,63 @@ joannt@foodforthepoor.ca`;
             // Check if we haven't already generated a follow-up for this milestone
             const existingFollowUp = followUpEmails.find(
               email => email.projectId === project.id && 
-                      email.milestoneTitle === milestone.title
+                      email.milestoneTitle === milestone.title &&
+                      email.trigger === "milestone"
             );
             
             if (!existingFollowUp) {
-              const draftEmail = generateFollowUpEmail(project, milestone, projectNotes);
+              const draftEmail = generateFollowUpEmail(project, milestone, projectNotes, "milestone");
               
               newFollowUps.push({
-                id: `${project.id}-${milestone.id}-${Date.now()}`,
+                id: `${project.id}-${milestone.id}-milestone-${Date.now()}`,
                 projectId: project.id,
                 projectName: project.projectName,
                 milestoneTitle: milestone.title,
                 milestoneDueDate: milestone.dueDate,
                 draftEmail,
                 generated: new Date().toISOString(),
-                priority: milestone.priority
+                priority: milestone.priority,
+                trigger: "milestone"
+              });
+            }
+          }
+        });
+
+        // Check for note-based follow-ups (new notes added today)
+        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const recentNotes = projectNotes.filter(note => {
+          const noteDate = new Date(note.dateOfNote);
+          return noteDate >= todayStart;
+        });
+
+        recentNotes.forEach(note => {
+          // Find the next upcoming milestone for this project
+          const upcomingMilestone = projectMilestones
+            .filter(m => new Date(m.dueDate) >= today && m.status !== "Completed")
+            .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
+
+          if (upcomingMilestone) {
+            // Check if we haven't already generated a note-based follow-up for this note
+            const existingNoteFollowUp = followUpEmails.find(
+              email => email.projectId === project.id && 
+                      email.trigger === "note" &&
+                      email.noteContent === note.content
+            );
+
+            if (!existingNoteFollowUp) {
+              const draftEmail = generateFollowUpEmail(project, upcomingMilestone, projectNotes, "note", note);
+              
+              newFollowUps.push({
+                id: `${project.id}-note-${note.id}-${Date.now()}`,
+                projectId: project.id,
+                projectName: project.projectName,
+                milestoneTitle: upcomingMilestone.title,
+                milestoneDueDate: upcomingMilestone.dueDate,
+                draftEmail,
+                generated: new Date().toISOString(),
+                priority: upcomingMilestone.priority,
+                trigger: "note",
+                noteContent: note.content
               });
             }
           }
@@ -164,7 +219,16 @@ joannt@foodforthepoor.ca`;
 
   useEffect(() => {
     checkAndGenerateFollowUps();
+    setLastNoteCount(notes.length);
   }, [projects, milestones, notes]);
+
+  // Check for new notes specifically
+  useEffect(() => {
+    if (notes.length > lastNoteCount) {
+      checkAndGenerateFollowUps();
+      setLastNoteCount(notes.length);
+    }
+  }, [notes.length, lastNoteCount]);
 
   const markFollowUpSent = (followUpId: string) => {
     setFollowUpEmails(prev => prev.filter(email => email.id !== followUpId));

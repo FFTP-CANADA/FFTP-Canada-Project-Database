@@ -173,9 +173,13 @@ const AutoFollowUpManager = ({
             <div className="text-center py-8">
               <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500 mb-4">
-                No automatic follow-ups generated. Follow-ups are created 10 days before milestones for projects marked as needing follow-up.
+                No automatic follow-ups generated. Follow-ups are created for projects marked as needing follow-up when:
               </p>
-              <p className="text-sm text-gray-400">
+              <ul className="text-sm text-gray-400 list-disc list-inside space-y-1">
+                <li>Milestones are due within 10 days</li>
+                <li>New notes are added to projects</li>
+              </ul>
+              <p className="text-sm text-gray-400 mt-4">
                 Configure your email settings above to enable automatic email sending when follow-ups are generated.
               </p>
             </div>
@@ -192,6 +196,9 @@ const AutoFollowUpManager = ({
                           <Badge className={getPriorityColor(email.priority)}>
                             {email.priority}
                           </Badge>
+                          <Badge className={email.trigger === "note" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"}>
+                            {email.trigger === "note" ? "Note Update" : "Milestone Due"}
+                          </Badge>
                           {daysUntilDue <= 3 && (
                             <Badge className="bg-red-100 text-red-800">
                               <AlertTriangle className="h-3 w-3 mr-1" />
@@ -202,6 +209,11 @@ const AutoFollowUpManager = ({
                         <p className="text-sm text-gray-600 mb-1">
                           Milestone: {email.milestoneTitle}
                         </p>
+                        {email.trigger === "note" && email.noteContent && (
+                          <p className="text-sm text-blue-600 mb-1 italic">
+                            Triggered by note: "{email.noteContent.length > 50 ? email.noteContent.substring(0, 50) + "..." : email.noteContent}"
+                          </p>
+                        )}
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <span className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />

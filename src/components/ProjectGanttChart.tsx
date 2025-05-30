@@ -28,7 +28,7 @@ const getProjectColor = (status: Project["status"]) => {
   }
 };
 
-const getMilestoneColor = (milestoneType: FFTPMilestoneType, status: ProjectMilestone["status"]) => {
+const getMilestoneColor = (milestoneType: FFTPMilestoneType | undefined, status: ProjectMilestone["status"]) => {
   // Color coding by phase as requested
   let baseColor = "bg-gray-500";
   
@@ -58,8 +58,18 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
     // Calculate project duration in days
     const totalDays = Math.ceil((projectEnd.getTime() - projectStart.getTime()) / (1000 * 60 * 60 * 24));
     
-    // Create timeline items
-    const items = [
+    // Create timeline items with proper typing
+    const items: Array<{
+      id: string;
+      name: string;
+      start: Date;
+      end: Date;
+      type: "project" | "milestone";
+      status: Project["status"] | ProjectMilestone["status"];
+      color: string;
+      priority?: ProjectMilestone["priority"];
+      milestoneType?: FFTPMilestoneType;
+    }> = [
       {
         id: "project",
         name: project.projectName,
@@ -74,11 +84,11 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
         name: milestone.title,
         start: new Date(milestone.startDate),
         end: new Date(milestone.dueDate),
-        type: "milestone",
+        type: "milestone" as const,
         status: milestone.status,
         priority: milestone.priority,
         milestoneType: milestone.milestoneType,
-        color: getMilestoneColor(milestone.milestoneType as FFTPMilestoneType, milestone.status)
+        color: getMilestoneColor(milestone.milestoneType, milestone.status)
       }))
     ];
 

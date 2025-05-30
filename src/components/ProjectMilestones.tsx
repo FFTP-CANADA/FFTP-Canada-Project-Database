@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +30,7 @@ const ProjectMilestones = ({
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    startDate: "",
     dueDate: "",
     status: "Not Started" as ProjectMilestone["status"],
     priority: "Medium" as ProjectMilestone["priority"]
@@ -39,7 +39,7 @@ const ProjectMilestones = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.dueDate) {
+    if (!formData.title || !formData.startDate || !formData.dueDate) {
       toast({
         title: "Error",
         description: "Please fill in the required fields.",
@@ -52,6 +52,7 @@ const ProjectMilestones = ({
       projectId,
       title: formData.title,
       description: formData.description,
+      startDate: formData.startDate,
       dueDate: formData.dueDate,
       status: formData.status,
       priority: formData.priority
@@ -60,6 +61,7 @@ const ProjectMilestones = ({
     setFormData({
       title: "",
       description: "",
+      startDate: "",
       dueDate: "",
       status: "Not Started",
       priority: "Medium"
@@ -150,6 +152,16 @@ const ProjectMilestones = ({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
+                    <Label htmlFor="startDate">Start Date *</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={formData.startDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div>
                     <Label htmlFor="dueDate">Due Date *</Label>
                     <Input
                       id="dueDate"
@@ -159,22 +171,22 @@ const ProjectMilestones = ({
                       required
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="priority">Priority</Label>
-                    <Select
-                      value={formData.priority}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value as ProjectMilestone["priority"] }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Low">Low</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="High">High</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="priority">Priority</Label>
+                  <Select
+                    value={formData.priority}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value as ProjectMilestone["priority"] }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Low">Low</SelectItem>
+                      <SelectItem value="Medium">Medium</SelectItem>
+                      <SelectItem value="High">High</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex justify-end space-x-2">
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>
@@ -220,7 +232,8 @@ const ProjectMilestones = ({
                     )}
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Calendar className="h-4 w-4" />
-                      <span>Due: {new Date(milestone.dueDate).toLocaleDateString()}</span>
+                      <span>Start: {new Date(milestone.startDate).toLocaleDateString()}</span>
+                      <span>• Due: {new Date(milestone.dueDate).toLocaleDateString()}</span>
                       {milestone.completedDate && (
                         <span className="text-green-600">
                           • Completed: {new Date(milestone.completedDate).toLocaleDateString()}

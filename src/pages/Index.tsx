@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +15,8 @@ import ProjectMilestonesDialog from "@/components/ProjectMilestonesDialog";
 import ProjectGanttDialog from "@/components/ProjectGanttDialog";
 import { useProjectData } from "@/hooks/useProjectData";
 import { Project } from "@/types/project";
+import ExchangeRateDisplay from "@/components/ExchangeRateDisplay";
+import { convertUsdToCad, formatWithExchange } from "@/utils/currencyUtils";
 
 const Index = () => {
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
@@ -71,6 +72,12 @@ const Index = () => {
     totalProjects: projects.length,
     activeProjects: projects.filter(p => p.status === "On-Track" || p.status === "Delayed").length,
     totalDisbursed: projects.reduce((sum, p) => sum + p.amountDisbursed, 0),
+    totalDisbursedCAD: projects.reduce((sum, p) => {
+      if (p.currency === 'USD') {
+        return sum + convertUsdToCad(p.amountDisbursed);
+      }
+      return sum + p.amountDisbursed;
+    }, 0),
     needsFollowUp: projects.filter(p => p.followUpNeeded).length,
   };
 
@@ -125,7 +132,7 @@ const Index = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-blue-700">Total Projects</CardTitle>
@@ -148,12 +155,12 @@ const Index = () => {
 
           <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700">Total Disbursed</CardTitle>
+              <CardTitle className="text-sm font-medium text-blue-700">Total Disbursed (CAD)</CardTitle>
               <DollarSign className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-900">
-                ${stats.totalDisbursed.toLocaleString()}
+                CAD ${stats.totalDisbursedCAD.toLocaleString()}
               </div>
             </CardContent>
           </Card>
@@ -167,6 +174,8 @@ const Index = () => {
               <div className="text-2xl font-bold text-orange-600">{stats.needsFollowUp}</div>
             </CardContent>
           </Card>
+
+          <ExchangeRateDisplay />
         </div>
 
         {/* Main Content Tabs */}

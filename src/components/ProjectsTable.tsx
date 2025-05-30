@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt } from "lucide-react";
 import { Project } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
+import { formatWithExchange } from "@/utils/currencyUtils";
 
 interface ProjectsTableProps {
   projects: Project[];
@@ -187,10 +187,10 @@ const ProjectsTable = ({
                   </Badge>
                 </TableCell>
                 <TableCell className="text-blue-900">
-                  {project.totalCost ? `${project.currency} $${project.totalCost.toLocaleString()}` : "N/A"}
+                  {project.totalCost ? formatWithExchange(project.totalCost, project.currency) : "N/A"}
                 </TableCell>
                 <TableCell className="text-blue-900">
-                  {project.currency} ${project.amountDisbursed.toLocaleString()}
+                  {formatWithExchange(project.amountDisbursed, project.currency)}
                 </TableCell>
                 <TableCell>
                   {project.totalCost ? (

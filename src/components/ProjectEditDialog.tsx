@@ -142,7 +142,7 @@ const ProjectEditDialog = ({
             <div>
               <Label htmlFor="impactArea">Impact Area</Label>
               <Select
-                value={formData.impactArea || ""}
+                value={formData.impactArea || "Food Security"}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, impactArea: value as any }))}
               >
                 <SelectTrigger>
@@ -161,7 +161,7 @@ const ProjectEditDialog = ({
             <div>
               <Label htmlFor="status">Status</Label>
               <Select
-                value={formData.status || ""}
+                value={formData.status || "On-Track"}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as any }))}
               >
                 <SelectTrigger>
@@ -183,7 +183,7 @@ const ProjectEditDialog = ({
             <div>
               <Label htmlFor="currency">Currency</Label>
               <Select
-                value={formData.currency || ""}
+                value={formData.currency || "CAD"}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value as any }))}
               >
                 <SelectTrigger>

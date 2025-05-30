@@ -10,6 +10,7 @@ import { formatWithExchange, convertUsdToCad } from "@/utils/currencyUtils";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
+import { useProjectData } from "@/hooks/useProjectData";
 
 // Extend jsPDF type to include autoTable
 declare module 'jspdf' {
@@ -25,6 +26,7 @@ interface StatusReportDialogProps {
 
 const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
   const [open, setOpen] = useState(false);
+  const { getMilestonesForProject } = useProjectData();
 
   // Calculate comprehensive metrics
   const metrics = {
@@ -50,6 +52,12 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
       }
       return sum;
     }, 0),
+    totalReportedSpendCAD: projects.reduce((sum, p) => {
+      if (p.currency === 'USD') {
+        return sum + convertUsdToCad(p.reportedSpend);
+      }
+      return sum + p.reportedSpend;
+    }, 0),
   };
 
   const utilizationRate = metrics.totalBudgetCAD > 0 ? (metrics.totalDisbursedCAD / metrics.totalBudgetCAD) * 100 : 0;
@@ -58,43 +66,111 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
   const countryBreakdown = projects.reduce((acc, project) => {
     const country = project.country || 'Unspecified';
     if (!acc[country]) {
-      acc[country] = { count: 0, disbursed: 0 };
+      acc[country] = { count: 0, disbursed: 0, budget: 0, reportedSpend: 0 };
     }
     acc[country].count++;
     if (project.currency === 'USD') {
       acc[country].disbursed += convertUsdToCad(project.amountDisbursed);
+      acc[country].budget += project.totalCost ? convertUsdToCad(project.totalCost) : 0;
+      acc[country].reportedSpend += convertUsdToCad(project.reportedSpend);
     } else {
       acc[country].disbursed += project.amountDisbursed;
+      acc[country].budget += project.totalCost || 0;
+      acc[country].reportedSpend += project.reportedSpend;
     }
     return acc;
-  }, {} as Record<string, { count: number; disbursed: number }>);
+  }, {} as Record<string, { count: number; disbursed: number; budget: number; reportedSpend: number }>);
 
   // Impact area breakdown
   const impactAreaBreakdown = projects.reduce((acc, project) => {
     const area = project.impactArea;
     if (!acc[area]) {
-      acc[area] = { count: 0, disbursed: 0 };
+      acc[area] = { count: 0, disbursed: 0, budget: 0 };
     }
     acc[area].count++;
     if (project.currency === 'USD') {
       acc[area].disbursed += convertUsdToCad(project.amountDisbursed);
+      acc[area].budget += project.totalCost ? convertUsdToCad(project.totalCost) : 0;
     } else {
       acc[area].disbursed += project.amountDisbursed;
+      acc[area].budget += project.totalCost || 0;
     }
     return acc;
-  }, {} as Record<string, { count: number; disbursed: number }>);
+  }, {} as Record<string, { count: number; disbursed: number; budget: number }>);
 
-  // Recent notes summary (last 30 days)
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const recentNotes = notes.filter(note => new Date(note.dateOfNote) >= thirtyDaysAgo);
+  // Project details with milestones and timeline
+  const projectDetails = projects.map(project => {
+    const milestones = getMilestonesForProject(project.id);
+    const projectNotes = notes.filter(note => note.projectId === project.id);
+    
+    // Calculate timeline metrics
+    const startDate = new Date(project.startDate);
+    const endDate = project.endDate ? new Date(project.endDate) : new Date();
+    const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const elapsedDays = Math.ceil((new Date().getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const progressPercentage = Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100));
+    
+    // Milestone completion rate
+    const completedMilestones = milestones.filter(m => m.status === "Completed").length;
+    const milestoneCompletionRate = milestones.length > 0 ? (completedMilestones / milestones.length) * 100 : 0;
+    
+    // Financial variance
+    const budgetCAD = project.currency === 'USD' && project.totalCost ? 
+      convertUsdToCad(project.totalCost) : (project.totalCost || 0);
+    const disbursedCAD = project.currency === 'USD' ? 
+      convertUsdToCad(project.amountDisbursed) : project.amountDisbursed;
+    const reportedSpendCAD = project.currency === 'USD' ? 
+      convertUsdToCad(project.reportedSpend) : project.reportedSpend;
+    
+    const disbursementRate = budgetCAD > 0 ? (disbursedCAD / budgetCAD) * 100 : 0;
+    const variance = disbursedCAD - reportedSpendCAD;
+    
+    return {
+      ...project,
+      milestones,
+      projectNotes,
+      timeline: {
+        totalDays,
+        elapsedDays,
+        progressPercentage: Math.round(progressPercentage),
+        milestoneCompletionRate: Math.round(milestoneCompletionRate)
+      },
+      financials: {
+        budgetCAD,
+        disbursedCAD,
+        reportedSpendCAD,
+        disbursementRate: Math.round(disbursementRate),
+        variance,
+        variancePercentage: disbursedCAD > 0 ? Math.round((variance / disbursedCAD) * 100) : 0
+      }
+    };
+  });
+
+  // Formal notes summary
+  const generateFormalNotesSummary = (projectNotes: typeof notes) => {
+    if (projectNotes.length === 0) return "No project notes recorded during this reporting period.";
+    
+    const recentNotes = projectNotes.filter(note => {
+      const noteDate = new Date(note.dateOfNote);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      return noteDate >= thirtyDaysAgo;
+    }).sort((a, b) => new Date(b.dateOfNote).getTime() - new Date(a.dateOfNote).getTime());
+
+    if (recentNotes.length === 0) return "No recent project activity recorded in the last 30 days.";
+    
+    return recentNotes.map(note => 
+      `${new Date(note.dateOfNote).toLocaleDateString()}: ${note.content}`
+    ).join('. ');
+  };
 
   // Key insights
   const insights = [
     `${((metrics.completedProjects / metrics.totalProjects) * 100).toFixed(1)}% project completion rate`,
-    `${utilizationRate.toFixed(1)}% budget utilization`,
-    `${metrics.delayedProjects} projects currently delayed`,
-    `${recentNotes.length} notes added in the last 30 days`,
+    `${utilizationRate.toFixed(1)}% budget utilization across portfolio`,
+    `${metrics.delayedProjects} projects currently experiencing delays`,
+    `CAD $${(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD).toLocaleString()} variance between disbursed and reported spending`,
+    `${Math.round(projectDetails.reduce((sum, p) => sum + p.timeline.milestoneCompletionRate, 0) / projectDetails.length)}% average milestone completion rate`
   ];
 
   const generatePDFReport = () => {
@@ -105,13 +181,13 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
     doc.setFontSize(20);
     doc.text('FOOD FOR THE POOR CANADA', 105, 20, { align: 'center' });
     doc.setFontSize(16);
-    doc.text('PROJECT STATUS REPORT', 105, 30, { align: 'center' });
+    doc.text('COMPREHENSIVE PROJECT STATUS REPORT', 105, 30, { align: 'center' });
     doc.setFontSize(12);
     doc.text(`Generated: ${reportDate}`, 105, 40, { align: 'center' });
 
     let yPosition = 60;
 
-    // Executive Summary Table
+    // Executive Summary
     doc.setFontSize(14);
     doc.text('EXECUTIVE SUMMARY', 20, yPosition);
     yPosition += 10;
@@ -123,7 +199,9 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
         ['Total Active Projects', metrics.activeProjects.toString()],
         ['Total Budget Allocated', `CAD $${metrics.totalBudgetCAD.toLocaleString()}`],
         ['Total Funds Disbursed', `CAD $${metrics.totalDisbursedCAD.toLocaleString()}`],
+        ['Total Reported Spend', `CAD $${metrics.totalReportedSpendCAD.toLocaleString()}`],
         ['Budget Utilization', `${utilizationRate.toFixed(1)}%`],
+        ['Financial Variance', `CAD $${(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD).toLocaleString()}`],
       ],
       theme: 'striped',
       headStyles: { fillColor: [59, 130, 246] },
@@ -131,24 +209,31 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
 
     yPosition = (doc as any).lastAutoTable.finalY + 20;
 
-    // Project Status Table
+    // Detailed Project Analysis
+    if (yPosition > 200) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
     doc.setFontSize(14);
-    doc.text('PROJECT STATUS OVERVIEW', 20, yPosition);
+    doc.text('DETAILED PROJECT ANALYSIS', 20, yPosition);
     yPosition += 10;
 
     autoTable(doc, {
       startY: yPosition,
-      head: [['Status', 'Count']],
-      body: [
-        ['Completed', metrics.completedProjects.toString()],
-        ['On-Track', projects.filter(p => p.status === "On-Track").length.toString()],
-        ['Delayed', metrics.delayedProjects.toString()],
-        ['Pending Start', metrics.pendingProjects.toString()],
-        ['Needs Attention', metrics.needsAttentionProjects.toString()],
-        ['Follow-up Required', metrics.followUpNeeded.toString()],
-      ],
+      head: [['Project', 'Country', 'Status', 'Timeline Progress', 'Milestone Progress', 'Budget Utilization', 'Variance']],
+      body: projectDetails.map(project => [
+        project.projectName,
+        project.country || 'N/A',
+        project.status,
+        `${project.timeline.progressPercentage}%`,
+        `${project.timeline.milestoneCompletionRate}%`,
+        `${project.financials.disbursementRate}%`,
+        `CAD $${project.financials.variance.toLocaleString()}`
+      ]),
       theme: 'striped',
       headStyles: { fillColor: [59, 130, 246] },
+      styles: { fontSize: 8 }
     });
 
     yPosition = (doc as any).lastAutoTable.finalY + 20;
@@ -199,7 +284,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
       headStyles: { fillColor: [59, 130, 246] },
     });
 
-    doc.save(`FFTP_Status_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`FFTP_Comprehensive_Report_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const generateWordReport = () => {
@@ -349,16 +434,16 @@ Report generated by Food For The Poor Canada Project Management System
           Generate Status Report
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Executive Status Report
+            Comprehensive Executive Status Report
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Key Metrics Table */}
+          {/* Executive Summary */}
           <Card>
             <CardHeader>
               <CardTitle>Executive Summary</CardTitle>
@@ -385,68 +470,136 @@ Report generated by Food For The Poor Canada Project Management System
                     <TableCell className="font-bold">CAD ${metrics.totalDisbursedCAD.toLocaleString()}</TableCell>
                   </TableRow>
                   <TableRow>
+                    <TableCell>Total Reported Spend</TableCell>
+                    <TableCell className="font-bold">CAD ${metrics.totalReportedSpendCAD.toLocaleString()}</TableCell>
+                  </TableRow>
+                  <TableRow>
                     <TableCell>Budget Utilization</TableCell>
                     <TableCell className="font-bold">{utilizationRate.toFixed(1)}%</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Financial Variance</TableCell>
+                    <TableCell className="font-bold">CAD ${(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD).toLocaleString()}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
 
-          {/* Project Status Table */}
+          {/* Detailed Project Analysis */}
           <Card>
             <CardHeader>
-              <CardTitle>Project Status Overview</CardTitle>
+              <CardTitle>Detailed Project Analysis</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Project</TableHead>
+                    <TableHead>Country</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Count</TableHead>
-                    <TableHead>Percentage</TableHead>
+                    <TableHead>Timeline Progress</TableHead>
+                    <TableHead>Milestone Progress</TableHead>
+                    <TableHead>Budget Utilization</TableHead>
+                    <TableHead>Financial Variance</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>Completed</TableCell>
-                    <TableCell>{metrics.completedProjects}</TableCell>
-                    <TableCell>{((metrics.completedProjects / metrics.totalProjects) * 100).toFixed(1)}%</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>On-Track</TableCell>
-                    <TableCell>{projects.filter(p => p.status === "On-Track").length}</TableCell>
-                    <TableCell>{((projects.filter(p => p.status === "On-Track").length / metrics.totalProjects) * 100).toFixed(1)}%</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Delayed</TableCell>
-                    <TableCell>{metrics.delayedProjects}</TableCell>
-                    <TableCell>{((metrics.delayedProjects / metrics.totalProjects) * 100).toFixed(1)}%</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Pending Start</TableCell>
-                    <TableCell>{metrics.pendingProjects}</TableCell>
-                    <TableCell>{((metrics.pendingProjects / metrics.totalProjects) * 100).toFixed(1)}%</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Needs Attention</TableCell>
-                    <TableCell>{metrics.needsAttentionProjects}</TableCell>
-                    <TableCell>{((metrics.needsAttentionProjects / metrics.totalProjects) * 100).toFixed(1)}%</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Follow-up Required</TableCell>
-                    <TableCell>{metrics.followUpNeeded}</TableCell>
-                    <TableCell>{((metrics.followUpNeeded / metrics.totalProjects) * 100).toFixed(1)}%</TableCell>
-                  </TableRow>
+                  {projectDetails.map((project) => (
+                    <TableRow key={project.id}>
+                      <TableCell className="font-medium">{project.projectName}</TableCell>
+                      <TableCell>{project.country || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Badge className={
+                          project.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                          project.status === 'On-Track' ? 'bg-blue-100 text-blue-800' :
+                          project.status === 'Delayed' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }>
+                          {project.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{project.timeline.progressPercentage}%</TableCell>
+                      <TableCell>{project.timeline.milestoneCompletionRate}%</TableCell>
+                      <TableCell>{project.financials.disbursementRate}%</TableCell>
+                      <TableCell className={project.financials.variance < 0 ? 'text-red-600' : 'text-green-600'}>
+                        CAD ${project.financials.variance.toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
 
-          {/* Geographic Distribution Table */}
+          {/* Milestone Summary by Project */}
           <Card>
             <CardHeader>
-              <CardTitle>Geographic Distribution</CardTitle>
+              <CardTitle>Milestone Progress Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {projectDetails.map((project) => (
+                  <div key={project.id} className="border rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-semibold">{project.projectName}</h4>
+                      <Badge>{project.milestones.length} Milestones</Badge>
+                    </div>
+                    <div className="grid grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">Completed:</span>
+                        <span className="ml-1 font-medium">
+                          {project.milestones.filter(m => m.status === 'Completed').length}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">In Progress:</span>
+                        <span className="ml-1 font-medium">
+                          {project.milestones.filter(m => m.status === 'In Progress').length}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Overdue:</span>
+                        <span className="ml-1 font-medium text-red-600">
+                          {project.milestones.filter(m => m.status === 'Overdue').length}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Completion Rate:</span>
+                        <span className="ml-1 font-medium">
+                          {project.timeline.milestoneCompletionRate}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Formal Notes Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Project Notes Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {projectDetails.map((project) => (
+                  <div key={project.id} className="border rounded-lg p-4">
+                    <h4 className="font-semibold mb-2">{project.projectName}</h4>
+                    <p className="text-sm text-gray-700">
+                      {generateFormalNotesSummary(project.projectNotes)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Financial Analysis */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Financial Analysis by Country</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -454,8 +607,11 @@ Report generated by Food For The Poor Canada Project Management System
                   <TableRow>
                     <TableHead>Country</TableHead>
                     <TableHead>Projects</TableHead>
+                    <TableHead>Budget (CAD)</TableHead>
                     <TableHead>Disbursed (CAD)</TableHead>
-                    <TableHead>% of Total Disbursed</TableHead>
+                    <TableHead>Reported Spend (CAD)</TableHead>
+                    <TableHead>Utilization Rate</TableHead>
+                    <TableHead>Variance</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -463,8 +619,13 @@ Report generated by Food For The Poor Canada Project Management System
                     <TableRow key={country}>
                       <TableCell className="font-medium">{country}</TableCell>
                       <TableCell>{data.count}</TableCell>
+                      <TableCell>CAD ${data.budget.toLocaleString()}</TableCell>
                       <TableCell>CAD ${data.disbursed.toLocaleString()}</TableCell>
-                      <TableCell>{((data.disbursed / metrics.totalDisbursedCAD) * 100).toFixed(1)}%</TableCell>
+                      <TableCell>CAD ${data.reportedSpend.toLocaleString()}</TableCell>
+                      <TableCell>{data.budget > 0 ? ((data.disbursed / data.budget) * 100).toFixed(1) : '0'}%</TableCell>
+                      <TableCell className={data.disbursed - data.reportedSpend < 0 ? 'text-red-600' : 'text-green-600'}>
+                        CAD ${(data.disbursed - data.reportedSpend).toLocaleString()}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -472,66 +633,20 @@ Report generated by Food For The Poor Canada Project Management System
             </CardContent>
           </Card>
 
-          {/* Impact Areas Table */}
+          {/* Key Strategic Insights */}
           <Card>
             <CardHeader>
-              <CardTitle>Impact Area Breakdown</CardTitle>
+              <CardTitle>Key Strategic Insights</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Impact Area</TableHead>
-                    <TableHead>Projects</TableHead>
-                    <TableHead>Disbursed (CAD)</TableHead>
-                    <TableHead>% of Total Disbursed</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {Object.entries(impactAreaBreakdown).map(([area, data]) => (
-                    <TableRow key={area}>
-                      <TableCell className="font-medium">{area}</TableCell>
-                      <TableCell>{data.count}</TableCell>
-                      <TableCell>CAD ${data.disbursed.toLocaleString()}</TableCell>
-                      <TableCell>{((data.disbursed / metrics.totalDisbursedCAD) * 100).toFixed(1)}%</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
-          {/* Key Insights */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Key Insights</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-1">
+              <ul className="space-y-2">
                 {insights.map((insight, index) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    {insight}
+                  <li key={index} className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                    <span>{insight}</span>
                   </li>
                 ))}
               </ul>
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Recent Activity (Last 30 Days)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div>📝 {recentNotes.length} new project notes recorded</div>
-                <div>⚠️ {metrics.needsAttentionProjects} projects need attention</div>
-                <div>📞 {metrics.followUpNeeded} projects require follow-up</div>
-              </div>
             </CardContent>
           </Card>
 
@@ -546,7 +661,7 @@ Report generated by Food For The Poor Canada Project Management System
             </Button>
             <Button onClick={generatePDFReport} className="bg-red-600 hover:bg-red-700">
               <FileDown className="w-4 h-4 mr-2" />
-              Download PDF
+              Download Comprehensive PDF
             </Button>
             <Button onClick={generateWordReport} className="bg-blue-600 hover:bg-blue-700">
               <FileDown className="w-4 h-4 mr-2" />

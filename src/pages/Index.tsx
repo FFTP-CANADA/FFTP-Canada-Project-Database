@@ -13,6 +13,7 @@ import ProgramManagementDialog from "@/components/ProgramManagementDialog";
 import ProjectNotesDialog from "@/components/ProjectNotesDialog";
 import ProjectMilestonesDialog from "@/components/ProjectMilestonesDialog";
 import ProjectGanttDialog from "@/components/ProjectGanttDialog";
+import StatusReportDialog from "@/components/StatusReportDialog";
 import { useProjectData } from "@/hooks/useProjectData";
 import { Project } from "@/types/project";
 import ExchangeRateDisplay from "@/components/ExchangeRateDisplay";
@@ -119,13 +120,16 @@ const Index = () => {
               />
               <p className="text-blue-600 mt-1">Project Tracker & Analytics Dashboard</p>
             </div>
-            <Button 
-              onClick={() => setIsAddProjectOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Project
-            </Button>
+            <div className="flex gap-3">
+              <StatusReportDialog projects={projects} notes={notes} />
+              <Button 
+                onClick={() => setIsAddProjectOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Project
+              </Button>
+            </div>
           </div>
         </div>
       </div>

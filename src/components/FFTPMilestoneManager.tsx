@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,7 +62,7 @@ const FFTPMilestoneManager = ({
 
     onAddMilestone({
       projectId,
-      title: newMilestone.milestoneType,
+      title: newMilestone.milestoneType, // Use milestoneType as the title
       milestoneType: newMilestone.milestoneType,
       startDate: newMilestone.startDate.toISOString().split('T')[0],
       dueDate: newMilestone.dueDate.toISOString().split('T')[0],

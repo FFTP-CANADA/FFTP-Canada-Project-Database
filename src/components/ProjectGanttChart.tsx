@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartGantt } from "lucide-react";
@@ -167,17 +166,6 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
               <div key={item.id} className="flex items-center gap-4">
                 <div className="w-64 text-sm font-medium truncate" title={item.name}>
                   {item.name}
-                  {item.type === "milestone" && item.milestoneType && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      Phase: {
-                        item.milestoneType === "MOU Signed" ? "MOU" :
-                        item.milestoneType.includes("Disbursement") ? "Disbursement" :
-                        item.milestoneType.includes("Receipts") ? "Receipt Verification" :
-                        item.milestoneType.includes("Report") ? "Reporting" :
-                        "Other"
-                      }
-                    </div>
-                  )}
                 </div>
                 <div className="flex-1 relative h-8 bg-gray-100 rounded">
                   {item.type === "project" ? (

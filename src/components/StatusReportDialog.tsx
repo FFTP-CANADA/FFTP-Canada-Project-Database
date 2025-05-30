@@ -185,117 +185,245 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
     const doc = new jsPDF();
     const reportDate = new Date().toLocaleDateString();
 
-    // Title
-    doc.setFontSize(20);
-    doc.text('FOOD FOR THE POOR CANADA', 105, 20, { align: 'center' });
-    doc.setFontSize(16);
-    doc.text('COMPREHENSIVE PROJECT STATUS REPORT', 105, 30, { align: 'center' });
-    doc.setFontSize(12);
-    doc.text(`Generated: ${reportDate}`, 105, 40, { align: 'center' });
+    // Add company logo
+    const logoImg = new Image();
+    logoImg.onload = function() {
+      // Add logo to PDF
+      doc.addImage(logoImg, 'PNG', 20, 15, 40, 20);
+      
+      // Title (adjusted position to account for logo)
+      doc.setFontSize(20);
+      doc.text('FOOD FOR THE POOR CANADA', 105, 25, { align: 'center' });
+      doc.setFontSize(16);
+      doc.text('COMPREHENSIVE PROJECT STATUS REPORT', 105, 35, { align: 'center' });
+      doc.setFontSize(12);
+      doc.text(`Generated: ${reportDate}`, 105, 45, { align: 'center' });
 
-    let yPosition = 60;
+      let yPosition = 65;
 
-    // Executive Summary
-    doc.setFontSize(14);
-    doc.text('EXECUTIVE SUMMARY', 20, yPosition);
-    yPosition += 10;
+      // Executive Summary
+      doc.setFontSize(14);
+      doc.text('EXECUTIVE SUMMARY', 20, yPosition);
+      yPosition += 10;
 
-    autoTable(doc, {
-      startY: yPosition,
-      head: [['Metric', 'Value']],
-      body: [
-        ['Total Active Projects', metrics.activeProjects.toString()],
-        ['Total Budget Allocated', `CAD $${metrics.totalBudgetCAD.toLocaleString()}`],
-        ['Total Funds Disbursed', `CAD $${metrics.totalDisbursedCAD.toLocaleString()}`],
-        ['Total Reported Spend', `CAD $${metrics.totalReportedSpendCAD.toLocaleString()}`],
-        ['Budget Utilization', `${utilizationRate.toFixed(1)}%`],
-        ['Financial Variance', `CAD $${(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD).toLocaleString()}`],
-      ],
-      theme: 'striped',
-      headStyles: { fillColor: [59, 130, 246] },
-    });
+      autoTable(doc, {
+        startY: yPosition,
+        head: [['Metric', 'Value']],
+        body: [
+          ['Total Active Projects', metrics.activeProjects.toString()],
+          ['Total Budget Allocated', `CAD $${metrics.totalBudgetCAD.toLocaleString()}`],
+          ['Total Funds Disbursed', `CAD $${metrics.totalDisbursedCAD.toLocaleString()}`],
+          ['Total Reported Spend', `CAD $${metrics.totalReportedSpendCAD.toLocaleString()}`],
+          ['Budget Utilization', `${utilizationRate.toFixed(1)}%`],
+          ['Financial Variance', `CAD $${(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD).toLocaleString()}`],
+        ],
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+      });
 
-    yPosition = (doc as any).lastAutoTable.finalY + 20;
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
 
-    // Detailed Project Analysis
-    if (yPosition > 200) {
-      doc.addPage();
-      yPosition = 20;
-    }
+      // Detailed Project Analysis
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 20;
+      }
 
-    doc.setFontSize(14);
-    doc.text('DETAILED PROJECT ANALYSIS', 20, yPosition);
-    yPosition += 10;
+      doc.setFontSize(14);
+      doc.text('DETAILED PROJECT ANALYSIS', 20, yPosition);
+      yPosition += 10;
 
-    autoTable(doc, {
-      startY: yPosition,
-      head: [['Project', 'Country', 'Status', 'Total Cost (CAD)', 'Disbursed (CAD)', 'Reported Spend (CAD)', 'Budget Utilization', 'Variance', 'Timeline Progress', 'Milestone Progress']],
-      body: projectDetails.map(project => [
-        project.projectName,
-        project.country || 'N/A',
-        project.status,
-        `CAD $${project.financials.budgetCAD.toLocaleString()}`,
-        `CAD $${project.financials.disbursedCAD.toLocaleString()}`,
-        `CAD $${project.financials.reportedSpendCAD.toLocaleString()}`,
-        `${project.financials.disbursementRate}%`,
-        `CAD $${project.financials.variance.toLocaleString()}`,
-        `${project.timeline.progressPercentage}%`,
-        `${project.timeline.milestoneCompletionRate}%`
-      ]),
-      theme: 'striped',
-      headStyles: { fillColor: [59, 130, 246] },
-      styles: { fontSize: 8 }
-    });
+      autoTable(doc, {
+        startY: yPosition,
+        head: [['Project', 'Country', 'Status', 'Total Cost (CAD)', 'Disbursed (CAD)', 'Reported Spend (CAD)', 'Budget Utilization', 'Variance', 'Timeline Progress', 'Milestone Progress']],
+        body: projectDetails.map(project => [
+          project.projectName,
+          project.country || 'N/A',
+          project.status,
+          `CAD $${project.financials.budgetCAD.toLocaleString()}`,
+          `CAD $${project.financials.disbursedCAD.toLocaleString()}`,
+          `CAD $${project.financials.reportedSpendCAD.toLocaleString()}`,
+          `${project.financials.disbursementRate}%`,
+          `CAD $${project.financials.variance.toLocaleString()}`,
+          `${project.timeline.progressPercentage}%`,
+          `${project.timeline.milestoneCompletionRate}%`
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+        styles: { fontSize: 8 }
+      });
 
-    yPosition = (doc as any).lastAutoTable.finalY + 20;
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
 
-    // Geographic Distribution Table
-    if (yPosition > 200) {
-      doc.addPage();
-      yPosition = 20;
-    }
+      // Geographic Distribution Table
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 20;
+      }
 
-    doc.setFontSize(14);
-    doc.text('GEOGRAPHIC DISTRIBUTION', 20, yPosition);
-    yPosition += 10;
+      doc.setFontSize(14);
+      doc.text('GEOGRAPHIC DISTRIBUTION', 20, yPosition);
+      yPosition += 10;
 
-    autoTable(doc, {
-      startY: yPosition,
-      head: [['Country', 'Projects', 'Disbursed (CAD)']],
-      body: Object.entries(countryBreakdown).map(([country, data]) => [
-        country,
-        data.count.toString(),
-        `$${data.disbursed.toLocaleString()}`
-      ]),
-      theme: 'striped',
-      headStyles: { fillColor: [59, 130, 246] },
-    });
+      autoTable(doc, {
+        startY: yPosition,
+        head: [['Country', 'Projects', 'Disbursed (CAD)']],
+        body: Object.entries(countryBreakdown).map(([country, data]) => [
+          country,
+          data.count.toString(),
+          `$${data.disbursed.toLocaleString()}`
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+      });
 
-    yPosition = (doc as any).lastAutoTable.finalY + 20;
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
 
-    // Impact Area Breakdown Table
-    if (yPosition > 200) {
-      doc.addPage();
-      yPosition = 20;
-    }
+      // Impact Area Breakdown Table
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 20;
+      }
 
-    doc.setFontSize(14);
-    doc.text('IMPACT AREA BREAKDOWN', 20, yPosition);
-    yPosition += 10;
+      doc.setFontSize(14);
+      doc.text('IMPACT AREA BREAKDOWN', 20, yPosition);
+      yPosition += 10;
 
-    autoTable(doc, {
-      startY: yPosition,
-      head: [['Impact Area', 'Projects', 'Disbursed (CAD)']],
-      body: Object.entries(impactAreaBreakdown).map(([area, data]) => [
-        area,
-        data.count.toString(),
-        `$${data.disbursed.toLocaleString()}`
-      ]),
-      theme: 'striped',
-      headStyles: { fillColor: [59, 130, 246] },
-    });
+      autoTable(doc, {
+        startY: yPosition,
+        head: [['Impact Area', 'Projects', 'Disbursed (CAD)']],
+        body: Object.entries(impactAreaBreakdown).map(([area, data]) => [
+          area,
+          data.count.toString(),
+          `$${data.disbursed.toLocaleString()}`
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+      });
 
-    doc.save(`FFTP_Comprehensive_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`FFTP_Comprehensive_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+
+    // Handle error if logo fails to load
+    logoImg.onerror = function() {
+      console.warn('Logo failed to load, generating PDF without logo');
+      
+      // Title without logo
+      doc.setFontSize(20);
+      doc.text('FOOD FOR THE POOR CANADA', 105, 20, { align: 'center' });
+      doc.setFontSize(16);
+      doc.text('COMPREHENSIVE PROJECT STATUS REPORT', 105, 30, { align: 'center' });
+      doc.setFontSize(12);
+      doc.text(`Generated: ${reportDate}`, 105, 40, { align: 'center' });
+
+      // Continue with rest of PDF generation using original positions
+      let yPosition = 60;
+
+      // Executive Summary
+      doc.setFontSize(14);
+      doc.text('EXECUTIVE SUMMARY', 20, yPosition);
+      yPosition += 10;
+
+      autoTable(doc, {
+        startY: yPosition,
+        head: [['Metric', 'Value']],
+        body: [
+          ['Total Active Projects', metrics.activeProjects.toString()],
+          ['Total Budget Allocated', `CAD $${metrics.totalBudgetCAD.toLocaleString()}`],
+          ['Total Funds Disbursed', `CAD $${metrics.totalDisbursedCAD.toLocaleString()}`],
+          ['Total Reported Spend', `CAD $${metrics.totalReportedSpendCAD.toLocaleString()}`],
+          ['Budget Utilization', `${utilizationRate.toFixed(1)}%`],
+          ['Financial Variance', `CAD $${(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD).toLocaleString()}`],
+        ],
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+      // Detailed Project Analysis
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.text('DETAILED PROJECT ANALYSIS', 20, yPosition);
+      yPosition += 10;
+
+      autoTable(doc, {
+        startY: yPosition,
+        head: [['Project', 'Country', 'Status', 'Total Cost (CAD)', 'Disbursed (CAD)', 'Reported Spend (CAD)', 'Budget Utilization', 'Variance', 'Timeline Progress', 'Milestone Progress']],
+        body: projectDetails.map(project => [
+          project.projectName,
+          project.country || 'N/A',
+          project.status,
+          `CAD $${project.financials.budgetCAD.toLocaleString()}`,
+          `CAD $${project.financials.disbursedCAD.toLocaleString()}`,
+          `CAD $${project.financials.reportedSpendCAD.toLocaleString()}`,
+          `${project.financials.disbursementRate}%`,
+          `CAD $${project.financials.variance.toLocaleString()}`,
+          `${project.timeline.progressPercentage}%`,
+          `${project.timeline.milestoneCompletionRate}%`
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+        styles: { fontSize: 8 }
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+      // Geographic Distribution Table
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.text('GEOGRAPHIC DISTRIBUTION', 20, yPosition);
+      yPosition += 10;
+
+      autoTable(doc, {
+        startY: yPosition,
+        head: [['Country', 'Projects', 'Disbursed (CAD)']],
+        body: Object.entries(countryBreakdown).map(([country, data]) => [
+          country,
+          data.count.toString(),
+          `$${data.disbursed.toLocaleString()}`
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 20;
+
+      // Impact Area Breakdown Table
+      if (yPosition > 200) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.text('IMPACT AREA BREAKDOWN', 20, yPosition);
+      yPosition += 10;
+
+      autoTable(doc, {
+        startY: yPosition,
+        head: [['Impact Area', 'Projects', 'Disbursed (CAD)']],
+        body: Object.entries(impactAreaBreakdown).map(([area, data]) => [
+          area,
+          data.count.toString(),
+          `$${data.disbursed.toLocaleString()}`
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+      });
+
+      doc.save(`FFTP_Comprehensive_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+
+    // Load the logo image
+    logoImg.src = '/lovable-uploads/af3d9a60-0267-4a1b-bf2d-e92b594a9ba7.png';
   };
 
   const generateWordReport = () => {

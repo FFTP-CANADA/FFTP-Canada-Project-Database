@@ -19,6 +19,17 @@ export interface Project {
   program?: string;
 }
 
+export interface ProjectMilestone {
+  id: string;
+  projectId: string;
+  title: string;
+  description?: string;
+  dueDate: string;
+  completedDate?: string;
+  status: "Not Started" | "In Progress" | "Completed" | "Overdue";
+  priority: "Low" | "Medium" | "High";
+}
+
 export interface ProjectNote {
   id: string;
   projectId: string;
@@ -136,6 +147,7 @@ export const useProjectData = () => {
   const [attachments, setAttachments] = useState<ProjectAttachment[]>([]);
   const [photos, setPhotos] = useState<ProjectPhoto[]>([]);
   const [customPrograms, setCustomPrograms] = useState<string[]>([]);
+  const [milestones, setMilestones] = useState<ProjectMilestone[]>([]);
 
   const allPrograms = [...PROGRAM_OPTIONS, ...customPrograms];
 
@@ -204,11 +216,32 @@ export const useProjectData = () => {
     }
   };
 
+  const addMilestone = (milestone: Omit<ProjectMilestone, "id">) => {
+    const newMilestone: ProjectMilestone = {
+      ...milestone,
+      id: Date.now().toString(),
+    };
+    setMilestones(prev => [...prev, newMilestone]);
+  };
+
+  const updateMilestone = (id: string, updates: Partial<ProjectMilestone>) => {
+    setMilestones(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
+  };
+
+  const deleteMilestone = (id: string) => {
+    setMilestones(prev => prev.filter(m => m.id !== id));
+  };
+
+  const getMilestonesForProject = (projectId: string) => {
+    return milestones.filter(milestone => milestone.projectId === projectId);
+  };
+
   return {
     projects,
     notes,
     attachments,
     photos,
+    milestones,
     allPrograms,
     addProject,
     updateProject,
@@ -220,5 +253,9 @@ export const useProjectData = () => {
     getPhotosForProject,
     addProgram,
     deleteProgram,
+    addMilestone,
+    updateMilestone,
+    deleteMilestone,
+    getMilestonesForProject,
   };
 };

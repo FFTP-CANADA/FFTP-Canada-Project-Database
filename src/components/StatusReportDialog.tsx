@@ -62,6 +62,14 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
 
   const utilizationRate = metrics.totalBudgetCAD > 0 ? (metrics.totalDisbursedCAD / metrics.totalBudgetCAD) * 100 : 0;
 
+  // Calculate recent notes for the report
+  const recentNotes = notes.filter(note => {
+    const noteDate = new Date(note.dateOfNote);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return noteDate >= thirtyDaysAgo;
+  }).sort((a, b) => new Date(b.dateOfNote).getTime() - new Date(a.dateOfNote).getTime());
+
   // Country breakdown
   const countryBreakdown = projects.reduce((acc, project) => {
     const country = project.country || 'Unspecified';
@@ -150,16 +158,16 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
   const generateFormalNotesSummary = (projectNotes: typeof notes) => {
     if (projectNotes.length === 0) return "No project notes recorded during this reporting period.";
     
-    const recentNotes = projectNotes.filter(note => {
+    const recentProjectNotes = projectNotes.filter(note => {
       const noteDate = new Date(note.dateOfNote);
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       return noteDate >= thirtyDaysAgo;
     }).sort((a, b) => new Date(b.dateOfNote).getTime() - new Date(a.dateOfNote).getTime());
 
-    if (recentNotes.length === 0) return "No recent project activity recorded in the last 30 days.";
+    if (recentProjectNotes.length === 0) return "No recent project activity recorded in the last 30 days.";
     
-    return recentNotes.map(note => 
+    return recentProjectNotes.map(note => 
       `${new Date(note.dateOfNote).toLocaleDateString()}: ${note.content}`
     ).join('. ');
   };

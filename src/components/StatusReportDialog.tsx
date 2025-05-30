@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import { FileText, Download, Calendar, DollarSign, Target, AlertCircle, Trending
 import { Project, ProjectNote } from "@/types/project";
 import { formatWithExchange, convertUsdToCad } from "@/utils/currencyUtils";
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 
 // Extend jsPDF type to include autoTable
@@ -117,7 +116,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
     doc.text('EXECUTIVE SUMMARY', 20, yPosition);
     yPosition += 10;
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPosition,
       head: [['Metric', 'Value']],
       body: [
@@ -137,7 +136,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
     doc.text('PROJECT STATUS OVERVIEW', 20, yPosition);
     yPosition += 10;
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPosition,
       head: [['Status', 'Count']],
       body: [
@@ -164,7 +163,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
     doc.text('GEOGRAPHIC DISTRIBUTION', 20, yPosition);
     yPosition += 10;
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPosition,
       head: [['Country', 'Projects', 'Disbursed (CAD)']],
       body: Object.entries(countryBreakdown).map(([country, data]) => [
@@ -188,7 +187,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
     doc.text('IMPACT AREA BREAKDOWN', 20, yPosition);
     yPosition += 10;
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPosition,
       head: [['Impact Area', 'Projects', 'Disbursed (CAD)']],
       body: Object.entries(impactAreaBreakdown).map(([area, data]) => [

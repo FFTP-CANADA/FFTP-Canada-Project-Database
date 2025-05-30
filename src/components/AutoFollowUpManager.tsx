@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,8 +31,8 @@ const AutoFollowUpManager = ({
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(editedEmailContent);
     toast({
-      title: "Email Copied",
-      description: "The email content has been copied to your clipboard.",
+      title: "Email Template Copied",
+      description: "The draft email template has been copied to your clipboard.",
     });
   };
 
@@ -42,8 +41,8 @@ const AutoFollowUpManager = ({
       onMarkSent(selectedEmail.id);
       setSelectedEmail(null);
       toast({
-        title: "Follow-up Marked as Sent",
-        description: `Follow-up for ${selectedEmail.projectName} has been marked as sent.`,
+        title: "Follow-up Template Used",
+        description: `Draft email template for ${selectedEmail.projectName} has been marked as used.`,
       });
     }
   };
@@ -74,7 +73,7 @@ const AutoFollowUpManager = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Mail className="h-5 w-5" />
-          Automatic Follow-ups ({followUpEmails.length})
+          Draft Email Templates ({followUpEmails.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -82,7 +81,7 @@ const AutoFollowUpManager = ({
           <div className="text-center py-8">
             <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500 mb-4">
-              No automatic follow-ups generated. Follow-ups are created for projects marked as needing follow-up when:
+              No draft email templates generated. Email templates are created for projects marked as needing follow-up when:
             </p>
             <ul className="text-sm text-gray-400 list-disc list-inside space-y-1">
               <li>Milestones are due within 10 days</li>
@@ -142,13 +141,13 @@ const AutoFollowUpManager = ({
                             onClick={() => handleViewEmail(email)}
                           >
                             <Mail className="h-4 w-4 mr-1" />
-                            View & Copy
+                            View & Copy Template
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                           <DialogHeader>
                             <DialogTitle>
-                              Follow-up Email: {email.projectName} - {email.milestoneTitle}
+                              Draft Email Template: {email.projectName} - {email.milestoneTitle}
                             </DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
@@ -159,7 +158,7 @@ const AutoFollowUpManager = ({
                             </div>
                             <div>
                               <label className="block text-sm font-medium mb-2">
-                                Email Content (editable):
+                                Email Template Content (editable):
                               </label>
                               <Textarea
                                 value={editedEmailContent}
@@ -171,7 +170,7 @@ const AutoFollowUpManager = ({
                             <div className="flex justify-between gap-2">
                               <Button onClick={handleCopyEmail} variant="outline" size="lg">
                                 <Copy className="h-4 w-4 mr-2" />
-                                Copy to Clipboard
+                                Copy Template to Clipboard
                               </Button>
                               <Button 
                                 onClick={handleMarkSent}
@@ -179,7 +178,7 @@ const AutoFollowUpManager = ({
                                 size="lg"
                               >
                                 <CheckCircle className="h-4 w-4 mr-2" />
-                                Mark as Sent
+                                Mark Template as Used
                               </Button>
                             </div>
                           </div>

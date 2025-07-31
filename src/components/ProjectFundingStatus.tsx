@@ -310,6 +310,7 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                     <TableHead className="font-medium">Date Pledged</TableHead>
                     <TableHead className="font-medium">Expected Date</TableHead>
                     <TableHead className="font-medium">Status</TableHead>
+                    <TableHead className="font-medium">Notes</TableHead>
                     <TableHead className="font-medium">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -332,6 +333,11 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                         }>
                           {pledge.status}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="max-w-xs">
+                        <div className="text-sm text-gray-600 truncate" title={pledge.notes || "No notes"}>
+                          {pledge.notes || "No notes"}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
@@ -478,6 +484,7 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                     <TableHead className="font-medium">Amount</TableHead>
                     <TableHead className="font-medium">Date Received</TableHead>
                     <TableHead className="font-medium">Method</TableHead>
+                    <TableHead className="font-medium">Notes</TableHead>
                     <TableHead className="font-medium">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -490,6 +497,11 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                       </TableCell>
                       <TableCell>{new Date(receipt.dateReceived + 'T00:00:00').toLocaleDateString()}</TableCell>
                       <TableCell>{receipt.paymentMethod}</TableCell>
+                      <TableCell className="max-w-xs">
+                        <div className="text-sm text-gray-600 truncate" title={receipt.notes || "No notes"}>
+                          {receipt.notes || "No notes"}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
                           <Button

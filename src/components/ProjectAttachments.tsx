@@ -93,42 +93,76 @@ const ProjectAttachments = ({
   };
 
   const handleDownload = (attachment: ProjectAttachment) => {
+    console.log('=== DOWNLOAD DEBUG START ===');
+    console.log('Attachment:', attachment);
+    console.log('File URL exists:', !!attachment.fileUrl);
+    console.log('File URL length:', attachment.fileUrl?.length);
+    console.log('File URL starts with data:', attachment.fileUrl?.startsWith('data:'));
+    
     try {
       if (!attachment.fileUrl) {
+        console.log('ERROR: No file URL');
         throw new Error('No file data available');
       }
 
-      // Convert base64 back to file
-      const base64Data = attachment.fileUrl.split(',')[1];
-      const byteCharacters = atob(base64Data);
-      const byteNumbers = new Array(byteCharacters.length);
+      if (!attachment.fileUrl.startsWith('data:')) {
+        console.log('ERROR: Invalid data URL format');
+        throw new Error('Invalid file format');
+      }
+
+      console.log('Splitting data URL...');
+      const parts = attachment.fileUrl.split(',');
+      if (parts.length !== 2) {
+        console.log('ERROR: Data URL split failed, parts:', parts.length);
+        throw new Error('Invalid data URL structure');
+      }
+
+      console.log('Converting base64...');
+      const base64Data = parts[1];
+      console.log('Base64 data length:', base64Data.length);
       
+      const byteCharacters = atob(base64Data);
+      console.log('Decoded bytes length:', byteCharacters.length);
+      
+      const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
       
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], { type: attachment.fileType });
+      console.log('Created blob size:', blob.size);
       
       // Create download link
       const url = URL.createObjectURL(blob);
+      console.log('Created blob URL:', url);
+      
       const link = document.createElement('a');
       link.href = url;
       link.download = attachment.fileName;
+      link.style.display = 'none';
       document.body.appendChild(link);
+      
+      console.log('Triggering download...');
       link.click();
+      
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      
+      console.log('=== DOWNLOAD SUCCESS ===');
       
       toast({
         title: "Download Started",
         description: `Downloading ${attachment.fileName}`,
       });
     } catch (error) {
-      console.error('Download error:', error);
+      console.log('=== DOWNLOAD ERROR ===');
+      console.error('Download error details:', error);
+      console.log('Error message:', error instanceof Error ? error.message : 'Unknown error');
+      
       toast({
         title: "Download Failed", 
-        description: `Unable to download ${attachment.fileName}`,
+        description: `Unable to download ${attachment.fileName}: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       });
     }

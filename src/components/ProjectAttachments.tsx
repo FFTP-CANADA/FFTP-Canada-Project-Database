@@ -26,7 +26,6 @@ const ProjectAttachments = ({
   onDeleteAttachment
 }: ProjectAttachmentsProps) => {
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
-  const [fileCache, setFileCache] = useState<Map<string, File>>(new Map());
   const { toast } = useToast();
 
   const handleFileUpload = (files: FileList | null) => {
@@ -43,14 +42,18 @@ const ProjectAttachments = ({
   const handleSaveAttachments = async () => {
     for (const file of uploadFiles) {
       try {
-        // Store file in cache for download
-        const fileId = `${Date.now()}_${file.name}`;
-        setFileCache(prev => new Map(prev.set(fileId, file)));
+        // Convert file to base64 for persistent storage
+        const base64Data = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
 
         const attachment: Omit<ProjectAttachment, "id"> = {
           projectId,
           fileName: file.name,
-          fileUrl: fileId, // Store file ID instead of URL
+          fileUrl: base64Data,
           fileSize: file.size,
           uploadDate: new Date().toISOString(),
           fileType: file.type || "application/octet-stream"
@@ -91,30 +94,41 @@ const ProjectAttachments = ({
 
   const handleDownload = (attachment: ProjectAttachment) => {
     try {
-      // Get file from cache
-      const file = fileCache.get(attachment.fileUrl);
-      if (!file) {
-        throw new Error('File not found in cache');
+      if (!attachment.fileUrl) {
+        throw new Error('No file data available');
       }
 
-      // Create blob URL and download
-      const blobUrl = URL.createObjectURL(file);
+      // Convert base64 back to file
+      const base64Data = attachment.fileUrl.split(',')[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: attachment.fileType });
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = blobUrl;
+      link.href = url;
       link.download = attachment.fileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
+      URL.revokeObjectURL(url);
       
       toast({
         title: "Download Started",
         description: `Downloading ${attachment.fileName}`,
       });
     } catch (error) {
+      console.error('Download error:', error);
       toast({
         title: "Download Failed", 
-        description: `File ${attachment.fileName} is no longer available`,
+        description: `Unable to download ${attachment.fileName}`,
         variant: "destructive"
       });
     }

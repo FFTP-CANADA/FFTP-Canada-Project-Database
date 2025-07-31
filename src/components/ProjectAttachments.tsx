@@ -26,6 +26,7 @@ const ProjectAttachments = ({
   onDeleteAttachment
 }: ProjectAttachmentsProps) => {
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+  const [fileCache, setFileCache] = useState<Map<string, File>>(new Map());
   const { toast } = useToast();
 
   const handleFileUpload = (files: FileList | null) => {
@@ -42,10 +43,14 @@ const ProjectAttachments = ({
   const handleSaveAttachments = async () => {
     for (const file of uploadFiles) {
       try {
+        // Store file in cache for download
+        const fileId = `${Date.now()}_${file.name}`;
+        setFileCache(prev => new Map(prev.set(fileId, file)));
+
         const attachment: Omit<ProjectAttachment, "id"> = {
           projectId,
           fileName: file.name,
-          fileUrl: URL.createObjectURL(file), // Use blob URL for immediate download capability
+          fileUrl: fileId, // Store file ID instead of URL
           fileSize: file.size,
           uploadDate: new Date().toISOString(),
           fileType: file.type || "application/octet-stream"
@@ -86,28 +91,30 @@ const ProjectAttachments = ({
 
   const handleDownload = (attachment: ProjectAttachment) => {
     try {
-      if (!attachment.fileUrl || attachment.fileUrl === '') {
-        throw new Error('File URL is empty or invalid');
+      // Get file from cache
+      const file = fileCache.get(attachment.fileUrl);
+      if (!file) {
+        throw new Error('File not found in cache');
       }
 
-      // Create download link
+      // Create blob URL and download
+      const blobUrl = URL.createObjectURL(file);
       const link = document.createElement('a');
-      link.href = attachment.fileUrl;
+      link.href = blobUrl;
       link.download = attachment.fileName;
-      link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
       
       toast({
         title: "Download Started",
         description: `Downloading ${attachment.fileName}`,
       });
     } catch (error) {
-      console.error('Download failed:', error);
       toast({
         title: "Download Failed", 
-        description: `Cannot download ${attachment.fileName}`,
+        description: `File ${attachment.fileName} is no longer available`,
         variant: "destructive"
       });
     }

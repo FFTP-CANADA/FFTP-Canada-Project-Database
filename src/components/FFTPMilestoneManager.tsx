@@ -14,7 +14,7 @@ import { ProjectMilestone, FFTPMilestoneType } from "@/types/project";
 const FFTP_MILESTONE_OPTIONS: FFTPMilestoneType[] = [
   "MOU Signed",
   "First Disbursement Sent", 
-  "Receipts Received & Verified (First Tranche)",
+  "Interim Report & Receipts Submitted (following Installment #1)",
   "Second Disbursement Sent",
   "Receipts Received & Verified (Second Tranche)",
   "Third Disbursement Sent",

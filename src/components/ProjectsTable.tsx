@@ -192,7 +192,7 @@ const ProjectsTable = ({
               <TableHead className="text-white">Disbursed</TableHead>
               <TableHead className="text-white">Balance Due</TableHead>
               <TableHead className="text-white">Progress</TableHead>
-              <TableHead className="text-white">Actions</TableHead>
+              <TableHead className="text-white w-96">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

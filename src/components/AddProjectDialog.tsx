@@ -143,7 +143,6 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
                 onChange={(e) => setFormData(prev => ({ ...prev, projectName: e.target.value }))}
                 className="border-blue-200 focus:border-blue-400"
                 placeholder="Enter project name"
-                required
               />
             </div>
 

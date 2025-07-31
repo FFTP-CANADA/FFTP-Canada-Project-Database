@@ -42,18 +42,10 @@ const ProjectAttachments = ({
   const handleSaveAttachments = async () => {
     for (const file of uploadFiles) {
       try {
-        // Convert file to base64 data URL for persistence
-        const fileDataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-
         const attachment: Omit<ProjectAttachment, "id"> = {
           projectId,
           fileName: file.name,
-          fileUrl: fileDataUrl, // Use base64 data URL instead of blob URL
+          fileUrl: URL.createObjectURL(file), // Use blob URL for immediate download capability
           fileSize: file.size,
           uploadDate: new Date().toISOString(),
           fileType: file.type || "application/octet-stream"
@@ -94,46 +86,18 @@ const ProjectAttachments = ({
 
   const handleDownload = (attachment: ProjectAttachment) => {
     try {
-      console.log('Attempting to download:', attachment.fileName);
-      console.log('File URL type:', typeof attachment.fileUrl);
-      console.log('File URL starts with data:', attachment.fileUrl?.startsWith('data:'));
-      
       if (!attachment.fileUrl || attachment.fileUrl === '') {
         throw new Error('File URL is empty or invalid');
       }
 
-      // Check if it's a base64 data URL
-      if (!attachment.fileUrl.startsWith('data:')) {
-        throw new Error('Invalid file format - not a data URL');
-      }
-
-      // Split the data URL to get the base64 part
-      const parts = attachment.fileUrl.split(',');
-      if (parts.length !== 2) {
-        throw new Error('Invalid data URL format');
-      }
-
-      console.log('Converting base64 to blob...');
-      const byteCharacters = atob(parts[1]);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: attachment.fileType });
-      
-      console.log('Created blob:', blob.size, 'bytes');
-      
-      // Create blob URL and download
-      const blobUrl = URL.createObjectURL(blob);
+      // Create download link
       const link = document.createElement('a');
-      link.href = blobUrl;
+      link.href = attachment.fileUrl;
       link.download = attachment.fileName;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
       
       toast({
         title: "Download Started",
@@ -141,10 +105,9 @@ const ProjectAttachments = ({
       });
     } catch (error) {
       console.error('Download failed:', error);
-      console.error('File data:', attachment.fileUrl?.substring(0, 100) + '...');
       toast({
         title: "Download Failed", 
-        description: `Cannot download ${attachment.fileName}. ${error instanceof Error ? error.message : 'Unknown error'}`,
+        description: `Cannot download ${attachment.fileName}`,
         variant: "destructive"
       });
     }

@@ -1,10 +1,17 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Project } from "@/types/project";
 import { initialProjects } from "@/data/initialProjects";
 
 export const useProjects = () => {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [projects, setProjects] = useState<Project[]>(() => {
+    const saved = localStorage.getItem('projects');
+    return saved ? JSON.parse(saved) : initialProjects;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('projects', JSON.stringify(projects));
+  }, [projects]);
 
   const addProject = (project: Omit<Project, "id">) => {
     const newProject: Project = {

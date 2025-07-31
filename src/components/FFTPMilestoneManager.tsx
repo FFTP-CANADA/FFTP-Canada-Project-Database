@@ -33,6 +33,10 @@ const getMilestonePhaseColor = (milestoneType: FFTPMilestoneType) => {
   return "bg-gray-100 border-gray-300";
 };
 
+const isDisbursementMilestone = (milestoneType: FFTPMilestoneType) => {
+  return milestoneType.includes("Disbursement");
+};
+
 interface FFTPMilestoneManagerProps {
   projectId: string;
   milestones: ProjectMilestone[];
@@ -55,14 +59,16 @@ const FFTPMilestoneManager = ({
     startDate: undefined as Date | undefined,
     dueDate: undefined as Date | undefined,
     status: "Not Started" as ProjectMilestone["status"],
-    priority: "Medium" as ProjectMilestone["priority"]
+    priority: "Medium" as ProjectMilestone["priority"],
+    disbursementAmount: undefined as number | undefined
   });
   const [editMilestone, setEditMilestone] = useState({
     milestoneType: "" as FFTPMilestoneType,
     startDate: undefined as Date | undefined,
     dueDate: undefined as Date | undefined,
     status: "Not Started" as ProjectMilestone["status"],
-    priority: "Medium" as ProjectMilestone["priority"]
+    priority: "Medium" as ProjectMilestone["priority"],
+    disbursementAmount: undefined as number | undefined
   });
 
   const handleAddMilestone = () => {
@@ -75,7 +81,8 @@ const FFTPMilestoneManager = ({
       startDate: newMilestone.startDate.toISOString().split('T')[0],
       dueDate: newMilestone.dueDate.toISOString().split('T')[0],
       status: newMilestone.status,
-      priority: newMilestone.priority
+      priority: newMilestone.priority,
+      disbursementAmount: newMilestone.disbursementAmount
     });
 
     setNewMilestone({
@@ -83,7 +90,8 @@ const FFTPMilestoneManager = ({
       startDate: undefined,
       dueDate: undefined,
       status: "Not Started",
-      priority: "Medium"
+      priority: "Medium",
+      disbursementAmount: undefined
     });
     setIsAddingMilestone(false);
   };
@@ -94,7 +102,8 @@ const FFTPMilestoneManager = ({
       startDate: new Date(milestone.startDate),
       dueDate: new Date(milestone.dueDate),
       status: milestone.status,
-      priority: milestone.priority
+      priority: milestone.priority,
+      disbursementAmount: milestone.disbursementAmount
     });
     setEditingMilestone(milestone.id);
   };
@@ -108,7 +117,8 @@ const FFTPMilestoneManager = ({
       startDate: editMilestone.startDate.toISOString().split('T')[0],
       dueDate: editMilestone.dueDate.toISOString().split('T')[0],
       status: editMilestone.status,
-      priority: editMilestone.priority
+      priority: editMilestone.priority,
+      disbursementAmount: editMilestone.disbursementAmount
     });
 
     setEditingMilestone(null);
@@ -117,7 +127,8 @@ const FFTPMilestoneManager = ({
       startDate: undefined,
       dueDate: undefined,
       status: "Not Started",
-      priority: "Medium"
+      priority: "Medium",
+      disbursementAmount: undefined
     });
   };
 
@@ -126,6 +137,10 @@ const FFTPMilestoneManager = ({
     const bIndex = FFTP_MILESTONE_OPTIONS.indexOf(b.milestoneType as FFTPMilestoneType);
     return aIndex - bIndex;
   });
+
+  const totalDisbursements = sortedMilestones
+    .filter(m => isDisbursementMilestone(m.milestoneType as FFTPMilestoneType) && m.disbursementAmount)
+    .reduce((sum, m) => sum + (m.disbursementAmount || 0), 0);
 
   return (
     <div className="space-y-4">
@@ -255,6 +270,22 @@ const FFTPMilestoneManager = ({
               </div>
             </div>
 
+            {/* Disbursement Amount Field */}
+            {isDisbursementMilestone(newMilestone.milestoneType) && (
+              <div>
+                <Label>Disbursement Amount</Label>
+                <Input
+                  type="number"
+                  value={newMilestone.disbursementAmount || ''}
+                  onChange={(e) => setNewMilestone(prev => ({ 
+                    ...prev, 
+                    disbursementAmount: e.target.value ? parseFloat(e.target.value) : undefined 
+                  }))}
+                  placeholder="Enter disbursement amount"
+                />
+              </div>
+            )}
+
             <div className="flex gap-2">
               <Button onClick={handleAddMilestone} size="sm">Add Milestone</Button>
               <Button onClick={() => setIsAddingMilestone(false)} variant="outline" size="sm">Cancel</Button>
@@ -382,9 +413,36 @@ const FFTPMilestoneManager = ({
               </div>
             </div>
 
+            {/* Disbursement Amount Field */}
+            {isDisbursementMilestone(editMilestone.milestoneType) && (
+              <div>
+                <Label>Disbursement Amount</Label>
+                <Input
+                  type="number"
+                  value={editMilestone.disbursementAmount || ''}
+                  onChange={(e) => setEditMilestone(prev => ({ 
+                    ...prev, 
+                    disbursementAmount: e.target.value ? parseFloat(e.target.value) : undefined 
+                  }))}
+                  placeholder="Enter disbursement amount"
+                />
+              </div>
+            )}
+
             <div className="flex gap-2">
               <Button onClick={handleUpdateMilestone} size="sm">Update Milestone</Button>
               <Button onClick={() => setEditingMilestone(null)} variant="outline" size="sm">Cancel</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Disbursement Summary */}
+      {totalDisbursements > 0 && (
+        <Card className="bg-green-50 border-green-200">
+          <CardContent className="p-4">
+            <div className="text-sm font-medium text-green-700">
+              Total Planned Disbursements: ${totalDisbursements.toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -400,6 +458,11 @@ const FFTPMilestoneManager = ({
                   <h4 className="font-medium">{milestone.title}</h4>
                   <div className="text-sm text-gray-600 mt-1">
                     {format(new Date(milestone.startDate), "MMM dd, yyyy")} - {format(new Date(milestone.dueDate), "MMM dd, yyyy")}
+                    {milestone.disbursementAmount && (
+                      <div className="text-green-600 font-medium mt-1">
+                        Disbursement: ${milestone.disbursementAmount.toLocaleString()}
+                      </div>
+                    )}
                   </div>
                   <div className="flex gap-2 mt-2">
                     <span className={`px-2 py-1 rounded text-xs ${

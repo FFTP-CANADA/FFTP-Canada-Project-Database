@@ -42,6 +42,7 @@ export interface ProjectMilestone {
   completedDate?: string;
   status: "Not Started" | "In Progress" | "Completed" | "Overdue";
   priority: "Low" | "Medium" | "High";
+  disbursementAmount?: number; // For disbursement-type milestones
 }
 
 export interface ProjectNote {

@@ -185,6 +185,7 @@ const ProjectsTable = ({
               <TableHead className="text-white">Status</TableHead>
               <TableHead className="text-white">Total Cost</TableHead>
               <TableHead className="text-white">Disbursed</TableHead>
+              <TableHead className="text-white">Balance Due</TableHead>
               <TableHead className="text-white">Progress</TableHead>
               <TableHead className="text-white">Actions</TableHead>
             </TableRow>
@@ -213,6 +214,14 @@ const ProjectsTable = ({
                 </TableCell>
                 <TableCell className="text-blue-900">
                   {formatWithExchange(project.amountDisbursed, project.currency)}
+                </TableCell>
+                <TableCell className="text-blue-900">
+                  {project.totalCost ? 
+                    <span className={project.totalCost - project.amountDisbursed > 0 ? "text-orange-600 font-medium" : "text-green-600"}>
+                      {formatWithExchange(project.totalCost - project.amountDisbursed, project.currency)}
+                    </span>
+                    : "N/A"
+                  }
                 </TableCell>
                 <TableCell>
                   {project.totalCost ? (

@@ -4,10 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Banknote, Plus, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Banknote, Plus, AlertTriangle, CheckCircle, Clock, Edit, Trash2, Save, X } from "lucide-react";
 import { Project, ProjectMilestone } from "@/types/project";
 import { formatWithExchange } from "@/utils/currencyUtils";
 import { useState } from "react";
+
+// Mock donor receipt interface - in real app this would come from Supabase
+interface DonorReceipt {
+  id: string;
+  projectId: string;
+  donorName: string;
+  amount: number;
+  dateReceived: string;
+  paymentMethod: string;
+  notes?: string;
+}
 
 interface ProjectFundingStatusProps {
   project: Project;
@@ -16,17 +28,44 @@ interface ProjectFundingStatusProps {
 
 const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps) => {
   const [isAddingReceipt, setIsAddingReceipt] = useState(false);
-  const [receiptAmount, setReceiptAmount] = useState("");
-  const [receiptDate, setReceiptDate] = useState("");
-  const [receiptMethod, setReceiptMethod] = useState("");
+  const [editingReceiptId, setEditingReceiptId] = useState<string | null>(null);
+  const [receiptForm, setReceiptForm] = useState({
+    donorName: "",
+    amount: "",
+    dateReceived: "",
+    paymentMethod: "",
+    notes: ""
+  });
+
+  // Mock data - in real implementation this would come from Supabase
+  const [donorReceipts, setDonorReceipts] = useState<DonorReceipt[]>([
+    {
+      id: "1",
+      projectId: project.id,
+      donorName: "Global Education Foundation",
+      amount: 8000,
+      dateReceived: "2025-07-15",
+      paymentMethod: "Wire Transfer",
+      notes: "First installment of committed funding"
+    },
+    {
+      id: "2", 
+      projectId: project.id,
+      donorName: "Caribbean Development Fund",
+      amount: 4000,
+      dateReceived: "2025-07-25",
+      paymentMethod: "Check",
+      notes: "Additional support for infrastructure"
+    }
+  ]);
 
   // Calculate total scheduled disbursements
   const totalScheduledDisbursements = milestones
     .filter(m => m.disbursementAmount)
     .reduce((sum, m) => sum + (m.disbursementAmount || 0), 0);
 
-  // Mock data - in real implementation this would come from Supabase
-  const totalReceivedFromDonors = 12000; // Example: $12,000 received
+  // Calculate total received from all donor receipts
+  const totalReceivedFromDonors = donorReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
   
   const fundingGap = totalScheduledDisbursements - totalReceivedFromDonors;
   const fundingPercentage = totalScheduledDisbursements > 0 
@@ -45,6 +84,71 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
 
   const fundingStatus = getFundingStatus();
   const StatusIcon = fundingStatus.icon;
+
+  const resetForm = () => {
+    setReceiptForm({
+      donorName: "",
+      amount: "",
+      dateReceived: "",
+      paymentMethod: "",
+      notes: ""
+    });
+    setEditingReceiptId(null);
+  };
+
+  const handleAddReceipt = () => {
+    if (!receiptForm.donorName || !receiptForm.amount || !receiptForm.dateReceived) return;
+    
+    const newReceipt: DonorReceipt = {
+      id: Date.now().toString(),
+      projectId: project.id,
+      donorName: receiptForm.donorName,
+      amount: parseFloat(receiptForm.amount),
+      dateReceived: receiptForm.dateReceived,
+      paymentMethod: receiptForm.paymentMethod,
+      notes: receiptForm.notes
+    };
+    
+    setDonorReceipts(prev => [...prev, newReceipt]);
+    resetForm();
+    setIsAddingReceipt(false);
+  };
+
+  const handleEditReceipt = (receipt: DonorReceipt) => {
+    setReceiptForm({
+      donorName: receipt.donorName,
+      amount: receipt.amount.toString(),
+      dateReceived: receipt.dateReceived,
+      paymentMethod: receipt.paymentMethod,
+      notes: receipt.notes || ""
+    });
+    setEditingReceiptId(receipt.id);
+    setIsAddingReceipt(true);
+  };
+
+  const handleUpdateReceipt = () => {
+    if (!receiptForm.donorName || !receiptForm.amount || !receiptForm.dateReceived || !editingReceiptId) return;
+    
+    setDonorReceipts(prev => prev.map(receipt => 
+      receipt.id === editingReceiptId 
+        ? {
+            ...receipt,
+            donorName: receiptForm.donorName,
+            amount: parseFloat(receiptForm.amount),
+            dateReceived: receiptForm.dateReceived,
+            paymentMethod: receiptForm.paymentMethod,
+            notes: receiptForm.notes
+          }
+        : receipt
+    ));
+    
+    resetForm();
+    setIsAddingReceipt(false);
+  };
+
+  const handleDeleteReceipt = (receiptId: string) => {
+    setDonorReceipts(prev => prev.filter(receipt => receipt.id !== receiptId));
+  };
 
   return (
     <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -98,62 +202,144 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
           />
         </div>
 
-        {/* Add Receipt Button */}
-        <Dialog open={isAddingReceipt} onOpenChange={setIsAddingReceipt}>
+        {/* Donor Receipts Table */}
+        <div className="mt-6">
+          <h4 className="font-medium text-gray-800 mb-3">Donor Fund Receipts</h4>
+          {donorReceipts.length > 0 ? (
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-50">
+                    <TableHead className="font-medium">Donor/Foundation</TableHead>
+                    <TableHead className="font-medium">Amount</TableHead>
+                    <TableHead className="font-medium">Date Received</TableHead>
+                    <TableHead className="font-medium">Method</TableHead>
+                    <TableHead className="font-medium">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {donorReceipts.map((receipt) => (
+                    <TableRow key={receipt.id}>
+                      <TableCell className="font-medium">{receipt.donorName}</TableCell>
+                      <TableCell className="text-green-600 font-medium">
+                        {formatWithExchange(receipt.amount, project.currency)}
+                      </TableCell>
+                      <TableCell>{new Date(receipt.dateReceived).toLocaleDateString()}</TableCell>
+                      <TableCell>{receipt.paymentMethod}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditReceipt(receipt)}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteReceipt(receipt.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No donor receipts recorded yet.</p>
+          )}
+        </div>
+
+        {/* Add/Edit Receipt Button */}
+        <Dialog open={isAddingReceipt} onOpenChange={(open) => {
+          setIsAddingReceipt(open);
+          if (!open) resetForm();
+        }}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full">
+            <Button variant="outline" size="sm" className="w-full mt-4">
               <Plus className="w-4 h-4 mr-2" />
               Add Donor Receipt
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Donor Fund Receipt</DialogTitle>
+              <DialogTitle>
+                {editingReceiptId ? "Edit Donor Fund Receipt" : "Add Donor Fund Receipt"}
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              <div>
+                <Label>Donor/Foundation Name</Label>
+                <Input
+                  placeholder="e.g. Global Education Foundation"
+                  value={receiptForm.donorName}
+                  onChange={(e) => setReceiptForm(prev => ({ ...prev, donorName: e.target.value }))}
+                />
+              </div>
               <div>
                 <Label>Amount Received</Label>
                 <Input
                   type="number"
                   placeholder="5000"
-                  value={receiptAmount}
-                  onChange={(e) => setReceiptAmount(e.target.value)}
+                  value={receiptForm.amount}
+                  onChange={(e) => setReceiptForm(prev => ({ ...prev, amount: e.target.value }))}
                 />
               </div>
               <div>
-                <Label>Receipt Date</Label>
+                <Label>Date Received</Label>
                 <Input
                   type="date"
-                  value={receiptDate}
-                  onChange={(e) => setReceiptDate(e.target.value)}
+                  value={receiptForm.dateReceived}
+                  onChange={(e) => setReceiptForm(prev => ({ ...prev, dateReceived: e.target.value }))}
                 />
               </div>
               <div>
                 <Label>Payment Method</Label>
                 <Input
                   placeholder="e.g. Check, Wire Transfer, Email Confirmation"
-                  value={receiptMethod}
-                  onChange={(e) => setReceiptMethod(e.target.value)}
+                  value={receiptForm.paymentMethod}
+                  onChange={(e) => setReceiptForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Notes (Optional)</Label>
+                <Input
+                  placeholder="Additional notes about this receipt"
+                  value={receiptForm.notes}
+                  onChange={(e) => setReceiptForm(prev => ({ ...prev, notes: e.target.value }))}
                 />
               </div>
               <div className="flex gap-2">
                 <Button 
-                  onClick={() => {
-                    // TODO: Save to Supabase when connected
-                    console.log("Save receipt:", { receiptAmount, receiptDate, receiptMethod });
-                    setIsAddingReceipt(false);
-                    setReceiptAmount("");
-                    setReceiptDate("");
-                    setReceiptMethod("");
-                  }}
+                  onClick={editingReceiptId ? handleUpdateReceipt : handleAddReceipt}
                   className="flex-1"
+                  disabled={!receiptForm.donorName || !receiptForm.amount || !receiptForm.dateReceived}
                 >
-                  Save Receipt
+                  {editingReceiptId ? (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Update Receipt
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Save Receipt
+                    </>
+                  )}
                 </Button>
                 <Button 
                   variant="outline" 
-                  onClick={() => setIsAddingReceipt(false)}
+                  onClick={() => {
+                    setIsAddingReceipt(false);
+                    resetForm();
+                  }}
                 >
+                  <X className="w-4 h-4 mr-2" />
                   Cancel
                 </Button>
               </div>

@@ -109,26 +109,36 @@ const FFTPMilestoneManager = ({
   };
 
   const handleUpdateMilestone = () => {
-    console.log("handleUpdateMilestone called");
+    console.log("=== handleUpdateMilestone START ===");
     console.log("editingMilestone:", editingMilestone);
-    console.log("editMilestone:", editMilestone);
+    console.log("editMilestone object:", editMilestone);
+    console.log("editMilestone.milestoneType:", editMilestone.milestoneType);
+    console.log("editMilestone.startDate:", editMilestone.startDate);
+    console.log("editMilestone.dueDate:", editMilestone.dueDate);
     
-    if (!editingMilestone || !editMilestone.milestoneType || !editMilestone.startDate || !editMilestone.dueDate) {
-      console.log("Validation failed - missing required fields");
+    if (!editingMilestone) {
+      console.log("❌ No editingMilestone ID");
+      return;
+    }
+    
+    if (!editMilestone.milestoneType) {
+      console.log("❌ No milestoneType");
+      return;
+    }
+    
+    if (!editMilestone.startDate) {
+      console.log("❌ No startDate");
+      return;
+    }
+    
+    if (!editMilestone.dueDate) {
+      console.log("❌ No dueDate");
       return;
     }
 
-    console.log("Calling onUpdateMilestone with:", editingMilestone, {
-      title: editMilestone.milestoneType,
-      milestoneType: editMilestone.milestoneType,
-      startDate: editMilestone.startDate.toISOString().split('T')[0],
-      dueDate: editMilestone.dueDate.toISOString().split('T')[0],
-      status: editMilestone.status,
-      priority: editMilestone.priority,
-      disbursementAmount: editMilestone.disbursementAmount
-    });
+    console.log("✅ All validation passed!");
 
-    onUpdateMilestone(editingMilestone, {
+    const updateData = {
       title: editMilestone.milestoneType,
       milestoneType: editMilestone.milestoneType,
       startDate: editMilestone.startDate.toISOString().split('T')[0],
@@ -136,7 +146,13 @@ const FFTPMilestoneManager = ({
       status: editMilestone.status,
       priority: editMilestone.priority,
       disbursementAmount: editMilestone.disbursementAmount
-    });
+    };
+    
+    console.log("Calling onUpdateMilestone with ID:", editingMilestone);
+    console.log("Calling onUpdateMilestone with data:", updateData);
+
+    onUpdateMilestone(editingMilestone, updateData);
+    console.log("=== onUpdateMilestone called ===");
 
     setEditingMilestone(null);
     setEditMilestone({
@@ -147,6 +163,7 @@ const FFTPMilestoneManager = ({
       priority: "Medium",
       disbursementAmount: undefined
     });
+    console.log("=== handleUpdateMilestone END ===");
   };
 
   const sortedMilestones = [...milestones].sort((a, b) => {

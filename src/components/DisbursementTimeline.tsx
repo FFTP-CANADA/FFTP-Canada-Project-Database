@@ -179,7 +179,7 @@ const DisbursementTimeline = ({ projects, milestones }: DisbursementTimelineProp
                   
                   {/* Today indicator */}
                   <div
-                    className="absolute top-0 bottom-0 w-1 bg-gradient-to-b from-red-400 to-red-600 z-20 shadow-lg"
+                    className="absolute top-0 bottom-0 w-1 bg-gradient-to-b from-red-400 to-red-600 z-10 shadow-lg"
                     style={{ left: `${getPositionFromDate(new Date())}%` }}
                   >
                     <div className="absolute -top-2 -left-3 w-6 h-6 bg-gradient-to-br from-red-400 to-red-600 rounded-full shadow-lg border-2 border-white animate-pulse">
@@ -199,7 +199,7 @@ const DisbursementTimeline = ({ projects, milestones }: DisbursementTimelineProp
                     return (
                       <div
                         key={milestone.id}
-                        className="absolute top-6 group cursor-pointer z-10"
+                        className="absolute top-6 cursor-pointer z-20"
                         style={{ 
                           left: `${position}%`, 
                           transform: 'translateX(-50%)',
@@ -218,36 +218,8 @@ const DisbursementTimeline = ({ projects, milestones }: DisbursementTimelineProp
                         <div className="absolute top-10 left-1/2 transform -translate-x-1/2 text-xs font-bold text-slate-700 whitespace-nowrap bg-white/90 px-2 py-1 rounded shadow-sm border">
                           {formatWithExchange(amount, project.currency).split(' ').slice(0, 2).join(' ')}
                         </div>
-                        
-                        {/* Enhanced Tooltip (on hover) */}
-                        <div className="absolute bottom-full mb-3 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-xl px-4 py-3 opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 whitespace-nowrap shadow-xl border border-gray-700 animate-scale-in">
-                          <div className="space-y-1">
-                            <div className="font-bold text-center text-white border-b border-gray-600 pb-1">
-                              {getMilestoneShortName(milestone.milestoneType || "")} Disbursement
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-3 h-3" />
-                              {format(parseISO(milestone.dueDate), 'MMM dd, yyyy')}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <DollarSign className="w-3 h-3" />
-                              {formatWithExchange(milestone.disbursementAmount || 0, project.currency)}
-                            </div>
-                            <div className="text-center">
-                              <Badge variant="outline" className="text-xs bg-gray-800 border-gray-600 text-white">
-                                {milestone.status}
-                              </Badge>
-                            </div>
-                            <div className="text-center pt-1 border-t border-gray-600">
-                              <span className="text-xs text-gray-300">
-                                Priority: {milestone.priority}
-                              </span>
-                            </div>
-                          </div>
-                          {/* Tooltip arrow */}
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                        </div>
                       </div>
+                        
                     );
                   })}
                 </div>

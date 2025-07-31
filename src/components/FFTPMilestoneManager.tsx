@@ -374,9 +374,12 @@ const FFTPMilestoneManager = ({
                     <Calendar
                       mode="single"
                       selected={editMilestone.startDate}
-                      onSelect={(date) => setEditMilestone(prev => ({ ...prev, startDate: date }))}
+                      onSelect={(date) => {
+                        console.log("Start date selected:", date);
+                        setEditMilestone(prev => ({ ...prev, startDate: date }));
+                      }}
                       initialFocus
-                      className="pointer-events-auto"
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
@@ -401,9 +404,12 @@ const FFTPMilestoneManager = ({
                     <Calendar
                       mode="single"
                       selected={editMilestone.dueDate}
-                      onSelect={(date) => setEditMilestone(prev => ({ ...prev, dueDate: date }))}
+                      onSelect={(date) => {
+                        console.log("End date selected:", date);
+                        setEditMilestone(prev => ({ ...prev, dueDate: date }));
+                      }}
                       initialFocus
-                      className="pointer-events-auto"
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>

@@ -96,19 +96,29 @@ const ProjectAttachments = ({
     try {
       console.log('Attempting to download:', attachment.fileName);
       
-      // Check if the URL is valid
       if (!attachment.fileUrl || attachment.fileUrl === '') {
         throw new Error('File URL is empty or invalid');
       }
 
-      // Create a temporary anchor element to trigger download
+      // Convert base64 data URL to blob
+      const byteCharacters = atob(attachment.fileUrl.split(',')[1]);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: attachment.fileType });
+      
+      // Create blob URL and download
+      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = attachment.fileUrl;
+      link.href = blobUrl;
       link.download = attachment.fileName;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
       
       toast({
         title: "Download Started",

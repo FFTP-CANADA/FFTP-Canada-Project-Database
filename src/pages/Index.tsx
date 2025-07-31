@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, BarChart3, Users, DollarSign, AlertCircle, Info } from "lucide-react";
 import ProjectsTable from "@/components/ProjectsTable";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import DisbursementSchedule from "@/components/DisbursementSchedule";
 import AddProjectDialog from "@/components/AddProjectDialog";
 import ProjectAttachments from "@/components/ProjectAttachments";
 import ProjectGallery from "@/components/ProjectGallery";
@@ -227,12 +228,18 @@ const Index = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="projects" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:w-[400px] bg-blue-50 border border-blue-200">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[600px] bg-blue-50 border border-blue-200">
             <TabsTrigger 
               value="projects" 
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               Projects
+            </TabsTrigger>
+            <TabsTrigger 
+              value="disbursements" 
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              Disbursements
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
@@ -265,6 +272,10 @@ const Index = () => {
                 />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="disbursements" className="space-y-6">
+            <DisbursementSchedule projects={projects} milestones={milestones} />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">

@@ -56,6 +56,13 @@ const FFTPMilestoneManager = ({
     status: "Not Started" as const,
     priority: "Medium" as const
   });
+  const [editMilestone, setEditMilestone] = useState({
+    milestoneType: "" as FFTPMilestoneType,
+    startDate: undefined as Date | undefined,
+    dueDate: undefined as Date | undefined,
+    status: "Not Started" as ProjectMilestone["status"],
+    priority: "Medium" as ProjectMilestone["priority"]
+  });
 
   const handleAddMilestone = () => {
     if (!newMilestone.milestoneType || !newMilestone.startDate || !newMilestone.dueDate) return;
@@ -78,6 +85,39 @@ const FFTPMilestoneManager = ({
       priority: "Medium"
     });
     setIsAddingMilestone(false);
+  };
+
+  const handleEditMilestone = (milestone: ProjectMilestone) => {
+    setEditMilestone({
+      milestoneType: milestone.milestoneType as FFTPMilestoneType,
+      startDate: new Date(milestone.startDate),
+      dueDate: new Date(milestone.dueDate),
+      status: milestone.status,
+      priority: milestone.priority
+    });
+    setEditingMilestone(milestone.id);
+  };
+
+  const handleUpdateMilestone = () => {
+    if (!editingMilestone || !editMilestone.milestoneType || !editMilestone.startDate || !editMilestone.dueDate) return;
+
+    onUpdateMilestone(editingMilestone, {
+      title: editMilestone.milestoneType,
+      milestoneType: editMilestone.milestoneType,
+      startDate: editMilestone.startDate.toISOString().split('T')[0],
+      dueDate: editMilestone.dueDate.toISOString().split('T')[0],
+      status: editMilestone.status,
+      priority: editMilestone.priority
+    });
+
+    setEditingMilestone(null);
+    setEditMilestone({
+      milestoneType: "" as FFTPMilestoneType,
+      startDate: undefined,
+      dueDate: undefined,
+      status: "Not Started",
+      priority: "Medium"
+    });
   };
 
   const sortedMilestones = [...milestones].sort((a, b) => {
@@ -186,6 +226,133 @@ const FFTPMilestoneManager = ({
         </Card>
       )}
 
+      {/* Edit Milestone Form */}
+      {editingMilestone && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Edit Milestone</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Milestone Type</Label>
+              <Select
+                value={editMilestone.milestoneType}
+                onValueChange={(value) => setEditMilestone(prev => ({ ...prev, milestoneType: value as FFTPMilestoneType }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select milestone type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FFTP_MILESTONE_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !editMilestone.startDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {editMilestone.startDate ? format(editMilestone.startDate, "PPP") : "Pick start date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={editMilestone.startDate}
+                      onSelect={(date) => setEditMilestone(prev => ({ ...prev, startDate: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div>
+                <Label>End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !editMilestone.dueDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {editMilestone.dueDate ? format(editMilestone.dueDate, "PPP") : "Pick end date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={editMilestone.dueDate}
+                      onSelect={(date) => setEditMilestone(prev => ({ ...prev, dueDate: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Status</Label>
+                <Select
+                  value={editMilestone.status}
+                  onValueChange={(value) => setEditMilestone(prev => ({ ...prev, status: value as ProjectMilestone["status"] }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Not Started">Not Started</SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                    <SelectItem value="Overdue">Overdue</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Priority</Label>
+                <Select
+                  value={editMilestone.priority}
+                  onValueChange={(value) => setEditMilestone(prev => ({ ...prev, priority: value as ProjectMilestone["priority"] }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button onClick={handleUpdateMilestone} size="sm">Update Milestone</Button>
+              <Button onClick={() => setEditingMilestone(null)} variant="outline" size="sm">Cancel</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Milestone List */}
       <div className="space-y-2">
         {sortedMilestones.map((milestone) => (
@@ -219,7 +386,7 @@ const FFTPMilestoneManager = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setEditingMilestone(milestone.id)}
+                    onClick={() => handleEditMilestone(milestone)}
                   >
                     <Edit className="h-3 w-3" />
                   </Button>

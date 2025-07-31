@@ -39,18 +39,35 @@ const ProjectAttachments = ({
     setUploadFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSaveAttachments = () => {
-    uploadFiles.forEach(file => {
-      const attachment: Omit<ProjectAttachment, "id"> = {
-        projectId,
-        fileName: file.name,
-        fileUrl: URL.createObjectURL(file), // In real app, upload to server first
-        fileSize: file.size,
-        uploadDate: new Date().toISOString(),
-        fileType: file.type || "application/octet-stream"
-      };
-      onAddAttachment(attachment);
-    });
+  const handleSaveAttachments = async () => {
+    for (const file of uploadFiles) {
+      try {
+        // Convert file to base64 data URL for persistence
+        const fileDataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        const attachment: Omit<ProjectAttachment, "id"> = {
+          projectId,
+          fileName: file.name,
+          fileUrl: fileDataUrl, // Use base64 data URL instead of blob URL
+          fileSize: file.size,
+          uploadDate: new Date().toISOString(),
+          fileType: file.type || "application/octet-stream"
+        };
+        onAddAttachment(attachment);
+      } catch (error) {
+        console.error('Failed to process file:', file.name, error);
+        toast({
+          title: "Upload Error",
+          description: `Failed to upload ${file.name}`,
+          variant: "destructive"
+        });
+      }
+    }
 
     setUploadFiles([]);
     toast({
@@ -77,10 +94,18 @@ const ProjectAttachments = ({
 
   const handleDownload = (attachment: ProjectAttachment) => {
     try {
+      console.log('Attempting to download:', attachment.fileName, 'URL:', attachment.fileUrl);
+      
+      // Check if the URL is valid
+      if (!attachment.fileUrl || attachment.fileUrl === '') {
+        throw new Error('File URL is empty or invalid');
+      }
+
       // Create a temporary anchor element to trigger download
       const link = document.createElement('a');
       link.href = attachment.fileUrl;
       link.download = attachment.fileName;
+      link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -93,7 +118,7 @@ const ProjectAttachments = ({
       console.error('Download failed:', error);
       toast({
         title: "Download Failed", 
-        description: "There was an error downloading the file",
+        description: `Cannot download ${attachment.fileName}. File may be corrupted or no longer available.`,
         variant: "destructive"
       });
     }

@@ -262,90 +262,111 @@ const ProjectsTable = ({
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex gap-1">
+                  <div className="flex flex-wrap gap-1 max-w-md">
+                    {/* Primary Actions */}
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-blue-300 text-blue-600 hover:bg-blue-50 px-2"
+                      className="border-blue-300 text-blue-600 hover:bg-blue-50 text-xs px-2 py-1"
                       onClick={() => onEditProject?.(project)}
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className="w-3 h-3 mr-1" />
+                      Edit
                     </Button>
+                    
+                    {/* Documentation Group */}
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-blue-300 text-blue-600 hover:bg-blue-50 px-2"
+                      className="border-blue-300 text-blue-600 hover:bg-blue-50 text-xs px-2 py-1"
                       onClick={() => onOpenNotes?.(project.id, project.projectName)}
                     >
-                      <FileText className="w-4 h-4" />
+                      <FileText className="w-3 h-3 mr-1" />
+                      Notes
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 px-2"
-                      onClick={() => onOpenMilestones?.(project.id, project.projectName)}
-                    >
-                      <Milestone className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-violet-300 text-violet-600 hover:bg-violet-50 px-2"
-                      onClick={() => onOpenGantt?.(project)}
-                    >
-                      <ChartGantt className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2"
-                      onClick={() => onOpenFunding?.(project)}
-                    >
-                      <Banknote className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-teal-300 text-teal-600 hover:bg-teal-50 px-2"
-                      onClick={() => onOpenDisbursement?.(project)}
-                    >
-                      <Calendar className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-purple-300 text-purple-600 hover:bg-purple-50 px-2"
+                      className="border-purple-300 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1"
                       onClick={() => onOpenAttachments?.(project.id, project.projectName)}
                     >
-                      <Paperclip className="w-4 h-4" />
+                      <Paperclip className="w-3 h-3 mr-1" />
+                      Files
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-green-300 text-green-600 hover:bg-green-50 px-2"
+                      className="border-green-300 text-green-600 hover:bg-green-50 text-xs px-2 py-1"
                       onClick={() => onOpenGallery?.(project.id, project.projectName)}
                     >
-                      <Camera className="w-4 h-4" />
+                      <Camera className="w-3 h-3 mr-1" />
+                      Photos
                     </Button>
-                     {project.followUpNeeded && (
-                       <Button
-                         size="sm"
-                         variant="outline"
-                         className="border-orange-300 text-orange-600 hover:bg-orange-50 px-2"
-                         onClick={() => handleSendFollowUp(project)}
-                       >
-                         <Mail className="w-4 h-4" />
-                       </Button>
-                     )}
-                     <Button
-                       size="sm"
-                       variant="outline"
-                       className="border-red-300 text-red-600 hover:bg-red-50 px-2"
-                       onClick={() => handleDeleteClick(project)}
-                     >
-                       <Trash2 className="w-4 h-4" />
-                     </Button>
-                   </div>
+                    
+                    {/* Project Management Group */}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 text-xs px-2 py-1"
+                      onClick={() => onOpenMilestones?.(project.id, project.projectName)}
+                    >
+                      <Milestone className="w-3 h-3 mr-1" />
+                      Milestones
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-violet-300 text-violet-600 hover:bg-violet-50 text-xs px-2 py-1"
+                      onClick={() => onOpenGantt?.(project)}
+                    >
+                      <ChartGantt className="w-3 h-3 mr-1" />
+                      Gantt
+                    </Button>
+                    
+                    {/* Financial Group */}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-emerald-300 text-emerald-600 hover:bg-emerald-50 text-xs px-2 py-1"
+                      onClick={() => onOpenFunding?.(project)}
+                    >
+                      <Banknote className="w-3 h-3 mr-1" />
+                      Funding
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-teal-300 text-teal-600 hover:bg-teal-50 text-xs px-2 py-1"
+                      onClick={() => onOpenDisbursement?.(project)}
+                    >
+                      <Calendar className="w-3 h-3 mr-1" />
+                      Schedule
+                    </Button>
+                    
+                    {/* Conditional Actions */}
+                    {project.followUpNeeded && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-orange-300 text-orange-600 hover:bg-orange-50 text-xs px-2 py-1"
+                        onClick={() => handleSendFollowUp(project)}
+                      >
+                        <Mail className="w-3 h-3 mr-1" />
+                        Follow-up
+                      </Button>
+                    )}
+                    
+                    {/* Delete Action */}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-red-300 text-red-600 hover:bg-red-50 text-xs px-2 py-1"
+                      onClick={() => handleDeleteClick(project)}
+                    >
+                      <Trash2 className="w-3 h-3 mr-1" />
+                      Delete
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

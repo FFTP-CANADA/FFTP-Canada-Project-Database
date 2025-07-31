@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Banknote, Plus, AlertTriangle, CheckCircle, Clock, Edit, Trash2, Save, X } from "lucide-react";
+import { Banknote, Plus, AlertTriangle, CheckCircle, Clock, Edit, Trash2, Save, X, FileText } from "lucide-react";
+import ProjectNotesDialog from "./ProjectNotesDialog";
+import { useProjectData } from "@/hooks/useProjectData";
 import { Project, ProjectMilestone } from "@/types/project";
 import { formatWithExchange } from "@/utils/currencyUtils";
 import { useState, useEffect } from "react";
@@ -19,8 +21,12 @@ interface ProjectFundingStatusProps {
 
 const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectFundingStatusProps) => {
   const fundingHook = useProjectFunding();
+  const { getNotesForProject, addNote } = useProjectData();
   const projectReceipts = fundingHook.getReceiptsForProject(project.id);
   const projectPledges = fundingHook.getPledgesForProject(project.id);
+  const projectNotes = getNotesForProject(project.id);
+
+  const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
 
   const [isAddingReceipt, setIsAddingReceipt] = useState(false);
   const [editingReceiptId, setEditingReceiptId] = useState<string | null>(null);
@@ -225,9 +231,20 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
   return (
     <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Banknote className="w-5 h-5 text-blue-600" />
-          Funding Status
+        <CardTitle className="flex items-center justify-between text-lg">
+          <div className="flex items-center gap-2">
+            <Banknote className="w-5 h-5 text-blue-600" />
+            Funding Status
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsNotesDialogOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <FileText className="w-4 h-4" />
+            View Notes ({projectNotes.length})
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -599,6 +616,16 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
           Connect to Supabase to save donor receipts and track funding history
         </div>
       </CardContent>
+
+      {/* Project Notes Dialog */}
+      <ProjectNotesDialog
+        projectId={project.id}
+        projectName={project.projectName}
+        open={isNotesDialogOpen}
+        onOpenChange={setIsNotesDialogOpen}
+        notes={projectNotes}
+        onAddNote={addNote}
+      />
     </Card>
   );
 };

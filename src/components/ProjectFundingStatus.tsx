@@ -334,8 +334,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                           {pledge.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="max-w-xs">
-                        <div className="text-sm text-gray-600 whitespace-normal break-words" title={pledge.notes || "No notes"}>
+                      <TableCell className="max-w-md w-80">
+                        <div className="text-sm text-gray-600 whitespace-normal break-words leading-relaxed" title={pledge.notes || "No notes"}>
                           {pledge.notes || "No notes"}
                         </div>
                       </TableCell>
@@ -497,8 +497,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                       </TableCell>
                       <TableCell>{new Date(receipt.dateReceived + 'T00:00:00').toLocaleDateString()}</TableCell>
                       <TableCell>{receipt.paymentMethod}</TableCell>
-                      <TableCell className="max-w-xs">
-                        <div className="text-sm text-gray-600 whitespace-normal break-words" title={receipt.notes || "No notes"}>
+                      <TableCell className="max-w-md w-80">
+                        <div className="text-sm text-gray-600 whitespace-normal break-words leading-relaxed" title={receipt.notes || "No notes"}>
                           {receipt.notes || "No notes"}
                         </div>
                       </TableCell>

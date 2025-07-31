@@ -28,23 +28,19 @@ const getProjectColor = (status: Project["status"]) => {
 };
 
 const getMilestoneColor = (milestoneType: FFTPMilestoneType | undefined, status: ProjectMilestone["status"]) => {
-  // Green for completed items
-  if (status === "Completed") {
-    return "bg-green-500";
+  // Color coding by status
+  switch (status) {
+    case "Completed":
+      return "bg-green-500";
+    case "Not Started":
+      return "bg-orange-500";
+    case "In Progress":
+      return "bg-blue-500";
+    case "Overdue":
+      return "bg-red-500";
+    default:
+      return "bg-gray-500";
   }
-  
-  // Color coding by phase for non-completed items
-  if (milestoneType === "MOU Signed") {
-    return "bg-blue-500"; // Blue for MOU
-  } else if (milestoneType && milestoneType.includes("Disbursement")) {
-    return "bg-purple-500"; // Purple for Disbursements
-  } else if (milestoneType && milestoneType.includes("Receipts")) {
-    return "bg-yellow-500"; // Yellow for Receipt Verification
-  } else if (milestoneType && milestoneType.includes("Report")) {
-    return "bg-orange-500"; // Orange for Reporting
-  }
-  
-  return "bg-gray-500"; // Default
 };
 
 const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
@@ -223,31 +219,19 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
             ))}
           </div>
 
-          {/* Enhanced Legend */}
+          {/* Legend */}
           <div className="flex flex-wrap gap-4 pt-4 border-t text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-2 bg-blue-500 rounded"></div>
-              <span>Project Duration</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-2 bg-blue-500 rounded"></div>
-              <span>MOU Phase</span>
-            </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-2 bg-green-500 rounded"></div>
               <span>Completed</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-2 bg-purple-500 rounded"></div>
-              <span>Disbursement Phase</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-2 bg-yellow-500 rounded"></div>
-              <span>Receipt Verification</span>
-            </div>
-            <div className="flex items-center gap-2">
               <div className="w-4 h-2 bg-orange-500 rounded"></div>
-              <span>Reporting Phase</span>
+              <span>Not Started</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-2 bg-blue-500 rounded"></div>
+              <span>On Track</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-0.5 h-4 bg-red-500"></div>

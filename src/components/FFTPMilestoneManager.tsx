@@ -21,6 +21,7 @@ const FFTP_MILESTONE_OPTIONS: FFTPMilestoneType[] = [
   "Receipts Received & Verified (Third Tranche)",
   "Final Disbursement Sent",
   "Final Report and Receipts Submitted",
+  "Post Narrative Report",
   "Final Report Submitted to Partnerships & Donor Engagement Officer"
 ];
 

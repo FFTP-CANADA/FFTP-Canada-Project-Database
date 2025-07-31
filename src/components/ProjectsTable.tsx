@@ -182,11 +182,11 @@ const ProjectsTable = ({
         <Table>
           <TableHeader className="bg-blue-600">
             <TableRow>
+              <TableHead className="text-white">Governance</TableHead>
               <TableHead className="text-white">Project Name</TableHead>
               <TableHead className="text-white">Program</TableHead>
               <TableHead className="text-white">Country</TableHead>
               <TableHead className="text-white">Impact Area</TableHead>
-              <TableHead className="text-white">Governance</TableHead>
               <TableHead className="text-white">Status</TableHead>
               <TableHead className="text-white">Total Cost</TableHead>
               <TableHead className="text-white">Disbursed</TableHead>
@@ -198,17 +198,6 @@ const ProjectsTable = ({
           <TableBody>
             {filteredProjects.map((project) => (
               <TableRow key={project.id} className="hover:bg-blue-50">
-                <TableCell className="font-medium text-blue-900">
-                  {project.projectName}
-                  {project.followUpNeeded && (
-                    <Badge variant="outline" className="ml-2 text-orange-600 border-orange-300">
-                      Follow-up needed
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell className="text-blue-700">{project.program || "N/A"}</TableCell>
-                <TableCell className="text-blue-700">{project.country || "N/A"}</TableCell>
-                <TableCell className="text-blue-700">{project.impactArea}</TableCell>
                 <TableCell className="text-blue-700">
                   {project.governanceType && project.governanceNumber ? (
                     <div className="text-sm">
@@ -223,6 +212,17 @@ const ProjectsTable = ({
                     "N/A"
                   )}
                 </TableCell>
+                <TableCell className="font-medium text-blue-900">
+                  {project.projectName}
+                  {project.followUpNeeded && (
+                    <Badge variant="outline" className="ml-2 text-orange-600 border-orange-300">
+                      Follow-up needed
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell className="text-blue-700">{project.program || "N/A"}</TableCell>
+                <TableCell className="text-blue-700">{project.country || "N/A"}</TableCell>
+                <TableCell className="text-blue-700">{project.impactArea}</TableCell>
                 <TableCell>
                   <Badge className={getStatusColor(project.status)}>
                     {project.status}

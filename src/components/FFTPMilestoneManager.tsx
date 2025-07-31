@@ -442,7 +442,7 @@ const FFTPMilestoneManager = ({
         <Card className="bg-green-50 border-green-200">
           <CardContent className="p-4">
             <div className="text-sm font-medium text-green-700">
-              Total Planned Disbursements: ${totalDisbursements.toLocaleString()}
+              Total Planned Disbursements: ${totalDisbursements.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </CardContent>
         </Card>
@@ -460,7 +460,7 @@ const FFTPMilestoneManager = ({
                     {format(new Date(milestone.startDate), "MMM dd, yyyy")} - {format(new Date(milestone.dueDate), "MMM dd, yyyy")}
                     {milestone.disbursementAmount && (
                       <div className="text-green-600 font-medium mt-1">
-                        Disbursement: ${milestone.disbursementAmount.toLocaleString()}
+                        Disbursement: ${milestone.disbursementAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </div>
                     )}
                   </div>

@@ -1,4 +1,3 @@
-
 let currentRate = 1.44;
 
 export const USD_TO_CAD_RATE = currentRate;
@@ -16,7 +15,7 @@ export const convertUsdToCad = (usdAmount: number): number => {
 };
 
 export const formatCurrency = (amount: number, currency: 'USD' | 'CAD'): string => {
-  return `${currency} $${amount.toLocaleString()}`;
+  return `${currency} $${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
 export const formatWithExchange = (amount: number, originalCurrency: 'USD' | 'CAD'): string => {
@@ -25,4 +24,14 @@ export const formatWithExchange = (amount: number, originalCurrency: 'USD' | 'CA
     return `${formatCurrency(amount, 'USD')} (${formatCurrency(cadAmount, 'CAD')})`;
   }
   return formatCurrency(amount, 'CAD');
+};
+
+// Helper function to format currency without prefix
+export const formatAmount = (amount: number): string => {
+  return amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+// Helper function to format with currency prefix
+export const formatAmountWithCurrency = (amount: number, prefix: string = '$'): string => {
+  return `${prefix}${formatAmount(amount)}`;
 };

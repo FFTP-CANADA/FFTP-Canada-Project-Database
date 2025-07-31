@@ -197,7 +197,7 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-900">
-                CAD ${stats.totalDisbursedCAD.toLocaleString()}
+                CAD ${stats.totalDisbursedCAD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
             </CardContent>
           </Card>

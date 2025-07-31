@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FileText, Download, Calendar, DollarSign, Target, AlertCircle, TrendingUp, Users, FileDown } from "lucide-react";
 import { Project, ProjectNote } from "@/types/project";
-import { formatWithExchange, convertUsdToCad } from "@/utils/currencyUtils";
+import { formatWithExchange, convertUsdToCad, formatAmountWithCurrency } from "@/utils/currencyUtils";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
@@ -177,7 +177,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
     `${((metrics.completedProjects / metrics.totalProjects) * 100).toFixed(1)}% project completion rate`,
     `${utilizationRate.toFixed(1)}% budget utilization across portfolio`,
     `${metrics.delayedProjects} projects currently experiencing delays`,
-    `CAD $${(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD).toLocaleString()} variance between disbursed and reported spending`,
+    `CAD ${formatAmountWithCurrency(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD)} variance between disbursed and reported spending`,
     `${Math.round(projectDetails.reduce((sum, p) => sum + p.timeline.milestoneCompletionRate, 0) / projectDetails.length)}% average milestone completion rate`
   ];
 
@@ -214,11 +214,11 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
         head: [['Metric', 'Value']],
         body: [
           ['Total Active Projects', metrics.activeProjects.toString()],
-          ['Total Budget Allocated', `CAD $${metrics.totalBudgetCAD.toLocaleString()}`],
-          ['Total Funds Disbursed', `CAD $${metrics.totalDisbursedCAD.toLocaleString()}`],
-          ['Total Reported Spend', `CAD $${metrics.totalReportedSpendCAD.toLocaleString()}`],
+          ['Total Budget Allocated', `CAD ${formatAmountWithCurrency(metrics.totalBudgetCAD)}`],
+          ['Total Funds Disbursed', `CAD ${formatAmountWithCurrency(metrics.totalDisbursedCAD)}`],
+          ['Total Reported Spend', `CAD ${formatAmountWithCurrency(metrics.totalReportedSpendCAD)}`],
           ['Budget Utilization', `${utilizationRate.toFixed(1)}%`],
-          ['Financial Variance', `CAD $${(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD).toLocaleString()}`],
+          ['Financial Variance', `CAD ${formatAmountWithCurrency(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD)}`],
         ],
         theme: 'striped',
         headStyles: { fillColor: [59, 130, 246] },
@@ -243,11 +243,11 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
           project.projectName,
           project.country || 'N/A',
           project.status,
-          `CAD $${project.financials.budgetCAD.toLocaleString()}`,
-          `CAD $${project.financials.disbursedCAD.toLocaleString()}`,
-          `CAD $${project.financials.reportedSpendCAD.toLocaleString()}`,
+          `CAD ${formatAmountWithCurrency(project.financials.budgetCAD)}`,
+          `CAD ${formatAmountWithCurrency(project.financials.disbursedCAD)}`,
+          `CAD ${formatAmountWithCurrency(project.financials.reportedSpendCAD)}`,
           `${project.financials.disbursementRate}%`,
-          `CAD $${project.financials.variance.toLocaleString()}`,
+          `CAD ${formatAmountWithCurrency(project.financials.variance)}`,
           `${project.timeline.progressPercentage}%`,
           `${project.timeline.milestoneCompletionRate}%`
         ]),
@@ -274,7 +274,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
         body: Object.entries(countryBreakdown).map(([country, data]) => [
           country,
           data.count.toString(),
-          `$${data.disbursed.toLocaleString()}`
+          `${formatAmountWithCurrency(data.disbursed)}`
         ]),
         theme: 'striped',
         headStyles: { fillColor: [59, 130, 246] },
@@ -298,7 +298,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
         body: Object.entries(impactAreaBreakdown).map(([area, data]) => [
           area,
           data.count.toString(),
-          `$${data.disbursed.toLocaleString()}`
+          `${formatAmountWithCurrency(data.disbursed)}`
         ]),
         theme: 'striped',
         headStyles: { fillColor: [59, 130, 246] },
@@ -330,11 +330,11 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
         head: [['Metric', 'Value']],
         body: [
           ['Total Active Projects', metrics.activeProjects.toString()],
-          ['Total Budget Allocated', `CAD $${metrics.totalBudgetCAD.toLocaleString()}`],
-          ['Total Funds Disbursed', `CAD $${metrics.totalDisbursedCAD.toLocaleString()}`],
-          ['Total Reported Spend', `CAD $${metrics.totalReportedSpendCAD.toLocaleString()}`],
+          ['Total Budget Allocated', `CAD ${formatAmountWithCurrency(metrics.totalBudgetCAD)}`],
+          ['Total Funds Disbursed', `CAD ${formatAmountWithCurrency(metrics.totalDisbursedCAD)}`],
+          ['Total Reported Spend', `CAD ${formatAmountWithCurrency(metrics.totalReportedSpendCAD)}`],
           ['Budget Utilization', `${utilizationRate.toFixed(1)}%`],
-          ['Financial Variance', `CAD $${(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD).toLocaleString()}`],
+          ['Financial Variance', `CAD ${formatAmountWithCurrency(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD)}`],
         ],
         theme: 'striped',
         headStyles: { fillColor: [59, 130, 246] },
@@ -359,11 +359,11 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
           project.projectName,
           project.country || 'N/A',
           project.status,
-          `CAD $${project.financials.budgetCAD.toLocaleString()}`,
-          `CAD $${project.financials.disbursedCAD.toLocaleString()}`,
-          `CAD $${project.financials.reportedSpendCAD.toLocaleString()}`,
+          `CAD ${formatAmountWithCurrency(project.financials.budgetCAD)}`,
+          `CAD ${formatAmountWithCurrency(project.financials.disbursedCAD)}`,
+          `CAD ${formatAmountWithCurrency(project.financials.reportedSpendCAD)}`,
           `${project.financials.disbursementRate}%`,
-          `CAD $${project.financials.variance.toLocaleString()}`,
+          `CAD ${formatAmountWithCurrency(project.financials.variance)}`,
           `${project.timeline.progressPercentage}%`,
           `${project.timeline.milestoneCompletionRate}%`
         ]),
@@ -390,7 +390,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
         body: Object.entries(countryBreakdown).map(([country, data]) => [
           country,
           data.count.toString(),
-          `$${data.disbursed.toLocaleString()}`
+          `${formatAmountWithCurrency(data.disbursed)}`
         ]),
         theme: 'striped',
         headStyles: { fillColor: [59, 130, 246] },
@@ -414,7 +414,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
         body: Object.entries(impactAreaBreakdown).map(([area, data]) => [
           area,
           data.count.toString(),
-          `$${data.disbursed.toLocaleString()}`
+          `${formatAmountWithCurrency(data.disbursed)}`
         ]),
         theme: 'striped',
         headStyles: { fillColor: [59, 130, 246] },
@@ -456,8 +456,8 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
           <table>
             <tr><th>Metric</th><th>Value</th></tr>
             <tr><td>Total Active Projects</td><td>${metrics.activeProjects}</td></tr>
-            <tr><td>Total Budget Allocated</td><td>CAD $${metrics.totalBudgetCAD.toLocaleString()}</td></tr>
-            <tr><td>Total Funds Disbursed</td><td>CAD $${metrics.totalDisbursedCAD.toLocaleString()}</td></tr>
+            <tr><td>Total Budget Allocated</td><td>CAD ${formatAmountWithCurrency(metrics.totalBudgetCAD)}</td></tr>
+            <tr><td>Total Funds Disbursed</td><td>CAD ${formatAmountWithCurrency(metrics.totalDisbursedCAD)}</td></tr>
             <tr><td>Budget Utilization</td><td>${utilizationRate.toFixed(1)}%</td></tr>
           </table>
 
@@ -476,7 +476,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
           <table>
             <tr><th>Country</th><th>Projects</th><th>Disbursed (CAD)</th></tr>
             ${Object.entries(countryBreakdown).map(([country, data]) => 
-              `<tr><td>${country}</td><td>${data.count}</td><td>$${data.disbursed.toLocaleString()}</td></tr>`
+              `<tr><td>${country}</td><td>${data.count}</td><td>${formatAmountWithCurrency(data.disbursed)}</td></tr>`
             ).join('')}
           </table>
 
@@ -484,7 +484,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
           <table>
             <tr><th>Impact Area</th><th>Projects</th><th>Disbursed (CAD)</th></tr>
             ${Object.entries(impactAreaBreakdown).map(([area, data]) => 
-              `<tr><td>${area}</td><td>${data.count}</td><td>$${data.disbursed.toLocaleString()}</td></tr>`
+              `<tr><td>${area}</td><td>${data.count}</td><td>${formatAmountWithCurrency(data.disbursed)}</td></tr>`
             ).join('')}
           </table>
 
@@ -516,8 +516,8 @@ Generated: ${reportDate}
 EXECUTIVE SUMMARY
 ================
 Total Active Projects: ${metrics.activeProjects}
-Total Budget Allocated: CAD $${metrics.totalBudgetCAD.toLocaleString()}
-Total Funds Disbursed: CAD $${metrics.totalDisbursedCAD.toLocaleString()}
+Total Budget Allocated: CAD ${formatAmountWithCurrency(metrics.totalBudgetCAD)}
+Total Funds Disbursed: CAD ${formatAmountWithCurrency(metrics.totalDisbursedCAD)}
 Budget Utilization: ${utilizationRate.toFixed(1)}%
 
 PROJECT STATUS OVERVIEW
@@ -532,13 +532,13 @@ PROJECT STATUS OVERVIEW
 GEOGRAPHIC DISTRIBUTION
 ======================
 ${Object.entries(countryBreakdown).map(([country, data]) => 
-  `${country}: ${data.count} projects, CAD $${data.disbursed.toLocaleString()} disbursed`
+  `${country}: ${data.count} projects, CAD ${formatAmountWithCurrency(data.disbursed)} disbursed`
 ).join('\n')}
 
 IMPACT AREA BREAKDOWN
 ====================
 ${Object.entries(impactAreaBreakdown).map(([area, data]) => 
-  `${area}: ${data.count} projects, CAD $${data.disbursed.toLocaleString()} disbursed`
+  `${area}: ${data.count} projects, CAD ${formatAmountWithCurrency(data.disbursed)} disbursed`
 ).join('\n')}
 
 KEY INSIGHTS
@@ -603,15 +603,15 @@ Report generated by Food For The Poor Canada Project Management System
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Budget Allocated</TableCell>
-                    <TableCell className="font-bold">CAD $${metrics.totalBudgetCAD.toLocaleString()}</TableCell>
+                    <TableCell className="font-bold">CAD ${formatAmountWithCurrency(metrics.totalBudgetCAD)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Funds Disbursed</TableCell>
-                    <TableCell className="font-bold">CAD $${metrics.totalDisbursedCAD.toLocaleString()}</TableCell>
+                    <TableCell className="font-bold">CAD ${formatAmountWithCurrency(metrics.totalDisbursedCAD)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Reported Spend</TableCell>
-                    <TableCell className="font-bold">CAD ${metrics.totalReportedSpendCAD.toLocaleString()}</TableCell>
+                    <TableCell className="font-bold">CAD ${formatAmountWithCurrency(metrics.totalReportedSpendCAD)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Budget Utilization</TableCell>
@@ -619,7 +619,7 @@ Report generated by Food For The Poor Canada Project Management System
                   </TableRow>
                   <TableRow>
                     <TableCell>Financial Variance</TableCell>
-                    <TableCell className="font-bold">CAD ${(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD).toLocaleString()}</TableCell>
+                    <TableCell className="font-bold">CAD ${formatAmountWithCurrency(metrics.totalDisbursedCAD - metrics.totalReportedSpendCAD)}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -662,12 +662,12 @@ Report generated by Food For The Poor Canada Project Management System
                           {project.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>CAD ${project.financials.budgetCAD.toLocaleString()}</TableCell>
-                      <TableCell>CAD ${project.financials.disbursedCAD.toLocaleString()}</TableCell>
-                      <TableCell>CAD ${project.financials.reportedSpendCAD.toLocaleString()}</TableCell>
+                      <TableCell>CAD ${formatAmountWithCurrency(project.financials.budgetCAD)}</TableCell>
+                      <TableCell>CAD ${formatAmountWithCurrency(project.financials.disbursedCAD)}</TableCell>
+                      <TableCell>CAD ${formatAmountWithCurrency(project.financials.reportedSpendCAD)}</TableCell>
                       <TableCell>{project.financials.disbursementRate}%</TableCell>
                       <TableCell className={project.financials.variance < 0 ? 'text-red-600' : 'text-green-600'}>
-                        CAD ${project.financials.variance.toLocaleString()}
+                        CAD ${formatAmountWithCurrency(project.financials.variance)}
                       </TableCell>
                       <TableCell>{project.timeline.progressPercentage}%</TableCell>
                       <TableCell>{project.timeline.milestoneCompletionRate}%</TableCell>
@@ -765,12 +765,12 @@ Report generated by Food For The Poor Canada Project Management System
                     <TableRow key={country}>
                       <TableCell className="font-medium">{country}</TableCell>
                       <TableCell>{data.count}</TableCell>
-                      <TableCell>CAD ${data.budget.toLocaleString()}</TableCell>
-                      <TableCell>CAD ${data.disbursed.toLocaleString()}</TableCell>
-                      <TableCell>CAD ${data.reportedSpend.toLocaleString()}</TableCell>
+                      <TableCell>CAD ${formatAmountWithCurrency(data.budget)}</TableCell>
+                      <TableCell>CAD ${formatAmountWithCurrency(data.disbursed)}</TableCell>
+                      <TableCell>CAD ${formatAmountWithCurrency(data.reportedSpend)}</TableCell>
                       <TableCell>{data.budget > 0 ? ((data.disbursed / data.budget) * 100).toFixed(1) : '0'}%</TableCell>
                       <TableCell className={data.disbursed - data.reportedSpend < 0 ? 'text-red-600' : 'text-green-600'}>
-                        CAD ${(data.disbursed - data.reportedSpend).toLocaleString()}
+                        CAD ${formatAmountWithCurrency(data.disbursed - data.reportedSpend)}
                       </TableCell>
                     </TableRow>
                   ))}

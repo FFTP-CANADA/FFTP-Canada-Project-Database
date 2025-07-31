@@ -99,8 +99,8 @@ const AnalyticsDashboard = ({ projects }: AnalyticsDashboardProps) => {
             <p key={index} className="text-blue-700">
               {entry.name}: {typeof entry.value === 'number' ? 
                 (entry.name.includes('amount') || entry.name.includes('Amount') ? 
-                  `$${entry.value.toLocaleString()}` : 
-                  entry.value.toLocaleString()
+                  `$${entry.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 
+                  entry.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                 ) : entry.value}
             </p>
           ))}
@@ -253,7 +253,7 @@ const AnalyticsDashboard = ({ projects }: AnalyticsDashboardProps) => {
                         <div className="bg-white p-3 border border-blue-200 rounded-lg shadow-lg">
                           <p className="text-blue-900 font-semibold">{data.type}</p>
                           <p className="text-blue-700">Projects: {data.count}</p>
-                          <p className="text-blue-700">Amount: ${data.amount.toLocaleString()}</p>
+                          <p className="text-blue-700">Amount: ${data.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
                       );
                     }
@@ -297,7 +297,7 @@ const AnalyticsDashboard = ({ projects }: AnalyticsDashboardProps) => {
                       <td className="py-3 px-4 text-right text-blue-800">{areaProjects.length}</td>
                       <td className="py-3 px-4 text-right text-blue-800">{undesignatedProjects.length}</td>
                       <td className="py-3 px-4 text-right text-blue-900 font-semibold">
-                        ${availableBalance.toLocaleString()}
+                        ${availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                     </tr>
                   );

@@ -156,6 +156,17 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
+              <Label htmlFor="projectName" className="text-blue-900">Project Name *</Label>
+              <Input
+                id="projectName"
+                value={formData.projectName}
+                onChange={(e) => setFormData(prev => ({ ...prev, projectName: e.target.value }))}
+                className="border-blue-200 focus:border-blue-400"
+                placeholder="Enter project name"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="governanceType" className="text-blue-900">Governance Type *</Label>
               <Select 
                 value={formData.governanceType} 
@@ -181,17 +192,6 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
                 className="border-blue-200 focus:border-blue-400"
                 placeholder="Enter governance number"
                 disabled={!formData.governanceType}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="projectName" className="text-blue-900">Project Name *</Label>
-              <Input
-                id="projectName"
-                value={formData.projectName}
-                onChange={(e) => setFormData(prev => ({ ...prev, projectName: e.target.value }))}
-                className="border-blue-200 focus:border-blue-400"
-                placeholder="Enter project name"
               />
             </div>
 

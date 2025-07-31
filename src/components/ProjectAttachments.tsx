@@ -75,6 +75,30 @@ const ProjectAttachments = ({
     return '📎';
   };
 
+  const handleDownload = (attachment: ProjectAttachment) => {
+    try {
+      // Create a temporary anchor element to trigger download
+      const link = document.createElement('a');
+      link.href = attachment.fileUrl;
+      link.download = attachment.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Download Started",
+        description: `Downloading ${attachment.fileName}`,
+      });
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: "Download Failed", 
+        description: "There was an error downloading the file",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -163,6 +187,7 @@ const ProjectAttachments = ({
                         variant="outline"
                         size="sm"
                         className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                        onClick={() => handleDownload(attachment)}
                       >
                         <Download className="w-4 h-4 mr-1" />
                         Download

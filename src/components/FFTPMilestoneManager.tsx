@@ -13,7 +13,7 @@ import { ProjectMilestone, FFTPMilestoneType } from "@/types/project";
 
 const FFTP_MILESTONE_OPTIONS: FFTPMilestoneType[] = [
   "MOU Signed",
-  "First Disbursement Sent",
+  "First Disbursement Sent", 
   "Receipts Received & Verified (First Tranche)",
   "Second Disbursement Sent",
   "Receipts Received & Verified (Second Tranche)",
@@ -214,6 +214,43 @@ const FFTPMilestoneManager = ({
                     />
                   </PopoverContent>
                 </Popover>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Status</Label>
+                <Select
+                  value={newMilestone.status}
+                  onValueChange={(value) => setNewMilestone(prev => ({ ...prev, status: value as ProjectMilestone["status"] }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Not Started">Not Started</SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                    <SelectItem value="Overdue">Overdue</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Priority</Label>
+                <Select
+                  value={newMilestone.priority}
+                  onValueChange={(value) => setNewMilestone(prev => ({ ...prev, priority: value as ProjectMilestone["priority"] }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

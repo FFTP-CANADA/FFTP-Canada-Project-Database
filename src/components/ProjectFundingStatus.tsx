@@ -295,9 +295,9 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
                       <TableCell className="text-blue-600 font-medium">
                         {formatWithExchange(pledge.pledgedAmount, project.currency)}
                       </TableCell>
-                      <TableCell>{new Date(pledge.datePledged).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(pledge.datePledged + 'T00:00:00').toLocaleDateString()}</TableCell>
                       <TableCell>
-                        {pledge.expectedDate ? new Date(pledge.expectedDate).toLocaleDateString() : 'TBD'}
+                        {pledge.expectedDate ? new Date(pledge.expectedDate + 'T00:00:00').toLocaleDateString() : 'TBD'}
                       </TableCell>
                       <TableCell>
                         <Badge className={
@@ -463,7 +463,7 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
                       <TableCell className="text-green-600 font-medium">
                         {formatWithExchange(receipt.amount, project.currency)}
                       </TableCell>
-                      <TableCell>{new Date(receipt.dateReceived).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(receipt.dateReceived + 'T00:00:00').toLocaleDateString()}</TableCell>
                       <TableCell>{receipt.paymentMethod}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">

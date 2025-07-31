@@ -101,29 +101,18 @@ const ProjectAttachments = ({
         throw new Error('File URL is empty or invalid');
       }
 
-      // Convert base64 data URL back to blob for reliable download
-      const response = fetch(attachment.fileUrl);
-      response.then(res => res.blob()).then(blob => {
-        const blobUrl = URL.createObjectURL(blob);
-        
-        // Create a temporary anchor element to trigger download
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = attachment.fileName;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Clean up the blob URL
-        URL.revokeObjectURL(blobUrl);
-        
-        toast({
-          title: "Download Started",
-          description: `Downloading ${attachment.fileName}`,
-        });
-      }).catch(error => {
-        throw error;
+      // Create a temporary anchor element to trigger download
+      const link = document.createElement('a');
+      link.href = attachment.fileUrl;
+      link.download = attachment.fileName;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Download Started",
+        description: `Downloading ${attachment.fileName}`,
       });
     } catch (error) {
       console.error('Download failed:', error);

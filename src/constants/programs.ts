@@ -1,9 +1,9 @@
 
 export const PROGRAM_OPTIONS = [
-  "Emergency Response Program",
-  "Housing and Community Development Program",
-  "Education Program",
-  "Health Program",
-  "Food Security Program",
-  "Economic Empowerment Program"
+  "Sustainable Nutrition & Food Access",
+  "Community Health & WASH Systems",
+  "Access to Quality Education",
+  "Infrastructure for Resilient Communities",
+  "Economic Inclusion & Livelihoods",
+  "Humanitarian Response & Recovery"
 ];

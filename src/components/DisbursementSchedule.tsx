@@ -218,7 +218,15 @@ const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProp
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {disbursementsByProject.map(({ project, disbursements, totalScheduled, completedCount, upcomingCount }) => (
+            {disbursementsByProject.map(({ project, disbursements, totalScheduled, completedCount, upcomingCount }) => {
+              // Calculate actual disbursement progress (completed vs scheduled)
+              const completedDisbursements = disbursements.filter(d => d.status === "Completed");
+              const totalCompletedAmount = completedDisbursements.reduce(
+                (sum, milestone) => sum + (milestone.disbursementAmount || 0), 0
+              );
+              const disbursementProgress = totalScheduled > 0 ? (totalCompletedAmount / totalScheduled) * 100 : 0;
+              
+              return (
               <div key={project.id} className="p-4 border border-blue-200 rounded-lg">
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -233,9 +241,9 @@ const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProp
                   </div>
                 </div>
                 
-                <div className="flex gap-4 text-sm">
+                <div className="flex gap-4 text-sm mb-2">
                   <span className="text-green-600">
-                    Completed: {completedCount}
+                    Completed: {completedCount} ({formatWithExchange(totalCompletedAmount, project.currency)})
                   </span>
                   <span className="text-orange-600">
                     Upcoming: {upcomingCount}
@@ -245,24 +253,22 @@ const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProp
                   </span>
                 </div>
 
-                {project.totalCost && (
-                  <div className="mt-2">
-                    <div className="flex justify-between text-sm text-gray-600 mb-1">
-                      <span>Disbursement Progress</span>
-                      <span>{Math.round((totalScheduled / project.totalCost) * 100)}%</span>
-                    </div>
-                    <div className="w-full bg-blue-100 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all"
-                        style={{ 
-                          width: `${Math.min((totalScheduled / project.totalCost) * 100, 100)}%` 
-                        }}
-                      />
-                    </div>
+                <div className="mt-2">
+                  <div className="flex justify-between text-sm text-gray-600 mb-1">
+                    <span>Disbursement Progress (Completed vs Scheduled)</span>
+                    <span>{Math.round(disbursementProgress)}%</span>
                   </div>
-                )}
+                  <div className="w-full bg-blue-100 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all"
+                      style={{ 
+                        width: `${Math.min(disbursementProgress, 100)}%` 
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
-            ))}
+            );})}
           </div>
         </CardContent>
       </Card>

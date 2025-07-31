@@ -156,6 +156,35 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
+              <Label htmlFor="governanceType" className="text-blue-900">Governance Type *</Label>
+              <Select 
+                value={formData.governanceType} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, governanceType: value }))}
+              >
+                <SelectTrigger className="border-blue-200 focus:border-blue-400">
+                  <SelectValue placeholder="Select governance type" />
+                </SelectTrigger>
+                <SelectContent className="bg-white z-50">
+                  <SelectItem value="MOU">MOU</SelectItem>
+                  <SelectItem value="AGENCY">AGENCY</SelectItem>
+                  <SelectItem value="LOD">LOD</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="governanceNumber" className="text-blue-900">Governance Number *</Label>
+              <Input
+                id="governanceNumber"
+                value={formData.governanceNumber}
+                onChange={(e) => setFormData(prev => ({ ...prev, governanceNumber: e.target.value }))}
+                className="border-blue-200 focus:border-blue-400"
+                placeholder="Enter governance number"
+                disabled={!formData.governanceType}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="projectName" className="text-blue-900">Project Name *</Label>
               <Input
                 id="projectName"
@@ -210,35 +239,6 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
                 onChange={(e) => setFormData(prev => ({ ...prev, partnerName: e.target.value }))}
                 className="border-blue-200 focus:border-blue-400"
                 placeholder="Enter partner name (optional)"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="governanceType" className="text-blue-900">Governance Type *</Label>
-              <Select 
-                value={formData.governanceType} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, governanceType: value }))}
-              >
-                <SelectTrigger className="border-blue-200 focus:border-blue-400">
-                  <SelectValue placeholder="Select governance type (optional)" />
-                </SelectTrigger>
-                <SelectContent className="bg-white z-50">
-                  <SelectItem value="MOU">MOU</SelectItem>
-                  <SelectItem value="AGENCY">AGENCY</SelectItem>
-                  <SelectItem value="LOD">LOD</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="governanceNumber" className="text-blue-900">Governance Number *</Label>
-              <Input
-                id="governanceNumber"
-                value={formData.governanceNumber}
-                onChange={(e) => setFormData(prev => ({ ...prev, governanceNumber: e.target.value }))}
-                className="border-blue-200 focus:border-blue-400"
-                placeholder="Enter governance number *"
-                disabled={!formData.governanceType}
               />
             </div>
 

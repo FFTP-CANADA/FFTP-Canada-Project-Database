@@ -234,6 +234,10 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
               <span>On Track</span>
             </div>
             <div className="flex items-center gap-2">
+              <div className="w-4 h-2 bg-red-500 rounded"></div>
+              <span>Delayed/Overdue</span>
+            </div>
+            <div className="flex items-center gap-2">
               <div className="w-0.5 h-4 bg-red-500"></div>
               <span>Today</span>
             </div>

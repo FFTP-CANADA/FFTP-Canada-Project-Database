@@ -27,7 +27,7 @@ export type FFTPMilestoneType =
   | "Third Disbursement Sent"
   | "Receipts Received & Verified (Third Tranche)"
   | "Final Disbursement Sent"
-  | "Final Report Pending (Due within 6 months)"
+  | "Final Report and Receipts Submitted"
   | "Final Report Submitted to Partnerships & Donor Engagement Officer";
 
 export interface ProjectMilestone {

@@ -72,6 +72,7 @@ const Index = () => {
     addProject, 
     updateProject,
     deleteProject,
+    validateGovernanceNumber,
     attachments,
     photos,
     notes,
@@ -308,6 +309,7 @@ const Index = () => {
         onOpenChange={(open) => setEditProject(prev => ({ ...prev, open }))}
         onUpdateProject={updateProject}
         availablePrograms={allPrograms}
+        validateGovernanceNumber={validateGovernanceNumber}
       />
 
       <ProgramManagementDialog

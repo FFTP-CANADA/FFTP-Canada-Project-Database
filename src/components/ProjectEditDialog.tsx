@@ -14,6 +14,7 @@ interface ProjectEditDialogProps {
   onOpenChange: (open: boolean) => void;
   onUpdateProject: (id: string, updates: Partial<Project>) => void;
   availablePrograms: string[];
+  validateGovernanceNumber?: (governanceNumber: string, governanceType: string, excludeId?: string) => boolean;
 }
 
 const ProjectEditDialog = ({ 
@@ -21,7 +22,8 @@ const ProjectEditDialog = ({
   open, 
   onOpenChange, 
   onUpdateProject,
-  availablePrograms 
+  availablePrograms,
+  validateGovernanceNumber
 }: ProjectEditDialogProps) => {
   const [formData, setFormData] = useState<Partial<Project>>({});
   const { toast } = useToast();
@@ -41,14 +43,28 @@ const ProjectEditDialog = ({
         amountDisbursed: project.amountDisbursed,
         startDate: project.startDate,
         endDate: project.endDate,
-        followUpNeeded: project.followUpNeeded
+        followUpNeeded: project.followUpNeeded,
+        governanceType: project.governanceType,
+        governanceNumber: project.governanceNumber
       });
     }
   }, [project]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (project) {
+      // Validate governance number if provided
+      if (formData.governanceType && formData.governanceNumber && validateGovernanceNumber) {
+        if (!validateGovernanceNumber(formData.governanceNumber, formData.governanceType, project.id)) {
+          toast({
+            title: "Validation Error",
+            description: `A project with ${formData.governanceType} number "${formData.governanceNumber}" already exists`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
       // Convert "none" values back to undefined for optional fields
       const updates = Object.fromEntries(
         Object.entries(formData).filter(([_, value]) => value !== undefined).map(([key, value]) => [
@@ -57,13 +73,21 @@ const ProjectEditDialog = ({
         ])
       );
       
-      onUpdateProject(project.id, updates);
-      onOpenChange(false);
-      
-      toast({
-        title: "Project Updated",
-        description: `${project.projectName} has been updated successfully.`,
-      });
+      try {
+        onUpdateProject(project.id, updates);
+        onOpenChange(false);
+        
+        toast({
+          title: "Project Updated",
+          description: `${project.projectName} has been updated successfully.`,
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to update project",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -176,6 +200,37 @@ const ProjectEditDialog = ({
                   <SelectItem value="Needs Attention">Needs Attention</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="governanceType">Governance Type</Label>
+              <Select
+                value={formData.governanceType || "none"}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, governanceType: value === "none" ? undefined : value as any }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select governance type" />
+                </SelectTrigger>
+                <SelectContent className="bg-white z-50">
+                  <SelectItem value="none">No governance</SelectItem>
+                  <SelectItem value="MOU">MOU</SelectItem>
+                  <SelectItem value="AGENCY">AGENCY</SelectItem>
+                  <SelectItem value="LOD">LOD</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="governanceNumber">Governance Number</Label>
+              <Input
+                id="governanceNumber"
+                value={formData.governanceNumber || ""}
+                onChange={(e) => setFormData(prev => ({ ...prev, governanceNumber: e.target.value }))}
+                disabled={!formData.governanceType}
+                placeholder="Enter governance number"
+              />
             </div>
           </div>
 

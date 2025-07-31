@@ -186,6 +186,7 @@ const ProjectsTable = ({
               <TableHead className="text-white">Program</TableHead>
               <TableHead className="text-white">Country</TableHead>
               <TableHead className="text-white">Impact Area</TableHead>
+              <TableHead className="text-white">Governance</TableHead>
               <TableHead className="text-white">Status</TableHead>
               <TableHead className="text-white">Total Cost</TableHead>
               <TableHead className="text-white">Disbursed</TableHead>
@@ -208,6 +209,20 @@ const ProjectsTable = ({
                 <TableCell className="text-blue-700">{project.program || "N/A"}</TableCell>
                 <TableCell className="text-blue-700">{project.country || "N/A"}</TableCell>
                 <TableCell className="text-blue-700">{project.impactArea}</TableCell>
+                <TableCell className="text-blue-700">
+                  {project.governanceType && project.governanceNumber ? (
+                    <div className="text-sm">
+                      <Badge variant="outline" className="text-xs">
+                        {project.governanceType}
+                      </Badge>
+                      <div className="mt-1 font-mono text-xs">
+                        {project.governanceNumber}
+                      </div>
+                    </div>
+                  ) : (
+                    "N/A"
+                  )}
+                </TableCell>
                 <TableCell>
                   <Badge className={getStatusColor(project.status)}>
                     {project.status}

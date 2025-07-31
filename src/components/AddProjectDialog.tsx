@@ -36,6 +36,8 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
     status: "",
     followUpNeeded: false,
     program: "",
+    governanceType: "",
+    governanceNumber: "",
   });
 
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -62,7 +64,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.projectName || !formData.impactArea || !formData.status || !formData.startDate) {
@@ -72,6 +74,12 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
         variant: "destructive",
       });
       return;
+    }
+
+    // Validate governance number uniqueness if both type and number are provided
+    if (formData.governanceType && formData.governanceNumber) {
+      // We need access to the useProjects hook validation here
+      // For now, we'll let the hook handle the validation and catch the error
     }
 
     const project: Omit<Project, "id"> = {
@@ -90,37 +98,49 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
       status: formData.status as Project["status"],
       followUpNeeded: formData.followUpNeeded,
       program: formData.program || undefined,
+      governanceType: formData.governanceType as Project["governanceType"],
+      governanceNumber: formData.governanceNumber || undefined,
     };
 
-    onAddProject(project);
-    
-    // Reset form
-    setFormData({
-      projectName: "",
-      country: "",
-      partnerName: "",
-      impactArea: "",
-      fundType: "",
-      isDesignated: false,
-      currency: "",
-      totalCost: "",
-      amountDisbursed: "",
-      reportedSpend: "",
-      startDate: undefined,
-      endDate: undefined,
-      status: "",
-      followUpNeeded: false,
-      program: "",
-    });
-    setAttachments([]);
-    setPhotos([]);
-    
-    onOpenChange(false);
-    
-    toast({
-      title: "Success",
-      description: "Project has been added successfully",
-    });
+    try {
+      onAddProject(project);
+      
+      // Reset form only if successful
+      setFormData({
+        projectName: "",
+        country: "",
+        partnerName: "",
+        impactArea: "",
+        fundType: "",
+        isDesignated: false,
+        currency: "",
+        totalCost: "",
+        amountDisbursed: "",
+        reportedSpend: "",
+        startDate: undefined,
+        endDate: undefined,
+        status: "",
+        followUpNeeded: false,
+        program: "",
+        governanceType: "",
+        governanceNumber: "",
+      });
+      setAttachments([]);
+      setPhotos([]);
+      
+      onOpenChange(false);
+      
+      toast({
+        title: "Success",
+        description: "Project has been added successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add project",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -190,6 +210,35 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
                 onChange={(e) => setFormData(prev => ({ ...prev, partnerName: e.target.value }))}
                 className="border-blue-200 focus:border-blue-400"
                 placeholder="Enter partner name (optional)"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="governanceType" className="text-blue-900">Governance Type</Label>
+              <Select 
+                value={formData.governanceType} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, governanceType: value }))}
+              >
+                <SelectTrigger className="border-blue-200 focus:border-blue-400">
+                  <SelectValue placeholder="Select governance type (optional)" />
+                </SelectTrigger>
+                <SelectContent className="bg-white z-50">
+                  <SelectItem value="MOU">MOU</SelectItem>
+                  <SelectItem value="AGENCY">AGENCY</SelectItem>
+                  <SelectItem value="LOD">LOD</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="governanceNumber" className="text-blue-900">Governance Number</Label>
+              <Input
+                id="governanceNumber"
+                value={formData.governanceNumber}
+                onChange={(e) => setFormData(prev => ({ ...prev, governanceNumber: e.target.value }))}
+                className="border-blue-200 focus:border-blue-400"
+                placeholder="Enter governance number (optional)"
+                disabled={!formData.governanceType}
               />
             </div>
 

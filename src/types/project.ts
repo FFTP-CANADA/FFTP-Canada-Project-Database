@@ -1,4 +1,6 @@
 
+export type GovernanceType = "MOU" | "AGENCY" | "LOD";
+
 export interface Project {
   id: string;
   projectName: string;
@@ -16,6 +18,8 @@ export interface Project {
   status: "On-Track" | "Delayed" | "Pending Start" | "Completed" | "Cancelled" | "Needs Attention";
   followUpNeeded: boolean;
   program?: string;
+  governanceType?: GovernanceType;
+  governanceNumber?: string;
 }
 
 export type FFTPMilestoneType = 

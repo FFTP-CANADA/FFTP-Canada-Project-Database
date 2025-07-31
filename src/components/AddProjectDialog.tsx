@@ -67,10 +67,10 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.projectName || !formData.impactArea || !formData.status || !formData.startDate) {
+    if (!formData.projectName || !formData.impactArea || !formData.status || !formData.startDate || !formData.governanceType || !formData.governanceNumber) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields (Project Name, Impact Area, Status, Start Date)",
+        description: "Please fill in all required fields (Project Name, Impact Area, Status, Start Date, Governance Type, Governance Number)",
         variant: "destructive",
       });
       return;
@@ -214,7 +214,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="governanceType" className="text-blue-900">Governance Type</Label>
+              <Label htmlFor="governanceType" className="text-blue-900">Governance Type *</Label>
               <Select 
                 value={formData.governanceType} 
                 onValueChange={(value) => setFormData(prev => ({ ...prev, governanceType: value }))}
@@ -231,13 +231,13 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="governanceNumber" className="text-blue-900">Governance Number</Label>
+              <Label htmlFor="governanceNumber" className="text-blue-900">Governance Number *</Label>
               <Input
                 id="governanceNumber"
                 value={formData.governanceNumber}
                 onChange={(e) => setFormData(prev => ({ ...prev, governanceNumber: e.target.value }))}
                 className="border-blue-200 focus:border-blue-400"
-                placeholder="Enter governance number (optional)"
+                placeholder="Enter governance number *"
                 disabled={!formData.governanceType}
               />
             </div>

@@ -174,7 +174,7 @@ const DisbursementTimeline = ({ projects, milestones }: DisbursementTimelineProp
                 </div>
 
                 {/* Timeline */}
-                <div className="relative h-20 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl border-2 border-slate-200 shadow-inner overflow-hidden">
+                <div className="relative h-32 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl border-2 border-slate-200 shadow-inner overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500/3 to-indigo-500/3"></div>
                   
                   {/* Today indicator */}
@@ -185,26 +185,41 @@ const DisbursementTimeline = ({ projects, milestones }: DisbursementTimelineProp
                     <div className="absolute -top-2 -left-3 w-6 h-6 bg-gradient-to-br from-red-400 to-red-600 rounded-full shadow-lg border-2 border-white animate-pulse">
                       <Clock className="w-3 h-3 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
                     </div>
+                    <div className="absolute top-8 -left-6 text-xs font-semibold text-red-600 whitespace-nowrap">
+                      Today
+                    </div>
                   </div>
 
-                  {/* Disbursement markers */}
+                  {/* Disbursement markers with amounts */}
                   {disbursements.map((milestone, index) => {
                     const position = getPositionFromDate(parseISO(milestone.dueDate));
                     const colorClass = getStatusColor(milestone.status, milestone.dueDate);
+                    const amount = milestone.disbursementAmount || 0;
                     
                     return (
                       <div
                         key={milestone.id}
-                        className="absolute top-3 bottom-3 group cursor-pointer z-10 hover-scale"
+                        className="absolute top-6 group cursor-pointer z-10"
                         style={{ 
                           left: `${position}%`, 
                           transform: 'translateX(-50%)',
                           animationDelay: `${index * 100}ms`
                         }}
                       >
-                        <div className={`w-6 h-full ${colorClass} rounded-lg shadow-lg border-3 border-white hover:scale-110 transition-all duration-300 animate-fade-in`}></div>
+                        {/* Date label above marker */}
+                        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-slate-600 whitespace-nowrap">
+                          {format(parseISO(milestone.dueDate), 'MMM dd')}
+                        </div>
                         
-                        {/* Enhanced Tooltip */}
+                        {/* Marker */}
+                        <div className={`w-6 h-8 ${colorClass} rounded-lg shadow-lg border-3 border-white hover:scale-110 transition-all duration-300 animate-fade-in`}></div>
+                        
+                        {/* Amount label below marker */}
+                        <div className="absolute top-10 left-1/2 transform -translate-x-1/2 text-xs font-bold text-slate-700 whitespace-nowrap bg-white/90 px-2 py-1 rounded shadow-sm border">
+                          {formatWithExchange(amount, project.currency).split(' ').slice(0, 2).join(' ')}
+                        </div>
+                        
+                        {/* Enhanced Tooltip (on hover) */}
                         <div className="absolute bottom-full mb-3 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-xl px-4 py-3 opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 whitespace-nowrap shadow-xl border border-gray-700 animate-scale-in">
                           <div className="space-y-1">
                             <div className="font-bold text-center text-white border-b border-gray-600 pb-1">
@@ -222,6 +237,11 @@ const DisbursementTimeline = ({ projects, milestones }: DisbursementTimelineProp
                               <Badge variant="outline" className="text-xs bg-gray-800 border-gray-600 text-white">
                                 {milestone.status}
                               </Badge>
+                            </div>
+                            <div className="text-center pt-1 border-t border-gray-600">
+                              <span className="text-xs text-gray-300">
+                                Priority: {milestone.priority}
+                              </span>
                             </div>
                           </div>
                           {/* Tooltip arrow */}

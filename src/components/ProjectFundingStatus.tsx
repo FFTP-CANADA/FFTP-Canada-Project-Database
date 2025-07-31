@@ -93,11 +93,14 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
   const handleAddReceipt = () => {
     if (!receiptForm.donorName || !receiptForm.amount || !receiptForm.dateReceived) return;
     
+    // Convert date to ISO string and split to get just the date part (fixes timezone issues)
+    const dateReceived = new Date(receiptForm.dateReceived + 'T00:00:00').toISOString().split('T')[0];
+    
     fundingHook.addReceipt({
       projectId: project.id,
       donorName: receiptForm.donorName,
       amount: parseFloat(receiptForm.amount),
-      dateReceived: receiptForm.dateReceived,
+      dateReceived: dateReceived,
       paymentMethod: receiptForm.paymentMethod,
       notes: receiptForm.notes
     });
@@ -121,10 +124,13 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
   const handleUpdateReceipt = () => {
     if (!receiptForm.donorName || !receiptForm.amount || !receiptForm.dateReceived || !editingReceiptId) return;
     
+    // Convert date to ISO string and split to get just the date part (fixes timezone issues)
+    const dateReceived = new Date(receiptForm.dateReceived + 'T00:00:00').toISOString().split('T')[0];
+    
     fundingHook.updateReceipt(editingReceiptId, {
       donorName: receiptForm.donorName,
       amount: parseFloat(receiptForm.amount),
-      dateReceived: receiptForm.dateReceived,
+      dateReceived: dateReceived,
       paymentMethod: receiptForm.paymentMethod,
       notes: receiptForm.notes
     });
@@ -153,12 +159,16 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
   const handleAddPledge = () => {
     if (!pledgeForm.donorName || !pledgeForm.pledgedAmount || !pledgeForm.datePledged) return;
     
+    // Convert dates to ISO string and split to get just the date part (fixes timezone issues)
+    const datePledged = new Date(pledgeForm.datePledged + 'T00:00:00').toISOString().split('T')[0];
+    const expectedDate = pledgeForm.expectedDate ? new Date(pledgeForm.expectedDate + 'T00:00:00').toISOString().split('T')[0] : '';
+    
     fundingHook.addPledge({
       projectId: project.id,
       donorName: pledgeForm.donorName,
       pledgedAmount: parseFloat(pledgeForm.pledgedAmount),
-      datePledged: pledgeForm.datePledged,
-      expectedDate: pledgeForm.expectedDate,
+      datePledged: datePledged,
+      expectedDate: expectedDate,
       status: pledgeForm.status,
       notes: pledgeForm.notes
     });
@@ -183,11 +193,15 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
   const handleUpdatePledge = () => {
     if (!pledgeForm.donorName || !pledgeForm.pledgedAmount || !pledgeForm.datePledged || !editingPledgeId) return;
     
+    // Convert dates to ISO string and split to get just the date part (fixes timezone issues)
+    const datePledged = new Date(pledgeForm.datePledged + 'T00:00:00').toISOString().split('T')[0];
+    const expectedDate = pledgeForm.expectedDate ? new Date(pledgeForm.expectedDate + 'T00:00:00').toISOString().split('T')[0] : '';
+    
     fundingHook.updatePledge(editingPledgeId, {
       donorName: pledgeForm.donorName,
       pledgedAmount: parseFloat(pledgeForm.pledgedAmount),
-      datePledged: pledgeForm.datePledged,
-      expectedDate: pledgeForm.expectedDate,
+      datePledged: datePledged,
+      expectedDate: expectedDate,
       status: pledgeForm.status,
       notes: pledgeForm.notes
     });

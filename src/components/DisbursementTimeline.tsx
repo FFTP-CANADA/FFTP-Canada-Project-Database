@@ -132,6 +132,9 @@ const DisbursementTimeline = ({ projects, milestones }: DisbursementTimelineProp
               (sum, milestone) => sum + (milestone.disbursementAmount || 0), 0
             );
 
+            // Calculate balance due
+            const balanceDue = project.totalCost ? project.totalCost - project.amountDisbursed : 0;
+
             return (
               <div key={project.id} className="group bg-white border-2 border-slate-200 rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:border-blue-300 animate-fade-in">
                 {/* Project Info */}
@@ -150,12 +153,23 @@ const DisbursementTimeline = ({ projects, milestones }: DisbursementTimelineProp
                       </Badge>
                     </div>
                   </div>
-                  <div className="text-right bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
-                    <div className="text-2xl font-bold text-blue-700 flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5" />
-                      {formatWithExchange(totalScheduled, project.currency)}
+                  <div className="text-right space-y-3">
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
+                      <div className="text-2xl font-bold text-blue-700 flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5" />
+                        {formatWithExchange(totalScheduled, project.currency)}
+                      </div>
+                      <div className="text-sm text-blue-600 font-medium">{disbursements.length} disbursements planned</div>
                     </div>
-                    <div className="text-sm text-blue-600 font-medium">{disbursements.length} disbursements planned</div>
+                    {project.totalCost && (
+                      <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-3 rounded-xl border border-orange-200">
+                        <div className="text-lg font-bold text-orange-700 flex items-center gap-2">
+                          <DollarSign className="w-4 h-4" />
+                          {formatWithExchange(balanceDue, project.currency)}
+                        </div>
+                        <div className="text-sm text-orange-600 font-medium">Balance Due</div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

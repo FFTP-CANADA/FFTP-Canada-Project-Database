@@ -226,6 +226,9 @@ const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProp
               );
               const disbursementProgress = totalScheduled > 0 ? (totalCompletedAmount / totalScheduled) * 100 : 0;
               
+              // Calculate balance due
+              const balanceDue = project.totalCost ? project.totalCost - project.amountDisbursed : 0;
+              
               return (
               <div key={project.id} className="p-4 border border-blue-200 rounded-lg">
                 <div className="flex justify-between items-start mb-2">
@@ -233,11 +236,18 @@ const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProp
                     <h4 className="font-medium text-blue-900">{project.projectName}</h4>
                     <p className="text-sm text-blue-600">{project.country} • {project.impactArea}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right space-y-1">
                     <div className="text-lg font-semibold text-blue-900">
                       {formatWithExchange(totalScheduled, project.currency)}
                     </div>
                     <div className="text-sm text-blue-600">Total Scheduled</div>
+                    {project.totalCost && (
+                      <div className="text-sm">
+                        <span className="text-orange-600 font-medium">
+                          Balance Due: {formatWithExchange(balanceDue, project.currency)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 

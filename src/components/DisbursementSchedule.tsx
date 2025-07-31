@@ -112,7 +112,7 @@ const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProp
 
         <Card className="border-blue-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Total Project Disbursements to Be Made</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">Total Disbursements to Be Made</CardTitle>
             <Calendar className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>

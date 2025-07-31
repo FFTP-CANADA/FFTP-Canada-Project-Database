@@ -363,6 +363,7 @@ const Index = () => {
         project={fundingDialog.project}
         open={fundingDialog.open}
         onOpenChange={(open) => setFundingDialog({open, project: null})}
+        onUpdateProject={updateProject}
       />
 
       <ProjectDisbursementDialog

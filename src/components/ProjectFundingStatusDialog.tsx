@@ -7,12 +7,14 @@ interface ProjectFundingStatusDialogProps {
   project: Project | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onUpdateProject?: (id: string, updates: Partial<Project>) => void;
 }
 
 const ProjectFundingStatusDialog = ({
   project,
   open,
   onOpenChange,
+  onUpdateProject,
 }: ProjectFundingStatusDialogProps) => {
   const { getMilestonesForProject } = useProjectData();
 
@@ -29,6 +31,7 @@ const ProjectFundingStatusDialog = ({
         <ProjectFundingStatus
           project={project}
           milestones={milestones}
+          onUpdateProject={onUpdateProject}
         />
       </DialogContent>
     </Dialog>

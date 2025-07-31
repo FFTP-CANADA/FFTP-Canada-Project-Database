@@ -8,15 +8,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Banknote, Plus, AlertTriangle, CheckCircle, Clock, Edit, Trash2, Save, X } from "lucide-react";
 import { Project, ProjectMilestone } from "@/types/project";
 import { formatWithExchange } from "@/utils/currencyUtils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useProjectFunding, DonorReceipt, DonorPledge } from "@/hooks/useProjectFunding";
 
 interface ProjectFundingStatusProps {
   project: Project;
   milestones: ProjectMilestone[];
+  onUpdateProject?: (id: string, updates: Partial<Project>) => void;
 }
 
-const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps) => {
+const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectFundingStatusProps) => {
   const fundingHook = useProjectFunding();
   const projectReceipts = fundingHook.getReceiptsForProject(project.id);
   const projectPledges = fundingHook.getPledgesForProject(project.id);
@@ -78,6 +79,13 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
 
   const fundingStatus = getFundingStatus();
   const StatusIcon = fundingStatus.icon;
+
+  // Auto-update project status to "Completed" when funding reaches 100%
+  useEffect(() => {
+    if (fundingPercentage >= 100 && project.status !== "Completed" && onUpdateProject) {
+      onUpdateProject(project.id, { status: "Completed" });
+    }
+  }, [fundingPercentage, project.status, project.id, onUpdateProject]);
 
   const resetForm = () => {
     setReceiptForm({

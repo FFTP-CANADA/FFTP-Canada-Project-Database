@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt, Banknote, Trash2 } from "lucide-react";
+import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt, Banknote, Calendar, Trash2 } from "lucide-react";
 import { Project } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
 import { formatWithExchange } from "@/utils/currencyUtils";
@@ -19,6 +19,7 @@ interface ProjectsTableProps {
   onOpenMilestones?: (projectId: string, projectName: string) => void;
   onOpenGantt?: (project: Project) => void;
   onOpenFunding?: (project: Project) => void;
+  onOpenDisbursement?: (project: Project) => void;
   onEditProject?: (project: Project) => void;
   onDeleteProject?: (projectId: string) => void;
   onManagePrograms?: () => void;
@@ -33,6 +34,7 @@ const ProjectsTable = ({
   onOpenMilestones,
   onOpenGantt,
   onOpenFunding,
+  onOpenDisbursement,
   onEditProject,
   onDeleteProject,
   onManagePrograms
@@ -290,6 +292,15 @@ const ProjectsTable = ({
                     >
                       <Banknote className="w-4 h-4 mr-1" />
                       Funding
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-teal-300 text-teal-600 hover:bg-teal-50"
+                      onClick={() => onOpenDisbursement?.(project)}
+                    >
+                      <Calendar className="w-4 h-4 mr-1" />
+                      Disbursements
                     </Button>
                     <Button
                       size="sm"

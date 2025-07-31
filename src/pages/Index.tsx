@@ -6,6 +6,7 @@ import { Plus, BarChart3, Users, DollarSign, AlertCircle, Info } from "lucide-re
 import ProjectsTable from "@/components/ProjectsTable";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import DisbursementSchedule from "@/components/DisbursementSchedule";
+import ProjectDisbursementDialog from "@/components/ProjectDisbursementDialog";
 import AddProjectDialog from "@/components/AddProjectDialog";
 import ProjectAttachments from "@/components/ProjectAttachments";
 import ProjectGallery from "@/components/ProjectGallery";
@@ -48,6 +49,10 @@ const Index = () => {
     project: null
   });
   const [fundingDialog, setFundingDialog] = useState<{ open: boolean; project: Project | null }>({
+    open: false,
+    project: null
+  });
+  const [disbursementDialog, setDisbursementDialog] = useState<{ open: boolean; project: Project | null }>({
     open: false,
     project: null
   });
@@ -133,6 +138,10 @@ const Index = () => {
   const handleOpenFunding = (project: Project) => {
     console.log("Opening funding dialog for project:", project.id);
     setFundingDialog({ open: true, project });
+  };
+
+  const handleOpenDisbursement = (project: Project) => {
+    setDisbursementDialog({ open: true, project });
   };
 
   return (
@@ -239,18 +248,12 @@ const Index = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="projects" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-[600px] bg-blue-50 border border-blue-200">
+          <TabsList className="grid w-full grid-cols-2 lg:w-[400px] bg-blue-50 border border-blue-200">
             <TabsTrigger 
               value="projects" 
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               Projects
-            </TabsTrigger>
-            <TabsTrigger 
-              value="disbursements" 
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-            >
-              Disbursements
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
@@ -278,16 +281,13 @@ const Index = () => {
                   onOpenMilestones={handleOpenMilestones}
                   onOpenGantt={handleOpenGantt}
                   onOpenFunding={handleOpenFunding}
+                  onOpenDisbursement={handleOpenDisbursement}
                   onEditProject={handleEditProject}
                   onDeleteProject={deleteProject}
                   onManagePrograms={() => setProgramManagementOpen(true)}
                 />
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="disbursements" className="space-y-6">
-            <DisbursementSchedule projects={projects} milestones={milestones} />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
@@ -363,6 +363,12 @@ const Index = () => {
         project={fundingDialog.project}
         open={fundingDialog.open}
         onOpenChange={(open) => setFundingDialog({open, project: null})}
+      />
+
+      <ProjectDisbursementDialog
+        project={disbursementDialog.project}
+        open={disbursementDialog.open}
+        onOpenChange={(open) => setDisbursementDialog({open, project: null})}
       />
 
       <ProgramInfoDialog 

@@ -101,6 +101,7 @@ const ProjectMilestones = ({
   };
 
   const toggleMilestoneStatus = (milestone: ProjectMilestone) => {
+    console.log("ProjectMilestones: toggleMilestoneStatus called for milestone:", milestone);
     const newStatus = milestone.status === "Completed" ? "Not Started" : "Completed";
     const updates: Partial<ProjectMilestone> = { status: newStatus };
     
@@ -110,6 +111,7 @@ const ProjectMilestones = ({
       updates.completedDate = undefined;
     }
 
+    console.log("ProjectMilestones: calling onUpdateMilestone with:", milestone.id, updates);
     onUpdateMilestone(milestone.id, updates);
   };
 

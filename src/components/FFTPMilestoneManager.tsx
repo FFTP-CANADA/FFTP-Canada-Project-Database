@@ -53,8 +53,8 @@ const FFTPMilestoneManager = ({
     milestoneType: "" as FFTPMilestoneType,
     startDate: undefined as Date | undefined,
     dueDate: undefined as Date | undefined,
-    status: "Not Started" as const,
-    priority: "Medium" as const
+    status: "Not Started" as ProjectMilestone["status"],
+    priority: "Medium" as ProjectMilestone["priority"]
   });
   const [editMilestone, setEditMilestone] = useState({
     milestoneType: "" as FFTPMilestoneType,

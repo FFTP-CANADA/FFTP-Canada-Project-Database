@@ -128,8 +128,7 @@ const FFTPMilestoneManager = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">FFTP-Canada Monitoring Milestones</h3>
+      <div className="flex justify-end items-center">
         <Button onClick={() => setIsAddingMilestone(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />
           Add Milestone

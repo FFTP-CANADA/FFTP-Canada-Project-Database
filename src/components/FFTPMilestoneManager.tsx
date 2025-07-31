@@ -512,6 +512,10 @@ const FFTPMilestoneManager = ({
                 <div className="flex-1">
                   <h4 className="font-medium">{milestone.title}</h4>
                   <div className="text-sm text-gray-600 mt-1">
+                    {(() => {
+                      console.log("Displaying milestone dates:", milestone.id, "start:", milestone.startDate, "due:", milestone.dueDate);
+                      return null;
+                    })()}
                     {format(new Date(milestone.startDate), "MMM dd, yyyy")} - {format(new Date(milestone.dueDate), "MMM dd, yyyy")}
                     {milestone.disbursementAmount && (
                       <div className="text-green-600 font-medium mt-1">

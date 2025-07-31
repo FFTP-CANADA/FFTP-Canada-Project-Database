@@ -109,7 +109,24 @@ const FFTPMilestoneManager = ({
   };
 
   const handleUpdateMilestone = () => {
-    if (!editingMilestone || !editMilestone.milestoneType || !editMilestone.startDate || !editMilestone.dueDate) return;
+    console.log("handleUpdateMilestone called");
+    console.log("editingMilestone:", editingMilestone);
+    console.log("editMilestone:", editMilestone);
+    
+    if (!editingMilestone || !editMilestone.milestoneType || !editMilestone.startDate || !editMilestone.dueDate) {
+      console.log("Validation failed - missing required fields");
+      return;
+    }
+
+    console.log("Calling onUpdateMilestone with:", editingMilestone, {
+      title: editMilestone.milestoneType,
+      milestoneType: editMilestone.milestoneType,
+      startDate: editMilestone.startDate.toISOString().split('T')[0],
+      dueDate: editMilestone.dueDate.toISOString().split('T')[0],
+      status: editMilestone.status,
+      priority: editMilestone.priority,
+      disbursementAmount: editMilestone.disbursementAmount
+    });
 
     onUpdateMilestone(editingMilestone, {
       title: editMilestone.milestoneType,

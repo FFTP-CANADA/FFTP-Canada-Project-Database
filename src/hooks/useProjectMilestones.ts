@@ -48,7 +48,11 @@ export const useProjectMilestones = () => {
 
   const updateMilestone = (id: string, updates: Partial<ProjectMilestone>) => {
     console.log("Updating milestone:", id, updates);
-    setMilestones(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
+    setMilestones(prev => {
+      const updated = prev.map(m => m.id === id ? { ...m, ...updates } : m);
+      console.log("Updated milestones array after update:", updated);
+      return updated;
+    });
   };
 
   const deleteMilestone = (id: string) => {

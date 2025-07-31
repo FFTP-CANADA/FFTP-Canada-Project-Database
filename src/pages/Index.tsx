@@ -13,6 +13,7 @@ import ProjectEditDialog from "@/components/ProjectEditDialog";
 import ProgramManagementDialog from "@/components/ProgramManagementDialog";
 import ProjectNotesDialog from "@/components/ProjectNotesDialog";
 import ProjectMilestonesDialog from "@/components/ProjectMilestonesDialog";
+import ProjectFundingStatus from "@/components/ProjectFundingStatus";
 import ProjectGanttDialog from "@/components/ProjectGanttDialog";
 import StatusReportDialog from "@/components/StatusReportDialog";
 import ProgramInfoDialog from "@/components/ProgramInfoDialog";
@@ -273,6 +274,17 @@ const Index = () => {
                 />
               </CardContent>
             </Card>
+            
+            {/* Project Funding Status Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+              {projects.map((project) => (
+                <ProjectFundingStatus
+                  key={project.id}
+                  project={project}
+                  milestones={getMilestonesForProject(project.id)}
+                />
+              ))}
+            </div>
           </TabsContent>
 
           <TabsContent value="disbursements" className="space-y-6">

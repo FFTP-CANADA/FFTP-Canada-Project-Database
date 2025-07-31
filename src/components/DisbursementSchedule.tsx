@@ -102,17 +102,17 @@ const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProp
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border-blue-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Projects with Disbursements</CardTitle>
-            <DollarSign className="h-4 w-4 text-blue-600" />
+            <CardTitle className="text-sm font-medium text-blue-700">Disbursements Already Completed</CardTitle>
+            <Calendar className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-900">{disbursementsByProject.length}</div>
+            <div className="text-2xl font-bold text-blue-900">{sortedDisbursements.filter(m => m.status === "Completed").length}</div>
           </CardContent>
         </Card>
 
         <Card className="border-blue-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Total Disbursements</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">Total Project Disbursements to Be Made</CardTitle>
             <Calendar className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>

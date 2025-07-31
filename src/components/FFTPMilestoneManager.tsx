@@ -52,6 +52,7 @@ const FFTPMilestoneManager = ({
   onUpdateMilestone,
   onDeleteMilestone
 }: FFTPMilestoneManagerProps) => {
+  console.log("FFTPMilestoneManager rendered with milestones:", milestones.length);
   const [isAddingMilestone, setIsAddingMilestone] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState<string | null>(null);
   const [newMilestone, setNewMilestone] = useState({

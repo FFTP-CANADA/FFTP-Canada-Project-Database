@@ -47,10 +47,14 @@ export const useProjectMilestones = () => {
   };
 
   const updateMilestone = (id: string, updates: Partial<ProjectMilestone>) => {
-    console.log("Updating milestone:", id, updates);
+    console.log("🔄 useProjectMilestones.updateMilestone called");
+    console.log("🔄 Milestone ID:", id);
+    console.log("🔄 Updates:", updates);
+    console.log("🔄 Current milestones before update:", milestones);
+    
     setMilestones(prev => {
       const updated = prev.map(m => m.id === id ? { ...m, ...updates } : m);
-      console.log("Updated milestones array after update:", updated);
+      console.log("🔄 Updated milestones array after update:", updated);
       return updated;
     });
   };

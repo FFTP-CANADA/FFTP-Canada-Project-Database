@@ -28,25 +28,23 @@ const getProjectColor = (status: Project["status"]) => {
 };
 
 const getMilestoneColor = (milestoneType: FFTPMilestoneType | undefined, status: ProjectMilestone["status"]) => {
-  // Color coding by phase as requested
-  let baseColor = "bg-gray-500";
-  
-  if (milestoneType === "MOU Signed") {
-    baseColor = "bg-blue-500"; // Light Blue for MOU
-  } else if (milestoneType && milestoneType.includes("Disbursement")) {
-    baseColor = "bg-green-500"; // Green for Disbursements
-  } else if (milestoneType && milestoneType.includes("Receipts")) {
-    baseColor = "bg-yellow-500"; // Yellow for Receipt Verification
-  } else if (milestoneType && milestoneType.includes("Report")) {
-    baseColor = "bg-orange-500"; // Orange for Reporting
-  }
-
-  // Darken if completed
+  // Green for completed items
   if (status === "Completed") {
-    return baseColor.replace("500", "600");
+    return "bg-green-500";
   }
   
-  return baseColor;
+  // Color coding by phase for non-completed items
+  if (milestoneType === "MOU Signed") {
+    return "bg-blue-500"; // Blue for MOU
+  } else if (milestoneType && milestoneType.includes("Disbursement")) {
+    return "bg-purple-500"; // Purple for Disbursements
+  } else if (milestoneType && milestoneType.includes("Receipts")) {
+    return "bg-yellow-500"; // Yellow for Receipt Verification
+  } else if (milestoneType && milestoneType.includes("Report")) {
+    return "bg-orange-500"; // Orange for Reporting
+  }
+  
+  return "bg-gray-500"; // Default
 };
 
 const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
@@ -78,17 +76,46 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
         status: project.status,
         color: getProjectColor(project.status)
       },
-      ...milestones.map((milestone) => ({
-        id: milestone.id,
-        name: milestone.title,
-        start: new Date(milestone.startDate),
-        end: new Date(milestone.dueDate),
-        type: "milestone" as const,
-        status: milestone.status,
-        priority: milestone.priority,
-        milestoneType: milestone.milestoneType,
-        color: getMilestoneColor(milestone.milestoneType, milestone.status)
-      }))
+      ...milestones.map((milestone) => {
+        const start = new Date(milestone.startDate);
+        const end = milestone.completedDate 
+          ? new Date(milestone.completedDate)
+          : new Date(milestone.dueDate);
+        
+        // For completed milestones, make them shorter (1-2 days max)
+        if (milestone.status === "Completed" && milestone.completedDate) {
+          const completedDate = new Date(milestone.completedDate);
+          const shortEnd = new Date(completedDate);
+          shortEnd.setDate(completedDate.getDate() + 1); // 1 day duration for completed
+          return {
+            id: milestone.id,
+            name: milestone.title,
+            start: completedDate,
+            end: shortEnd,
+            type: "milestone" as const,
+            status: milestone.status,
+            priority: milestone.priority,
+            milestoneType: milestone.milestoneType,
+            color: getMilestoneColor(milestone.milestoneType, milestone.status)
+          };
+        }
+        
+        // For non-completed milestones, make them shorter duration (3-5 days max)
+        const shortEnd = new Date(start);
+        shortEnd.setDate(start.getDate() + 3); // 3 day duration for ongoing/future
+        
+        return {
+          id: milestone.id,
+          name: milestone.title,
+          start,
+          end: shortEnd,
+          type: "milestone" as const,
+          status: milestone.status,
+          priority: milestone.priority,
+          milestoneType: milestone.milestoneType,
+          color: getMilestoneColor(milestone.milestoneType, milestone.status)
+        };
+      })
     ];
 
     return { items, projectStart, projectEnd, totalDays };
@@ -208,6 +235,10 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-2 bg-green-500 rounded"></div>
+              <span>Completed</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-2 bg-purple-500 rounded"></div>
               <span>Disbursement Phase</span>
             </div>
             <div className="flex items-center gap-2">

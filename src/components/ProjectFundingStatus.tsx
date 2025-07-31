@@ -9,29 +9,7 @@ import { Banknote, Plus, AlertTriangle, CheckCircle, Clock, Edit, Trash2, Save, 
 import { Project, ProjectMilestone } from "@/types/project";
 import { formatWithExchange } from "@/utils/currencyUtils";
 import { useState } from "react";
-
-// Mock donor receipt interface - in real app this would come from Supabase
-interface DonorReceipt {
-  id: string;
-  projectId: string;
-  donorName: string;
-  amount: number;
-  dateReceived: string;
-  paymentMethod: string;
-  notes?: string;
-}
-
-// Mock donor pledge interface - in real app this would come from Supabase
-interface DonorPledge {
-  id: string;
-  projectId: string;
-  donorName: string;
-  pledgedAmount: number;
-  datePledged: string;
-  expectedDate?: string;
-  status: "Pending" | "Partially Fulfilled" | "Fulfilled";
-  notes?: string;
-}
+import { useProjectFunding, DonorReceipt, DonorPledge } from "@/hooks/useProjectFunding";
 
 interface ProjectFundingStatusProps {
   project: Project;
@@ -39,6 +17,10 @@ interface ProjectFundingStatusProps {
 }
 
 const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps) => {
+  const fundingHook = useProjectFunding();
+  const projectReceipts = fundingHook.getReceiptsForProject(project.id);
+  const projectPledges = fundingHook.getPledgesForProject(project.id);
+
   const [isAddingReceipt, setIsAddingReceipt] = useState(false);
   const [editingReceiptId, setEditingReceiptId] = useState<string | null>(null);
   const [receiptForm, setReceiptForm] = useState({
@@ -68,62 +50,16 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
     notes: ""
   });
 
-  // Mock data - in real implementation this would come from Supabase
-  const [donorReceipts, setDonorReceipts] = useState<DonorReceipt[]>([
-    {
-      id: "1",
-      projectId: project.id,
-      donorName: "Global Education Foundation",
-      amount: 8000,
-      dateReceived: "2025-07-15",
-      paymentMethod: "Wire Transfer",
-      notes: "First installment of committed funding"
-    },
-    {
-      id: "2", 
-      projectId: project.id,
-      donorName: "Caribbean Development Fund",
-      amount: 4000,
-      dateReceived: "2025-07-25",
-      paymentMethod: "Check",
-      notes: "Additional support for infrastructure"
-    }
-  ]);
-
-  // Mock pledge data - in real implementation this would come from Supabase
-  const [donorPledges, setDonorPledges] = useState<DonorPledge[]>([
-    {
-      id: "1",
-      projectId: project.id,
-      donorName: "International Education Trust",
-      pledgedAmount: 15000,
-      datePledged: "2025-07-01",
-      expectedDate: "2025-08-15",
-      status: "Pending",
-      notes: "Committed to full project funding"
-    },
-    {
-      id: "2",
-      projectId: project.id,
-      donorName: "Global Education Foundation",
-      pledgedAmount: 10000,
-      datePledged: "2025-07-10",
-      expectedDate: "2025-09-01",
-      status: "Partially Fulfilled",
-      notes: "Partial fulfillment received"
-    }
-  ]);
-
   // Calculate total scheduled disbursements
   const totalScheduledDisbursements = milestones
     .filter(m => m.disbursementAmount)
     .reduce((sum, m) => sum + (m.disbursementAmount || 0), 0);
 
   // Calculate total received from all donor receipts
-  const totalReceivedFromDonors = donorReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
+  const totalReceivedFromDonors = projectReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
   
   // Calculate total pledged from all donor pledges
-  const totalPledgedFromDonors = donorPledges.reduce((sum, pledge) => sum + pledge.pledgedAmount, 0);
+  const totalPledgedFromDonors = projectPledges.reduce((sum, pledge) => sum + pledge.pledgedAmount, 0);
   
   const fundingGap = totalScheduledDisbursements - totalReceivedFromDonors;
   const fundingPercentage = totalScheduledDisbursements > 0 
@@ -157,17 +93,15 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
   const handleAddReceipt = () => {
     if (!receiptForm.donorName || !receiptForm.amount || !receiptForm.dateReceived) return;
     
-    const newReceipt: DonorReceipt = {
-      id: Date.now().toString(),
+    fundingHook.addReceipt({
       projectId: project.id,
       donorName: receiptForm.donorName,
       amount: parseFloat(receiptForm.amount),
       dateReceived: receiptForm.dateReceived,
       paymentMethod: receiptForm.paymentMethod,
       notes: receiptForm.notes
-    };
+    });
     
-    setDonorReceipts(prev => [...prev, newReceipt]);
     resetForm();
     setIsAddingReceipt(false);
   };
@@ -187,25 +121,20 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
   const handleUpdateReceipt = () => {
     if (!receiptForm.donorName || !receiptForm.amount || !receiptForm.dateReceived || !editingReceiptId) return;
     
-    setDonorReceipts(prev => prev.map(receipt => 
-      receipt.id === editingReceiptId 
-        ? {
-            ...receipt,
-            donorName: receiptForm.donorName,
-            amount: parseFloat(receiptForm.amount),
-            dateReceived: receiptForm.dateReceived,
-            paymentMethod: receiptForm.paymentMethod,
-            notes: receiptForm.notes
-          }
-        : receipt
-    ));
+    fundingHook.updateReceipt(editingReceiptId, {
+      donorName: receiptForm.donorName,
+      amount: parseFloat(receiptForm.amount),
+      dateReceived: receiptForm.dateReceived,
+      paymentMethod: receiptForm.paymentMethod,
+      notes: receiptForm.notes
+    });
     
     resetForm();
     setIsAddingReceipt(false);
   };
 
   const handleDeleteReceipt = (receiptId: string) => {
-    setDonorReceipts(prev => prev.filter(receipt => receipt.id !== receiptId));
+    fundingHook.deleteReceipt(receiptId);
   };
 
   // Pledge management functions
@@ -224,8 +153,7 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
   const handleAddPledge = () => {
     if (!pledgeForm.donorName || !pledgeForm.pledgedAmount || !pledgeForm.datePledged) return;
     
-    const newPledge: DonorPledge = {
-      id: Date.now().toString(),
+    fundingHook.addPledge({
       projectId: project.id,
       donorName: pledgeForm.donorName,
       pledgedAmount: parseFloat(pledgeForm.pledgedAmount),
@@ -233,9 +161,8 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
       expectedDate: pledgeForm.expectedDate,
       status: pledgeForm.status,
       notes: pledgeForm.notes
-    };
+    });
     
-    setDonorPledges(prev => [...prev, newPledge]);
     resetPledgeForm();
     setIsAddingPledge(false);
   };
@@ -256,26 +183,21 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
   const handleUpdatePledge = () => {
     if (!pledgeForm.donorName || !pledgeForm.pledgedAmount || !pledgeForm.datePledged || !editingPledgeId) return;
     
-    setDonorPledges(prev => prev.map(pledge => 
-      pledge.id === editingPledgeId 
-        ? {
-            ...pledge,
-            donorName: pledgeForm.donorName,
-            pledgedAmount: parseFloat(pledgeForm.pledgedAmount),
-            datePledged: pledgeForm.datePledged,
-            expectedDate: pledgeForm.expectedDate,
-            status: pledgeForm.status,
-            notes: pledgeForm.notes
-          }
-        : pledge
-    ));
+    fundingHook.updatePledge(editingPledgeId, {
+      donorName: pledgeForm.donorName,
+      pledgedAmount: parseFloat(pledgeForm.pledgedAmount),
+      datePledged: pledgeForm.datePledged,
+      expectedDate: pledgeForm.expectedDate,
+      status: pledgeForm.status,
+      notes: pledgeForm.notes
+    });
     
     resetPledgeForm();
     setIsAddingPledge(false);
   };
 
   const handleDeletePledge = (pledgeId: string) => {
-    setDonorPledges(prev => prev.filter(pledge => pledge.id !== pledgeId));
+    fundingHook.deletePledge(pledgeId);
   };
 
   return (
@@ -339,7 +261,7 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
         {/* Donor Pledges Table */}
         <div className="mt-6">
           <h4 className="font-medium text-gray-800 mb-3">Donor Pledges</h4>
-          {donorPledges.length > 0 ? (
+          {projectPledges.length > 0 ? (
             <div className="border rounded-lg overflow-hidden">
               <Table>
                 <TableHeader>
@@ -353,7 +275,7 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {donorPledges.map((pledge) => (
+                  {projectPledges.map((pledge) => (
                     <TableRow key={pledge.id}>
                       <TableCell className="font-medium">{pledge.donorName}</TableCell>
                       <TableCell className="text-blue-600 font-medium">
@@ -508,7 +430,7 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
         {/* Donor Receipts Table */}
         <div className="mt-6">
           <h4 className="font-medium text-gray-800 mb-3">Donor Fund Receipts</h4>
-          {donorReceipts.length > 0 ? (
+          {projectReceipts.length > 0 ? (
             <div className="border rounded-lg overflow-hidden">
               <Table>
                 <TableHeader>
@@ -521,7 +443,7 @@ const ProjectFundingStatus = ({ project, milestones }: ProjectFundingStatusProps
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {donorReceipts.map((receipt) => (
+                  {projectReceipts.map((receipt) => (
                     <TableRow key={receipt.id}>
                       <TableCell className="font-medium">{receipt.donorName}</TableCell>
                       <TableCell className="text-green-600 font-medium">

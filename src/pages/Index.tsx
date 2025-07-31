@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus, BarChart3, Users, DollarSign, AlertCircle, Info } from "lucide-react";
+import { Plus, BarChart3, Users, DollarSign, AlertCircle, Info, Target, TrendingUp, Calendar, CheckCircle } from "lucide-react";
 import ProjectsTable from "@/components/ProjectsTable";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import DisbursementSchedule from "@/components/DisbursementSchedule";
@@ -25,6 +25,7 @@ import { Project } from "@/types/project";
 import ExchangeRateDisplay from "@/components/ExchangeRateDisplay";
 import { convertUsdToCad, formatWithExchange } from "@/utils/currencyUtils";
 import { useAutoFollowUp } from "@/hooks/useAutoFollowUp";
+import { useProjectFunding } from "@/hooks/useProjectFunding";
 
 const Index = () => {
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
@@ -99,6 +100,8 @@ const Index = () => {
     dismissFollowUp
   } = useAutoFollowUp(projects, milestones, notes);
 
+  const { donorPledges } = useProjectFunding();
+
   const stats = {
     totalProjects: projects.length,
     activeProjects: projects.filter(p => p.status === "On-Track" || p.status === "Delayed").length,
@@ -110,6 +113,23 @@ const Index = () => {
       return sum + p.amountDisbursed;
     }, 0),
     needsFollowUp: projects.filter(p => p.followUpNeeded).length,
+    totalProjectValueCAD: projects.reduce((sum, p) => {
+      const cost = p.totalCost || 0;
+      if (p.currency === 'USD') {
+        return sum + convertUsdToCad(cost);
+      }
+      return sum + cost;
+    }, 0),
+    totalPledgesCAD: donorPledges.reduce((sum, pledge) => sum + pledge.pledgedAmount, 0),
+    completedProjects: projects.filter(p => p.status === "Completed").length,
+    projectsAtRisk: projects.filter(p => p.status === "Delayed" || p.status === "Needs Attention").length,
+    avgProjectValue: projects.length > 0 ? projects.reduce((sum, p) => {
+      const cost = p.totalCost || 0;
+      if (p.currency === 'USD') {
+        return sum + convertUsdToCad(cost);
+      }
+      return sum + cost;
+    }, 0) / projects.length : 0,
   };
 
   const handleOpenAttachments = (projectId: string, projectName: string) => {
@@ -190,46 +210,104 @@ const Index = () => {
         />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
+          {/* Row 1 - Primary Metrics */}
           <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700">Total Projects</CardTitle>
+              <CardTitle className="text-xs font-medium text-blue-700">Total Projects</CardTitle>
               <BarChart3 className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-900">{stats.totalProjects}</div>
+              <div className="text-xl font-bold text-blue-900">{stats.totalProjects}</div>
             </CardContent>
           </Card>
 
           <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700">Active Projects</CardTitle>
+              <CardTitle className="text-xs font-medium text-blue-700">Active Projects</CardTitle>
               <Users className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-900">{stats.activeProjects}</div>
+              <div className="text-xl font-bold text-blue-900">{stats.activeProjects}</div>
             </CardContent>
           </Card>
 
           <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700">Total Disbursed (CAD)</CardTitle>
-              <DollarSign className="h-4 w-4 text-blue-600" />
+              <CardTitle className="text-xs font-medium text-blue-700">Total Project Value</CardTitle>
+              <Target className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-900">
-                CAD ${stats.totalDisbursedCAD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <div className="text-xl font-bold text-blue-900">
+                CAD ${stats.totalProjectValueCAD.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700">Needs Follow-Up</CardTitle>
-              <AlertCircle className="h-4 w-4 text-orange-600" />
+              <CardTitle className="text-xs font-medium text-blue-700">Total Pledges</CardTitle>
+              <TrendingUp className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{stats.needsFollowUp}</div>
+              <div className="text-xl font-bold text-blue-900">
+                CAD ${stats.totalPledgesCAD.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs font-medium text-blue-700">Total Disbursed</CardTitle>
+              <DollarSign className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl font-bold text-blue-900">
+                CAD ${stats.totalDisbursedCAD.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Row 2 - Management Metrics */}
+          <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs font-medium text-blue-700">Completed</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl font-bold text-green-600">{stats.completedProjects}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs font-medium text-blue-700">At Risk</CardTitle>
+              <AlertCircle className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl font-bold text-red-600">{stats.projectsAtRisk}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs font-medium text-blue-700">Needs Follow-Up</CardTitle>
+              <Calendar className="h-4 w-4 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl font-bold text-orange-600">{stats.needsFollowUp}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs font-medium text-blue-700">Avg Project Value</CardTitle>
+              <TrendingUp className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl font-bold text-blue-900">
+                CAD ${stats.avgProjectValue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </div>
             </CardContent>
           </Card>
 

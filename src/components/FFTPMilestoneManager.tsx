@@ -516,7 +516,7 @@ const FFTPMilestoneManager = ({
                       console.log("Displaying milestone dates:", milestone.id, "start:", milestone.startDate, "due:", milestone.dueDate);
                       return null;
                     })()}
-                    {format(new Date(milestone.startDate), "MMM dd, yyyy")} - {format(new Date(milestone.dueDate), "MMM dd, yyyy")}
+                    {milestone.startDate} - {milestone.dueDate}
                     {milestone.disbursementAmount && (
                       <div className="text-green-600 font-medium mt-1">
                         Disbursement: ${milestone.disbursementAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

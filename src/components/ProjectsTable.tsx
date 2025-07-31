@@ -262,98 +262,88 @@ const ProjectsTable = ({
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex gap-2 flex-wrap">
+                  <div className="flex gap-1">
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                      className="border-blue-300 text-blue-600 hover:bg-blue-50 px-2"
                       onClick={() => onEditProject?.(project)}
                     >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
+                      <Edit className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                      className="border-blue-300 text-blue-600 hover:bg-blue-50 px-2"
                       onClick={() => onOpenNotes?.(project.id, project.projectName)}
                     >
-                      <FileText className="w-4 h-4 mr-1" />
-                      Notes
+                      <FileText className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+                      className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 px-2"
                       onClick={() => onOpenMilestones?.(project.id, project.projectName)}
                     >
-                      <Milestone className="w-4 h-4 mr-1" />
-                      Milestones
+                      <Milestone className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-violet-300 text-violet-600 hover:bg-violet-50"
+                      className="border-violet-300 text-violet-600 hover:bg-violet-50 px-2"
                       onClick={() => onOpenGantt?.(project)}
                     >
-                      <ChartGantt className="w-4 h-4 mr-1" />
-                      Timeline
+                      <ChartGantt className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                      className="border-emerald-300 text-emerald-600 hover:bg-emerald-50 px-2"
                       onClick={() => onOpenFunding?.(project)}
                     >
-                      <Banknote className="w-4 h-4 mr-1" />
-                      Funding
+                      <Banknote className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-teal-300 text-teal-600 hover:bg-teal-50"
+                      className="border-teal-300 text-teal-600 hover:bg-teal-50 px-2"
                       onClick={() => onOpenDisbursement?.(project)}
                     >
-                      <Calendar className="w-4 h-4 mr-1" />
-                      Disbursements
+                      <Calendar className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                      className="border-purple-300 text-purple-600 hover:bg-purple-50 px-2"
                       onClick={() => onOpenAttachments?.(project.id, project.projectName)}
                     >
-                      <Paperclip className="w-4 h-4 mr-1" />
-                      Files
+                      <Paperclip className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-green-300 text-green-600 hover:bg-green-50"
+                      className="border-green-300 text-green-600 hover:bg-green-50 px-2"
                       onClick={() => onOpenGallery?.(project.id, project.projectName)}
                     >
-                      <Camera className="w-4 h-4 mr-1" />
-                      Gallery
+                      <Camera className="w-4 h-4" />
                     </Button>
                      {project.followUpNeeded && (
                        <Button
                          size="sm"
                          variant="outline"
-                         className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                         className="border-orange-300 text-orange-600 hover:bg-orange-50 px-2"
                          onClick={() => handleSendFollowUp(project)}
                        >
-                         <Mail className="w-4 h-4 mr-1" />
-                         Follow-up
+                         <Mail className="w-4 h-4" />
                        </Button>
                      )}
                      <Button
                        size="sm"
                        variant="outline"
-                       className="border-red-300 text-red-600 hover:bg-red-50"
+                       className="border-red-300 text-red-600 hover:bg-red-50 px-2"
                        onClick={() => handleDeleteClick(project)}
                      >
-                       <Trash2 className="w-4 h-4 mr-1" />
-                       Delete
+                       <Trash2 className="w-4 h-4" />
                      </Button>
                    </div>
                 </TableCell>

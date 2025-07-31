@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, DollarSign, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, DollarSign, Clock, Grid, BarChart3 } from "lucide-react";
 import { Project, ProjectMilestone } from "@/types/project";
 import { formatWithExchange } from "@/utils/currencyUtils";
+import DisbursementTimeline from "./DisbursementTimeline";
 import { format, parseISO, isAfter, isBefore } from "date-fns";
 
 interface DisbursementScheduleProps {
@@ -12,6 +15,7 @@ interface DisbursementScheduleProps {
 }
 
 const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProps) => {
+  const [viewMode, setViewMode] = useState<'table' | 'timeline'>('timeline');
   // Get disbursement milestones with amounts
   const disbursementMilestones = milestones.filter(
     milestone => milestone.milestoneType?.includes("Disbursement") && milestone.disbursementAmount
@@ -75,6 +79,25 @@ const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProp
 
   return (
     <div className="space-y-6">
+      {/* View Toggle */}
+      <div className="flex gap-2">
+        <Button
+          variant={viewMode === 'timeline' ? 'default' : 'outline'}
+          onClick={() => setViewMode('timeline')}
+          className="flex items-center gap-2"
+        >
+          <BarChart3 className="w-4 h-4" />
+          Timeline View
+        </Button>
+        <Button
+          variant={viewMode === 'table' ? 'default' : 'outline'}
+          onClick={() => setViewMode('table')}
+          className="flex items-center gap-2"
+        >
+          <Grid className="w-4 h-4" />
+          Table View
+        </Button>
+      </div>
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border-blue-200">
@@ -110,78 +133,83 @@ const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProp
         </Card>
       </div>
 
-      {/* Disbursement Schedule Table */}
-      <Card className="border-blue-200">
-        <CardHeader>
-          <CardTitle className="text-blue-900">Disbursement Schedule</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="border border-blue-200 rounded-lg overflow-hidden">
-            <Table>
-              <TableHeader className="bg-blue-600">
-                <TableRow>
-                  <TableHead className="text-white">Project</TableHead>
-                  <TableHead className="text-white">Milestone</TableHead>
-                  <TableHead className="text-white">Due Date</TableHead>
-                  <TableHead className="text-white">Amount</TableHead>
-                  <TableHead className="text-white">Status</TableHead>
-                  <TableHead className="text-white">Priority</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedDisbursements.map((milestone) => {
-                  const project = projects.find(p => p.id === milestone.projectId);
-                  if (!project) return null;
+      {/* Conditional View */}
+      {viewMode === 'timeline' ? (
+        <DisbursementTimeline projects={projects} milestones={milestones} />
+      ) : (
+        /* Disbursement Schedule Table */
+        <Card className="border-blue-200">
+          <CardHeader>
+            <CardTitle className="text-blue-900">Disbursement Schedule</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="border border-blue-200 rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader className="bg-blue-600">
+                  <TableRow>
+                    <TableHead className="text-white">Project</TableHead>
+                    <TableHead className="text-white">Milestone</TableHead>
+                    <TableHead className="text-white">Due Date</TableHead>
+                    <TableHead className="text-white">Amount</TableHead>
+                    <TableHead className="text-white">Status</TableHead>
+                    <TableHead className="text-white">Priority</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedDisbursements.map((milestone) => {
+                    const project = projects.find(p => p.id === milestone.projectId);
+                    if (!project) return null;
 
-                  return (
-                    <TableRow key={milestone.id} className="hover:bg-blue-50">
-                      <TableCell className="font-medium text-blue-900">
-                        {project.projectName}
-                        <div className="text-sm text-blue-600">{project.country}</div>
-                      </TableCell>
-                      <TableCell className="text-blue-700">
-                        {milestone.milestoneType}
-                        {milestone.description && (
-                          <div className="text-sm text-gray-600">{milestone.description}</div>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-blue-700">
-                        {format(parseISO(milestone.dueDate), 'MMM dd, yyyy')}
-                      </TableCell>
-                      <TableCell className="text-blue-900 font-medium">
-                        {formatWithExchange(milestone.disbursementAmount || 0, project.currency)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(milestone.status, milestone.dueDate)}>
-                          {getDisplayStatus(milestone.status, milestone.dueDate)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant="outline"
-                          className={
-                            milestone.priority === "High" ? "border-red-300 text-red-600" :
-                            milestone.priority === "Medium" ? "border-yellow-300 text-yellow-600" :
-                            "border-green-300 text-green-600"
-                          }
-                        >
-                          {milestone.priority}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-
-          {sortedDisbursements.length === 0 && (
-            <div className="text-center py-8 text-blue-600">
-              No disbursement milestones found.
+                    return (
+                      <TableRow key={milestone.id} className="hover:bg-blue-50">
+                        <TableCell className="font-medium text-blue-900">
+                          {project.projectName}
+                          <div className="text-sm text-blue-600">{project.country}</div>
+                        </TableCell>
+                        <TableCell className="text-blue-700">
+                          {milestone.milestoneType}
+                          {milestone.description && (
+                            <div className="text-sm text-gray-600">{milestone.description}</div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-blue-700">
+                          {format(parseISO(milestone.dueDate), 'MMM dd, yyyy')}
+                        </TableCell>
+                        <TableCell className="text-blue-900 font-medium">
+                          {formatWithExchange(milestone.disbursementAmount || 0, project.currency)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(milestone.status, milestone.dueDate)}>
+                            {getDisplayStatus(milestone.status, milestone.dueDate)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant="outline"
+                            className={
+                              milestone.priority === "High" ? "border-red-300 text-red-600" :
+                              milestone.priority === "Medium" ? "border-yellow-300 text-yellow-600" :
+                              "border-green-300 text-green-600"
+                            }
+                          >
+                            {milestone.priority}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {sortedDisbursements.length === 0 && (
+              <div className="text-center py-8 text-blue-600">
+                No disbursement milestones found.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Project Summary */}
       <Card className="border-blue-200">

@@ -58,6 +58,7 @@ const Index = () => {
     projects, 
     addProject, 
     updateProject,
+    deleteProject,
     attachments,
     photos,
     notes,
@@ -249,6 +250,7 @@ const Index = () => {
                   onOpenMilestones={handleOpenMilestones}
                   onOpenGantt={handleOpenGantt}
                   onEditProject={handleEditProject}
+                  onDeleteProject={deleteProject}
                   onManagePrograms={() => setProgramManagementOpen(true)}
                 />
               </CardContent>

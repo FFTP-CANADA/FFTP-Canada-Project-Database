@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt } from "lucide-react";
+import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt, Trash2 } from "lucide-react";
 import { Project } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
 import { formatWithExchange } from "@/utils/currencyUtils";
+import { ProjectDeleteDialog } from "@/components/ProjectDeleteDialog";
 
 interface ProjectsTableProps {
   projects: Project[];
@@ -18,6 +19,7 @@ interface ProjectsTableProps {
   onOpenMilestones?: (projectId: string, projectName: string) => void;
   onOpenGantt?: (project: Project) => void;
   onEditProject?: (project: Project) => void;
+  onDeleteProject?: (projectId: string) => void;
   onManagePrograms?: () => void;
 }
 
@@ -30,6 +32,7 @@ const ProjectsTable = ({
   onOpenMilestones,
   onOpenGantt,
   onEditProject,
+  onDeleteProject,
   onManagePrograms
 }: ProjectsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,6 +40,11 @@ const ProjectsTable = ({
   const [statusFilter, setStatusFilter] = useState("all");
   const [impactAreaFilter, setImpactAreaFilter] = useState("all");
   const [programFilter, setProgramFilter] = useState("all");
+  const [deleteDialog, setDeleteDialog] = useState<{open: boolean; projectId: string; projectName: string}>({
+    open: false,
+    projectId: "",
+    projectName: ""
+  });
   const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
@@ -68,6 +76,20 @@ const ProjectsTable = ({
       title: "Follow-up Email Sent",
       description: `Follow-up email sent for project: ${project.projectName}`,
     });
+  };
+
+  const handleDeleteClick = (project: Project) => {
+    setDeleteDialog({
+      open: true,
+      projectId: project.id,
+      projectName: project.projectName
+    });
+  };
+
+  const handleConfirmDelete = () => {
+    if (onDeleteProject) {
+      onDeleteProject(deleteDialog.projectId);
+    }
   };
 
   return (
@@ -267,18 +289,27 @@ const ProjectsTable = ({
                       <Camera className="w-4 h-4 mr-1" />
                       Gallery
                     </Button>
-                    {project.followUpNeeded && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-orange-300 text-orange-600 hover:bg-orange-50"
-                        onClick={() => handleSendFollowUp(project)}
-                      >
-                        <Mail className="w-4 h-4 mr-1" />
-                        Follow-up
-                      </Button>
-                    )}
-                  </div>
+                     {project.followUpNeeded && (
+                       <Button
+                         size="sm"
+                         variant="outline"
+                         className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                         onClick={() => handleSendFollowUp(project)}
+                       >
+                         <Mail className="w-4 h-4 mr-1" />
+                         Follow-up
+                       </Button>
+                     )}
+                     <Button
+                       size="sm"
+                       variant="outline"
+                       className="border-red-300 text-red-600 hover:bg-red-50"
+                       onClick={() => handleDeleteClick(project)}
+                     >
+                       <Trash2 className="w-4 h-4 mr-1" />
+                       Delete
+                     </Button>
+                   </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -291,6 +322,13 @@ const ProjectsTable = ({
           No projects found matching your criteria.
         </div>
       )}
+
+      <ProjectDeleteDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}
+        projectName={deleteDialog.projectName}
+        onConfirmDelete={handleConfirmDelete}
+      />
     </div>
   );
 };

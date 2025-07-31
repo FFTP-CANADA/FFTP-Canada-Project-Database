@@ -13,6 +13,7 @@ interface ProjectAttachmentsProps {
   onOpenChange: (open: boolean) => void;
   attachments: ProjectAttachment[];
   onAddAttachment: (attachment: Omit<ProjectAttachment, "id">) => void;
+  onDeleteAttachment: (id: string) => void;
 }
 
 const ProjectAttachments = ({ 
@@ -21,7 +22,8 @@ const ProjectAttachments = ({
   open, 
   onOpenChange, 
   attachments, 
-  onAddAttachment 
+  onAddAttachment,
+  onDeleteAttachment
 }: ProjectAttachmentsProps) => {
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const { toast } = useToast();
@@ -169,6 +171,13 @@ const ProjectAttachments = ({
                         variant="outline"
                         size="sm"
                         className="border-red-300 text-red-600 hover:bg-red-50"
+                        onClick={() => {
+                          onDeleteAttachment(attachment.id);
+                          toast({
+                            title: "File Deleted",
+                            description: `${attachment.fileName} has been deleted`,
+                          });
+                        }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

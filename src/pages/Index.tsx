@@ -67,6 +67,7 @@ const Index = () => {
     notes,
     allPrograms,
     addAttachment,
+    deleteAttachment,
     getAttachmentsForProject,
     addPhoto,
     getPhotosForProject,
@@ -313,6 +314,7 @@ const Index = () => {
         onOpenChange={(open) => setAttachmentsDialog(prev => ({ ...prev, open }))}
         attachments={getAttachmentsForProject(attachmentsDialog.projectId)}
         onAddAttachment={addAttachment}
+        onDeleteAttachment={deleteAttachment}
       />
 
       <ProjectGallery

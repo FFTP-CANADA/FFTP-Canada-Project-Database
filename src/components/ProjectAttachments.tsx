@@ -95,19 +95,34 @@ const ProjectAttachments = ({
   const handleDownload = (attachment: ProjectAttachment) => {
     try {
       console.log('Attempting to download:', attachment.fileName);
+      console.log('File URL type:', typeof attachment.fileUrl);
+      console.log('File URL starts with data:', attachment.fileUrl?.startsWith('data:'));
       
       if (!attachment.fileUrl || attachment.fileUrl === '') {
         throw new Error('File URL is empty or invalid');
       }
 
-      // Convert base64 data URL to blob
-      const byteCharacters = atob(attachment.fileUrl.split(',')[1]);
+      // Check if it's a base64 data URL
+      if (!attachment.fileUrl.startsWith('data:')) {
+        throw new Error('Invalid file format - not a data URL');
+      }
+
+      // Split the data URL to get the base64 part
+      const parts = attachment.fileUrl.split(',');
+      if (parts.length !== 2) {
+        throw new Error('Invalid data URL format');
+      }
+
+      console.log('Converting base64 to blob...');
+      const byteCharacters = atob(parts[1]);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], { type: attachment.fileType });
+      
+      console.log('Created blob:', blob.size, 'bytes');
       
       // Create blob URL and download
       const blobUrl = URL.createObjectURL(blob);
@@ -126,9 +141,10 @@ const ProjectAttachments = ({
       });
     } catch (error) {
       console.error('Download failed:', error);
+      console.error('File data:', attachment.fileUrl?.substring(0, 100) + '...');
       toast({
         title: "Download Failed", 
-        description: `Cannot download ${attachment.fileName}. File may be corrupted or no longer available.`,
+        description: `Cannot download ${attachment.fileName}. ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       });
     }

@@ -13,7 +13,7 @@ import ProjectEditDialog from "@/components/ProjectEditDialog";
 import ProgramManagementDialog from "@/components/ProgramManagementDialog";
 import ProjectNotesDialog from "@/components/ProjectNotesDialog";
 import ProjectMilestonesDialog from "@/components/ProjectMilestonesDialog";
-import ProjectFundingStatus from "@/components/ProjectFundingStatus";
+import ProjectFundingStatusDialog from "@/components/ProjectFundingStatusDialog";
 import ProjectGanttDialog from "@/components/ProjectGanttDialog";
 import StatusReportDialog from "@/components/StatusReportDialog";
 import ProgramInfoDialog from "@/components/ProgramInfoDialog";
@@ -44,6 +44,10 @@ const Index = () => {
     projectName: ""
   });
   const [ganttDialog, setGanttDialog] = useState<{ open: boolean; project: Project | null }>({
+    open: false,
+    project: null
+  });
+  const [fundingDialog, setFundingDialog] = useState<{ open: boolean; project: Project | null }>({
     open: false,
     project: null
   });
@@ -124,6 +128,10 @@ const Index = () => {
 
   const handleOpenGantt = (project: Project) => {
     setGanttDialog({ open: true, project });
+  };
+
+  const handleOpenFunding = (project: Project) => {
+    setFundingDialog({ open: true, project });
   };
 
   return (
@@ -268,23 +276,13 @@ const Index = () => {
                   onOpenNotes={handleOpenNotes}
                   onOpenMilestones={handleOpenMilestones}
                   onOpenGantt={handleOpenGantt}
+                  onOpenFunding={handleOpenFunding}
                   onEditProject={handleEditProject}
                   onDeleteProject={deleteProject}
                   onManagePrograms={() => setProgramManagementOpen(true)}
                 />
               </CardContent>
             </Card>
-            
-            {/* Project Funding Status Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-              {projects.map((project) => (
-                <ProjectFundingStatus
-                  key={project.id}
-                  project={project}
-                  milestones={getMilestonesForProject(project.id)}
-                />
-              ))}
-            </div>
           </TabsContent>
 
           <TabsContent value="disbursements" className="space-y-6">
@@ -358,6 +356,12 @@ const Index = () => {
         project={ganttDialog.project}
         open={ganttDialog.open}
         onOpenChange={(open) => setGanttDialog(prev => ({ ...prev, open }))}
+      />
+
+      <ProjectFundingStatusDialog
+        project={fundingDialog.project}
+        open={fundingDialog.open}
+        onOpenChange={(open) => setFundingDialog({open, project: null})}
       />
 
       <ProgramInfoDialog 

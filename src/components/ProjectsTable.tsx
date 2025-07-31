@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt, Trash2 } from "lucide-react";
+import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt, Banknote, Trash2 } from "lucide-react";
 import { Project } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
 import { formatWithExchange } from "@/utils/currencyUtils";
@@ -18,6 +18,7 @@ interface ProjectsTableProps {
   onOpenNotes?: (projectId: string, projectName: string) => void;
   onOpenMilestones?: (projectId: string, projectName: string) => void;
   onOpenGantt?: (project: Project) => void;
+  onOpenFunding?: (project: Project) => void;
   onEditProject?: (project: Project) => void;
   onDeleteProject?: (projectId: string) => void;
   onManagePrograms?: () => void;
@@ -31,6 +32,7 @@ const ProjectsTable = ({
   onOpenNotes,
   onOpenMilestones,
   onOpenGantt,
+  onOpenFunding,
   onEditProject,
   onDeleteProject,
   onManagePrograms
@@ -279,6 +281,15 @@ const ProjectsTable = ({
                     >
                       <ChartGantt className="w-4 h-4 mr-1" />
                       Timeline
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                      onClick={() => onOpenFunding?.(project)}
+                    >
+                      <Banknote className="w-4 h-4 mr-1" />
+                      Funding
                     </Button>
                     <Button
                       size="sm"

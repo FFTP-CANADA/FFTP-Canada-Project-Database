@@ -97,15 +97,20 @@ const FFTPMilestoneManager = ({
   };
 
   const handleEditMilestone = (milestone: ProjectMilestone) => {
-    setEditMilestone({
+    console.log("=== STARTING EDIT ===");
+    console.log("Original milestone data:", milestone);
+    const editData = {
       milestoneType: milestone.milestoneType as FFTPMilestoneType,
       startDate: new Date(milestone.startDate),
       dueDate: new Date(milestone.dueDate),
       status: milestone.status,
       priority: milestone.priority,
       disbursementAmount: milestone.disbursementAmount
-    });
+    };
+    console.log("Setting edit form with:", editData);
+    setEditMilestone(editData);
     setEditingMilestone(milestone.id);
+    console.log("=== EDIT FORM SET ===");
   };
 
   const handleUpdateMilestone = () => {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus, BarChart3, Users, DollarSign, AlertCircle } from "lucide-react";
+import { Plus, BarChart3, Users, DollarSign, AlertCircle, Info } from "lucide-react";
 import ProjectsTable from "@/components/ProjectsTable";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import AddProjectDialog from "@/components/AddProjectDialog";
@@ -14,6 +14,7 @@ import ProjectNotesDialog from "@/components/ProjectNotesDialog";
 import ProjectMilestonesDialog from "@/components/ProjectMilestonesDialog";
 import ProjectGanttDialog from "@/components/ProjectGanttDialog";
 import StatusReportDialog from "@/components/StatusReportDialog";
+import ProgramInfoDialog from "@/components/ProgramInfoDialog";
 import AutoFollowUpManager from "@/components/AutoFollowUpManager";
 import NotificationsAlert from "@/components/NotificationsAlert";
 import { useProjectData } from "@/hooks/useProjectData";
@@ -28,6 +29,7 @@ const Index = () => {
     open: false,
     project: null
   });
+  const [showProgramInfo, setShowProgramInfo] = useState(false);
   const [programManagementOpen, setProgramManagementOpen] = useState(false);
   const [notesDialog, setNotesDialog] = useState<{ open: boolean; projectId: string; projectName: string }>({
     open: false,
@@ -137,6 +139,14 @@ const Index = () => {
             </div>
             <div className="flex gap-3">
               <StatusReportDialog projects={projects} notes={notes} />
+              <Button 
+                variant="outline"
+                onClick={() => setShowProgramInfo(true)}
+                className="border-blue-300 text-blue-700 hover:bg-blue-50"
+              >
+                <Info className="w-4 h-4 mr-2" />
+                Program Info
+              </Button>
               <Button 
                 onClick={() => setIsAddProjectOpen(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -323,6 +333,11 @@ const Index = () => {
         project={ganttDialog.project}
         open={ganttDialog.open}
         onOpenChange={(open) => setGanttDialog(prev => ({ ...prev, open }))}
+      />
+
+      <ProgramInfoDialog 
+        open={showProgramInfo}
+        onOpenChange={setShowProgramInfo}
       />
     </div>
   );

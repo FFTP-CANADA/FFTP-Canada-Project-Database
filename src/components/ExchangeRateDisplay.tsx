@@ -22,8 +22,7 @@ const ExchangeRateDisplay = () => {
       setExchangeRate(newRate);
       setCurrentRate(newRate);
       setIsEditing(false);
-      // Force a page reload to update all components that use the exchange rate
-      window.location.reload();
+      // No need to reload - the rate is now persisted and will update reactively
     }
   };
 

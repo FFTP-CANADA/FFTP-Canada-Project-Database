@@ -1,9 +1,16 @@
-let currentRate = 1.44;
+// Load exchange rate from localStorage or use default
+const getStoredExchangeRate = (): number => {
+  const stored = localStorage.getItem('exchangeRate');
+  return stored ? parseFloat(stored) : 1.44;
+};
+
+let currentRate = getStoredExchangeRate();
 
 export const USD_TO_CAD_RATE = currentRate;
 
 export const setExchangeRate = (newRate: number): void => {
   currentRate = newRate;
+  localStorage.setItem('exchangeRate', newRate.toString());
 };
 
 export const getExchangeRate = (): number => {

@@ -447,7 +447,16 @@ const FFTPMilestoneManager = ({
             )}
 
             <div className="flex gap-2">
-              <Button onClick={handleUpdateMilestone} size="sm">Update Milestone</Button>
+              <Button 
+                onClick={() => {
+                  console.log("Button clicked!"); 
+                  alert("Update button clicked!");
+                  handleUpdateMilestone();
+                }} 
+                size="sm"
+              >
+                Update Milestone
+              </Button>
               <Button onClick={() => setEditingMilestone(null)} variant="outline" size="sm">Cancel</Button>
             </div>
           </CardContent>

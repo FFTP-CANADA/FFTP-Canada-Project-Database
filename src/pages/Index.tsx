@@ -131,6 +131,7 @@ const Index = () => {
   };
 
   const handleOpenFunding = (project: Project) => {
+    console.log("Opening funding dialog for project:", project.id);
     setFundingDialog({ open: true, project });
   };
 

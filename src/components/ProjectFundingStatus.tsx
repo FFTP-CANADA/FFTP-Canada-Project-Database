@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Banknote, Plus, AlertTriangle, CheckCircle, Clock, Edit, Trash2, Save, X, FileText } from "lucide-react";
+import { format } from "date-fns";
 import ProjectNotesDialog from "./ProjectNotesDialog";
 import { useProjectData } from "@/hooks/useProjectData";
 import { Project, ProjectMilestone } from "@/types/project";
@@ -108,7 +109,7 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
     if (!receiptForm.donorName || !receiptForm.amount || !receiptForm.dateReceived) return;
     
     // Convert date to ISO string and split to get just the date part (fixes timezone issues)
-    const dateReceived = new Date(receiptForm.dateReceived + 'T00:00:00').toISOString().split('T')[0];
+    const dateReceived = format(new Date(receiptForm.dateReceived), 'yyyy-MM-dd');
     
     fundingHook.addReceipt({
       projectId: project.id,
@@ -139,7 +140,7 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
     if (!receiptForm.donorName || !receiptForm.amount || !receiptForm.dateReceived || !editingReceiptId) return;
     
     // Convert date to ISO string and split to get just the date part (fixes timezone issues)
-    const dateReceived = new Date(receiptForm.dateReceived + 'T00:00:00').toISOString().split('T')[0];
+    const dateReceived = format(new Date(receiptForm.dateReceived), 'yyyy-MM-dd');
     
     fundingHook.updateReceipt(editingReceiptId, {
       donorName: receiptForm.donorName,
@@ -174,8 +175,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
     if (!pledgeForm.donorName || !pledgeForm.pledgedAmount || !pledgeForm.datePledged) return;
     
     // Convert dates to ISO string and split to get just the date part (fixes timezone issues)
-    const datePledged = new Date(pledgeForm.datePledged + 'T00:00:00').toISOString().split('T')[0];
-    const expectedDate = pledgeForm.expectedDate ? new Date(pledgeForm.expectedDate + 'T00:00:00').toISOString().split('T')[0] : '';
+    const datePledged = format(new Date(pledgeForm.datePledged), 'yyyy-MM-dd');
+    const expectedDate = pledgeForm.expectedDate ? format(new Date(pledgeForm.expectedDate), 'yyyy-MM-dd') : '';
     
     fundingHook.addPledge({
       projectId: project.id,
@@ -208,8 +209,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
     if (!pledgeForm.donorName || !pledgeForm.pledgedAmount || !pledgeForm.datePledged || !editingPledgeId) return;
     
     // Convert dates to ISO string and split to get just the date part (fixes timezone issues)
-    const datePledged = new Date(pledgeForm.datePledged + 'T00:00:00').toISOString().split('T')[0];
-    const expectedDate = pledgeForm.expectedDate ? new Date(pledgeForm.expectedDate + 'T00:00:00').toISOString().split('T')[0] : '';
+    const datePledged = format(new Date(pledgeForm.datePledged), 'yyyy-MM-dd');
+    const expectedDate = pledgeForm.expectedDate ? format(new Date(pledgeForm.expectedDate), 'yyyy-MM-dd') : '';
     
     fundingHook.updatePledge(editingPledgeId, {
       donorName: pledgeForm.donorName,

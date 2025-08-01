@@ -79,8 +79,8 @@ const FFTPMilestoneManager = ({
       projectId,
       title: newMilestone.milestoneType, // Use milestoneType as the title
       milestoneType: newMilestone.milestoneType,
-      startDate: newMilestone.startDate.toISOString().split('T')[0],
-      dueDate: newMilestone.dueDate.toISOString().split('T')[0],
+      startDate: format(newMilestone.startDate, 'yyyy-MM-dd'),
+      dueDate: format(newMilestone.dueDate, 'yyyy-MM-dd'),
       status: newMilestone.status,
       priority: newMilestone.priority,
       disbursementAmount: newMilestone.disbursementAmount
@@ -147,8 +147,8 @@ const FFTPMilestoneManager = ({
     const updateData = {
       title: editMilestone.milestoneType,
       milestoneType: editMilestone.milestoneType,
-      startDate: editMilestone.startDate.toISOString().split('T')[0],
-      dueDate: editMilestone.dueDate.toISOString().split('T')[0],
+      startDate: format(editMilestone.startDate, 'yyyy-MM-dd'),
+      dueDate: format(editMilestone.dueDate, 'yyyy-MM-dd'),
       status: editMilestone.status,
       priority: editMilestone.priority,
       disbursementAmount: editMilestone.disbursementAmount

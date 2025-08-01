@@ -1,31 +1,51 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Project } from "@/types/project";
-import { initialProjects } from "@/data/initialProjects";
 import { LocalStorageManager } from "@/utils/localStorageManager";
+
+let globalProjects: Project[] = [];
+let listeners: Array<(projects: Project[]) => void> = [];
+
+const notifyListeners = (projects: Project[]) => {
+  globalProjects = projects;
+  listeners.forEach(listener => listener(projects));
+};
+
+const saveProjects = async (projects: Project[]) => {
+  await LocalStorageManager.setItem('projects', projects);
+  notifyListeners(projects);
+};
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>(() => {
+    if (globalProjects.length > 0) return globalProjects;
     const saved = LocalStorageManager.getItem('projects', []);
-    return saved.length > 0 ? saved : initialProjects;
+    globalProjects = saved;
+    return saved;
   });
 
   useEffect(() => {
-    LocalStorageManager.setItem('projects', projects);
-  }, [projects]);
-
-  const validateGovernanceNumber = (governanceNumber: string, governanceType: string, excludeId?: string): boolean => {
-    if (!governanceNumber || !governanceType) return true; // Allow empty values
+    const listener = (newProjects: Project[]) => {
+      setProjects(newProjects);
+    };
+    listeners.push(listener);
     
-    return !projects.some(project => 
+    return () => {
+      listeners = listeners.filter(l => l !== listener);
+    };
+  }, []);
+
+  const validateGovernanceNumber = useCallback((governanceNumber: string, governanceType: string, excludeId?: string): boolean => {
+    if (!governanceNumber || !governanceType) return true;
+    
+    return !globalProjects.some(project => 
       project.id !== excludeId &&
       project.governanceNumber === governanceNumber && 
       project.governanceType === governanceType
     );
-  };
+  }, []);
 
-  const addProject = (project: Omit<Project, "id">) => {
-    // Validate governance number uniqueness
+  const addProject = useCallback(async (project: Omit<Project, "id">) => {
     if (project.governanceNumber && project.governanceType) {
       if (!validateGovernanceNumber(project.governanceNumber, project.governanceType)) {
         throw new Error(`A project with ${project.governanceType} number "${project.governanceNumber}" already exists`);
@@ -36,23 +56,26 @@ export const useProjects = () => {
       ...project,
       id: Date.now().toString(),
     };
-    setProjects(prev => [...prev, newProject]);
-  };
+    
+    const updatedProjects = [...globalProjects, newProject];
+    await saveProjects(updatedProjects);
+  }, [validateGovernanceNumber]);
 
-  const updateProject = (id: string, updates: Partial<Project>) => {
-    // Validate governance number uniqueness on update
+  const updateProject = useCallback(async (id: string, updates: Partial<Project>) => {
     if (updates.governanceNumber && updates.governanceType) {
       if (!validateGovernanceNumber(updates.governanceNumber, updates.governanceType, id)) {
         throw new Error(`A project with ${updates.governanceType} number "${updates.governanceNumber}" already exists`);
       }
     }
     
-    setProjects(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
-  };
+    const updatedProjects = globalProjects.map(p => p.id === id ? { ...p, ...updates } : p);
+    await saveProjects(updatedProjects);
+  }, [validateGovernanceNumber]);
 
-  const deleteProject = (id: string) => {
-    setProjects(prev => prev.filter(p => p.id !== id));
-  };
+  const deleteProject = useCallback(async (id: string) => {
+    const updatedProjects = globalProjects.filter(p => p.id !== id);
+    await saveProjects(updatedProjects);
+  }, []);
 
   return {
     projects,

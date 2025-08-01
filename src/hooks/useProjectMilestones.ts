@@ -1,85 +1,63 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ProjectMilestone } from "@/types/project";
+import { LocalStorageManager } from "@/utils/localStorageManager";
+
+let globalMilestones: ProjectMilestone[] = [];
+let milestoneListeners: Array<(milestones: ProjectMilestone[]) => void> = [];
+
+const notifyMilestoneListeners = (milestones: ProjectMilestone[]) => {
+  globalMilestones = milestones;
+  milestoneListeners.forEach(listener => listener(milestones));
+};
+
+const saveMilestones = async (milestones: ProjectMilestone[]) => {
+  await LocalStorageManager.setItem('project-milestones', milestones);
+  notifyMilestoneListeners(milestones);
+};
 
 export const useProjectMilestones = () => {
-  const [milestones, setMilestones] = useState<ProjectMilestone[]>([]);
+  const [milestones, setMilestones] = useState<ProjectMilestone[]>(() => {
+    if (globalMilestones.length > 0) return globalMilestones;
+    const saved = LocalStorageManager.getItem('project-milestones', []);
+    globalMilestones = saved;
+    return saved;
+  });
 
-  // Load milestones from localStorage on component mount
   useEffect(() => {
-    console.log("Loading milestones from localStorage...");
-    const savedMilestones = localStorage.getItem("project-milestones");
-    console.log("Raw saved milestones:", savedMilestones);
+    const listener = (newMilestones: ProjectMilestone[]) => {
+      setMilestones(newMilestones);
+    };
+    milestoneListeners.push(listener);
     
-    if (savedMilestones) {
-      try {
-        const parsedMilestones = JSON.parse(savedMilestones);
-        console.log("Parsed milestones:", parsedMilestones);
-        setMilestones(parsedMilestones);
-      } catch (error) {
-        console.error("Error loading milestones from localStorage:", error);
-      }
-    } else {
-      console.log("No saved milestones found in localStorage");
-    }
+    return () => {
+      milestoneListeners = milestoneListeners.filter(l => l !== listener);
+    };
   }, []);
 
-  // Save milestones to localStorage whenever milestones change
-  useEffect(() => {
-    try {
-      if (milestones.length > 0) {
-        console.log("Saving milestones to localStorage:", milestones);
-        localStorage.setItem("project-milestones", JSON.stringify(milestones));
-      } else {
-        console.log("Removing milestones from localStorage (empty array)");
-        localStorage.removeItem("project-milestones");
-      }
-    } catch (error) {
-      console.error("Failed to save milestones to localStorage:", error);
-    }
-  }, [milestones]);
-
-  const addMilestone = (milestone: Omit<ProjectMilestone, "id">) => {
-    console.log("Adding milestone:", milestone);
+  const addMilestone = useCallback(async (milestone: Omit<ProjectMilestone, "id">) => {
     const newMilestone: ProjectMilestone = {
       ...milestone,
       id: Date.now().toString(),
     };
-    console.log("New milestone with ID:", newMilestone);
-    setMilestones(prev => {
-      const updated = [...prev, newMilestone];
-      console.log("Updated milestones array:", updated);
-      return updated;
-    });
-  };
-
-  const updateMilestone = (id: string, updates: Partial<ProjectMilestone>) => {
-    console.log("🔄 useProjectMilestones.updateMilestone called");
-    console.log("🔄 Milestone ID:", id);
-    console.log("🔄 Updates:", updates);
-    console.log("🔄 Current milestones before update:", milestones);
     
-    setMilestones(prev => {
-      const updated = prev.map(m => m.id === id ? { ...m, ...updates } : m);
-      console.log("🔄 Updated milestones array after update:", updated);
-      return updated;
-    });
-  };
+    const updatedMilestones = [...globalMilestones, newMilestone];
+    await saveMilestones(updatedMilestones);
+  }, []);
 
-  const deleteMilestone = (id: string) => {
-    console.log("Deleting milestone:", id);
-    setMilestones(prev => {
-      const updated = prev.filter(m => m.id !== id);
-      console.log("Updated milestones after deletion:", updated);
-      return updated;
-    });
-  };
+  const updateMilestone = useCallback(async (id: string, updates: Partial<ProjectMilestone>) => {
+    const updatedMilestones = globalMilestones.map(m => m.id === id ? { ...m, ...updates } : m);
+    await saveMilestones(updatedMilestones);
+  }, []);
 
-  const getMilestonesForProject = (projectId: string) => {
-    const projectMilestones = milestones.filter(milestone => milestone.projectId === projectId);
-    console.log(`Milestones for project ${projectId}:`, projectMilestones);
-    return projectMilestones;
-  };
+  const deleteMilestone = useCallback(async (id: string) => {
+    const updatedMilestones = globalMilestones.filter(m => m.id !== id);
+    await saveMilestones(updatedMilestones);
+  }, []);
+
+  const getMilestonesForProject = useCallback((projectId: string) => {
+    return globalMilestones.filter(milestone => milestone.projectId === projectId);
+  }, []);
 
   return {
     milestones,

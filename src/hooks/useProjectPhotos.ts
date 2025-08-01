@@ -1,72 +1,58 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ProjectPhoto } from "@/types/project";
+import { LocalStorageManager } from "@/utils/localStorageManager";
+
+let globalPhotos: ProjectPhoto[] = [];
+let photoListeners: Array<(photos: ProjectPhoto[]) => void> = [];
+
+const notifyPhotoListeners = (photos: ProjectPhoto[]) => {
+  globalPhotos = photos;
+  photoListeners.forEach(listener => listener(photos));
+};
+
+const savePhotos = async (photos: ProjectPhoto[]) => {
+  await LocalStorageManager.setItem('project-photos', photos);
+  notifyPhotoListeners(photos);
+};
 
 export const useProjectPhotos = () => {
-  const [photos, setPhotos] = useState<ProjectPhoto[]>([]);
+  const [photos, setPhotos] = useState<ProjectPhoto[]>(() => {
+    if (globalPhotos.length > 0) return globalPhotos;
+    const saved = LocalStorageManager.getItem('project-photos', []);
+    globalPhotos = saved;
+    return saved;
+  });
 
-  // Load photos from localStorage on component mount
   useEffect(() => {
-    console.log("Loading photos from localStorage...");
-    const savedPhotos = localStorage.getItem("project-photos");
-    console.log("Raw saved photos:", savedPhotos);
+    const listener = (newPhotos: ProjectPhoto[]) => {
+      setPhotos(newPhotos);
+    };
+    photoListeners.push(listener);
     
-    if (savedPhotos) {
-      try {
-        const parsedPhotos = JSON.parse(savedPhotos);
-        console.log("Parsed photos:", parsedPhotos);
-        setPhotos(parsedPhotos);
-      } catch (error) {
-        console.error("Error loading photos from localStorage:", error);
-      }
-    } else {
-      console.log("No saved photos found in localStorage");
-    }
+    return () => {
+      photoListeners = photoListeners.filter(l => l !== listener);
+    };
   }, []);
 
-  // Save photos to localStorage whenever photos change
-  useEffect(() => {
-    try {
-      if (photos.length > 0) {
-        console.log("Saving photos to localStorage:", photos);
-        localStorage.setItem("project-photos", JSON.stringify(photos));
-      } else {
-        console.log("Removing photos from localStorage (empty array)");
-        localStorage.removeItem("project-photos");
-      }
-    } catch (error) {
-      console.error("Failed to save photos to localStorage:", error);
-    }
-  }, [photos]);
-
-  const addPhoto = (photo: Omit<ProjectPhoto, "id">) => {
-    console.log("Adding photo:", photo);
+  const addPhoto = useCallback(async (photo: Omit<ProjectPhoto, "id">) => {
     const newPhoto: ProjectPhoto = {
       ...photo,
       id: Date.now().toString(),
     };
-    console.log("New photo with ID:", newPhoto);
-    setPhotos(prev => {
-      const updated = [...prev, newPhoto];
-      console.log("Updated photos array:", updated);
-      return updated;
-    });
-  };
+    
+    const updatedPhotos = [...globalPhotos, newPhoto];
+    await savePhotos(updatedPhotos);
+  }, []);
 
-  const deletePhoto = (id: string) => {
-    console.log("Deleting photo:", id);
-    setPhotos(prev => {
-      const updated = prev.filter(photo => photo.id !== id);
-      console.log("Updated photos after deletion:", updated);
-      return updated;
-    });
-  };
+  const deletePhoto = useCallback(async (id: string) => {
+    const updatedPhotos = globalPhotos.filter(photo => photo.id !== id);
+    await savePhotos(updatedPhotos);
+  }, []);
 
-  const getPhotosForProject = (projectId: string) => {
-    const projectPhotos = photos.filter(photo => photo.projectId === projectId);
-    console.log(`Photos for project ${projectId}:`, projectPhotos);
-    return projectPhotos;
-  };
+  const getPhotosForProject = useCallback((projectId: string) => {
+    return globalPhotos.filter(photo => photo.projectId === projectId);
+  }, []);
 
   return {
     photos,

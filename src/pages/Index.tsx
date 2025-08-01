@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Plus, BarChart3, Users, DollarSign, AlertCircle, Info, Target, TrendingUp, Calendar, CheckCircle } from "lucide-react";
 import ProjectsTable from "@/components/ProjectsTable";
+import { BackupManagerComponent } from "@/components/BackupManager";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import DisbursementSchedule from "@/components/DisbursementSchedule";
 import ProjectDisbursementDialog from "@/components/ProjectDisbursementDialog";
@@ -327,7 +328,7 @@ const Index = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="projects" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:w-[400px] bg-blue-50 border border-blue-200">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[600px] bg-blue-50 border border-blue-200">
             <TabsTrigger 
               value="projects" 
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
@@ -339,6 +340,12 @@ const Index = () => {
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               Analytics
+            </TabsTrigger>
+            <TabsTrigger 
+              value="backup" 
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              Data Backup
             </TabsTrigger>
           </TabsList>
 
@@ -371,6 +378,12 @@ const Index = () => {
 
           <TabsContent value="analytics" className="space-y-6">
             <AnalyticsDashboard projects={projects} />
+          </TabsContent>
+
+          <TabsContent value="backup" className="space-y-6">
+            <div className="flex justify-center">
+              <BackupManagerComponent />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

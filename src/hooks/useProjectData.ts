@@ -1,6 +1,6 @@
 
 import { useProjects } from "./useProjects";
-import "../utils/restoreProjects"; // Auto-restore Port Kaituma project
+import { BackupManager } from "@/utils/backupManager";
 import { useProjectNotes } from "./useProjectNotes";
 import { useProjectAttachments } from "./useProjectAttachments";
 import { useProjectPhotos } from "./useProjectPhotos";
@@ -24,6 +24,9 @@ export const useProjectData = () => {
     ...programsHook,
   };
 };
+
+// Initialize auto-backup system
+BackupManager.initializeAutoBackup();
 
 // Re-export types for backwards compatibility
 export type { Project, ProjectMilestone, ProjectNote, ProjectAttachment, ProjectPhoto } from "@/types/project";

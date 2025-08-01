@@ -26,8 +26,8 @@ export const useProjectAttachments = () => {
 
   // Save attachments to localStorage whenever attachments change
   useEffect(() => {
-    if (attachments.length > 0) {
-      try {
+    try {
+      if (attachments.length > 0) {
         console.log("Saving attachments to localStorage:", attachments.length);
         const data = JSON.stringify(attachments);
         
@@ -42,19 +42,22 @@ export const useProjectAttachments = () => {
           localStorage.setItem("project-attachments", data);
           console.log("Successfully saved all attachments to localStorage");
         }
-      } catch (error) {
-        console.error("Failed to save attachments to localStorage:", error);
-        // Try to clear space and save again
-        try {
-          const reducedAttachments = attachments.slice(-20); // Keep only 20 most recent
-          localStorage.setItem("project-attachments", JSON.stringify(reducedAttachments));
-          console.log("Saved reduced attachments after error:", reducedAttachments.length);
-        } catch (secondError) {
-          console.error("Failed to save even reduced attachments:", secondError);
-          // If all else fails, clear the localStorage and start fresh
-          localStorage.removeItem("project-attachments");
-          console.log("Cleared localStorage due to persistent errors");
-        }
+      } else {
+        console.log("Removing attachments from localStorage (empty array)");
+        localStorage.removeItem("project-attachments");
+      }
+    } catch (error) {
+      console.error("Failed to save attachments to localStorage:", error);
+      // Try to clear space and save again
+      try {
+        const reducedAttachments = attachments.slice(-20); // Keep only 20 most recent
+        localStorage.setItem("project-attachments", JSON.stringify(reducedAttachments));
+        console.log("Saved reduced attachments after error:", reducedAttachments.length);
+      } catch (secondError) {
+        console.error("Failed to save even reduced attachments:", secondError);
+        // If all else fails, clear the localStorage and start fresh
+        localStorage.removeItem("project-attachments");
+        console.log("Cleared localStorage due to persistent errors");
       }
     }
   }, [attachments]);
@@ -78,12 +81,6 @@ export const useProjectAttachments = () => {
     setAttachments(prev => {
       const updated = prev.filter(attachment => attachment.id !== id);
       console.log("Updated attachments after deletion:", updated);
-      // Update localStorage immediately when deleting
-      if (updated.length === 0) {
-        localStorage.removeItem("project-attachments");
-      } else {
-        localStorage.setItem("project-attachments", JSON.stringify(updated));
-      }
       return updated;
     });
   };

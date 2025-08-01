@@ -26,9 +26,16 @@ export const useProjectMilestones = () => {
 
   // Save milestones to localStorage whenever milestones change
   useEffect(() => {
-    if (milestones.length > 0) {
-      console.log("Saving milestones to localStorage:", milestones);
-      localStorage.setItem("project-milestones", JSON.stringify(milestones));
+    try {
+      if (milestones.length > 0) {
+        console.log("Saving milestones to localStorage:", milestones);
+        localStorage.setItem("project-milestones", JSON.stringify(milestones));
+      } else {
+        console.log("Removing milestones from localStorage (empty array)");
+        localStorage.removeItem("project-milestones");
+      }
+    } catch (error) {
+      console.error("Failed to save milestones to localStorage:", error);
     }
   }, [milestones]);
 
@@ -61,7 +68,11 @@ export const useProjectMilestones = () => {
 
   const deleteMilestone = (id: string) => {
     console.log("Deleting milestone:", id);
-    setMilestones(prev => prev.filter(m => m.id !== id));
+    setMilestones(prev => {
+      const updated = prev.filter(m => m.id !== id);
+      console.log("Updated milestones after deletion:", updated);
+      return updated;
+    });
   };
 
   const getMilestonesForProject = (projectId: string) => {

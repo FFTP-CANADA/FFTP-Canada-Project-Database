@@ -2,15 +2,15 @@
 import { useState, useEffect } from "react";
 import { Project } from "@/types/project";
 import { initialProjects } from "@/data/initialProjects";
+import { LocalStorageManager } from "@/utils/localStorageManager";
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>(() => {
-    const saved = localStorage.getItem('projects');
-    return saved ? JSON.parse(saved) : initialProjects;
+    return LocalStorageManager.getItem('projects', initialProjects);
   });
 
   useEffect(() => {
-    localStorage.setItem('projects', JSON.stringify(projects));
+    LocalStorageManager.setItem('projects', projects);
   }, [projects]);
 
   const validateGovernanceNumber = (governanceNumber: string, governanceType: string, excludeId?: string): boolean => {

@@ -26,9 +26,16 @@ export const useProjectPhotos = () => {
 
   // Save photos to localStorage whenever photos change
   useEffect(() => {
-    if (photos.length > 0) {
-      console.log("Saving photos to localStorage:", photos);
-      localStorage.setItem("project-photos", JSON.stringify(photos));
+    try {
+      if (photos.length > 0) {
+        console.log("Saving photos to localStorage:", photos);
+        localStorage.setItem("project-photos", JSON.stringify(photos));
+      } else {
+        console.log("Removing photos from localStorage (empty array)");
+        localStorage.removeItem("project-photos");
+      }
+    } catch (error) {
+      console.error("Failed to save photos to localStorage:", error);
     }
   }, [photos]);
 
@@ -51,12 +58,6 @@ export const useProjectPhotos = () => {
     setPhotos(prev => {
       const updated = prev.filter(photo => photo.id !== id);
       console.log("Updated photos after deletion:", updated);
-      // Update localStorage immediately when deleting
-      if (updated.length === 0) {
-        localStorage.removeItem("project-photos");
-      } else {
-        localStorage.setItem("project-photos", JSON.stringify(updated));
-      }
       return updated;
     });
   };

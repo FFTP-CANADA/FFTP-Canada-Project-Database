@@ -33,7 +33,7 @@ export type FFTPMilestoneType =
   | "Final Disbursement Sent"
   | "Final Report and Receipts Submitted"
   | "Interim Report Submitted to Donor Engagement Personnel"
-  | "Post Narrative Report"
+  | "Post Narrative Report Submitted to Donor Engagement Personnel"
   | "Final Report Submitted to Donor Engagement Personnel"
   | "Donor Received Interim Report"
   | "Donor Received Final Report"

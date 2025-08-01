@@ -32,6 +32,7 @@ export type FFTPMilestoneType =
   | "Receipts Received & Verified (Third Tranche)"
   | "Final Disbursement Sent"
   | "Final Report and Receipts Submitted"
+  | "Interim Report Submitted to Donor Engagement Personnel"
   | "Post Narrative Report"
   | "Final Report Submitted to Donor Engagement Personnel";
 

@@ -33,7 +33,7 @@ export type FFTPMilestoneType =
   | "Final Disbursement Sent"
   | "Final Report and Receipts Submitted"
   | "Post Narrative Report"
-  | "Final Report Submitted to Partnerships & Donor Engagement Officer";
+  | "Final Report Submitted to Donor Engagement Personnel";
 
 export interface ProjectMilestone {
   id: string;

@@ -22,7 +22,7 @@ const FFTP_MILESTONE_OPTIONS: FFTPMilestoneType[] = [
   "Final Disbursement Sent",
   "Final Report and Receipts Submitted",
   "Post Narrative Report",
-  "Final Report Submitted to Partnerships & Donor Engagement Officer"
+  "Final Report Submitted to Donor Engagement Personnel"
 ];
 
 const getMilestonePhaseColor = (milestoneType: FFTPMilestoneType) => {

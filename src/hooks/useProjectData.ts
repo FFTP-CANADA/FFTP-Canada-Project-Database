@@ -1,5 +1,6 @@
 
 import { useProjects } from "./useProjects";
+import "../utils/restoreProjects"; // Auto-restore Port Kaituma project
 import { useProjectNotes } from "./useProjectNotes";
 import { useProjectAttachments } from "./useProjectAttachments";
 import { useProjectPhotos } from "./useProjectPhotos";

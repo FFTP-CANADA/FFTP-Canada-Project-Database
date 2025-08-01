@@ -216,7 +216,7 @@ const ProjectEditDialog = ({
                 <SelectContent className="bg-white z-50">
                   <SelectItem value="none">No governance</SelectItem>
                   <SelectItem value="MOU">MOU</SelectItem>
-                  <SelectItem value="AGENCY">AGENCY</SelectItem>
+                  <SelectItem value="AGENCY AGREEMENT">AGENCY AGREEMENT</SelectItem>
                   <SelectItem value="LOD">LOD</SelectItem>
                 </SelectContent>
               </Select>

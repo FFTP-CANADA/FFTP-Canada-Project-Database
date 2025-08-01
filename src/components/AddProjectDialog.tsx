@@ -177,7 +177,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
                 </SelectTrigger>
                 <SelectContent className="bg-white z-50">
                   <SelectItem value="MOU">MOU</SelectItem>
-                  <SelectItem value="AGENCY">AGENCY</SelectItem>
+                  <SelectItem value="AGENCY AGREEMENT">AGENCY AGREEMENT</SelectItem>
                   <SelectItem value="LOD">LOD</SelectItem>
                 </SelectContent>
               </Select>

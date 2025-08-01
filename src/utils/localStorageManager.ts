@@ -21,11 +21,12 @@ export class LocalStorageManager {
     if (!this.isAvailable()) return;
     
     const currentVersion = localStorage.getItem(this.VERSION_KEY);
-    if (currentVersion !== this.STORAGE_VERSION) {
-      console.log('Storage version mismatch, initializing fresh storage');
-      this.clearAll();
+    if (!currentVersion) {
+      // Only set version on first use, don't clear existing data
       localStorage.setItem(this.VERSION_KEY, this.STORAGE_VERSION);
+      console.log('Set initial storage version');
     }
+    // Never clear all data due to version mismatch to prevent data loss
   }
 
   static setItem<T>(key: StorageKey, value: T): boolean {
@@ -113,27 +114,9 @@ export class LocalStorageManager {
   }
 
   private static performEmergencyCleanup(excludeKey?: StorageKey): void {
-    const cleanupOrder: StorageKey[] = ['project-photos', 'project-attachments', 'project-milestones', 'project-notes'];
-    
-    for (const key of cleanupOrder) {
-      if (key === excludeKey) continue;
-      
-      try {
-        const data = localStorage.getItem(key);
-        if (data) {
-          const parsed = JSON.parse(data);
-          if (Array.isArray(parsed) && parsed.length > 10) {
-            // Keep only recent items
-            const reduced = parsed.slice(-10);
-            localStorage.setItem(key, JSON.stringify(reduced));
-            console.log(`🧹 Reduced ${key} from ${parsed.length} to ${reduced.length} items`);
-          }
-        }
-      } catch (error) {
-        console.error(`Failed to cleanup ${key}:`, error);
-        localStorage.removeItem(key);
-      }
-    }
+    // DO NOT perform emergency cleanup as it causes data loss
+    // Instead, just warn about storage issues
+    console.warn('Storage quota exceeded, but skipping cleanup to prevent data loss');
   }
 
   static getStorageStats(): { used: string; available: string; keys: number } {

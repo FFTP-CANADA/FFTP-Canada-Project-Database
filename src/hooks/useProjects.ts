@@ -6,7 +6,8 @@ import { LocalStorageManager } from "@/utils/localStorageManager";
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>(() => {
-    return LocalStorageManager.getItem('projects', initialProjects);
+    const saved = LocalStorageManager.getItem('projects', []);
+    return saved.length > 0 ? saved : initialProjects;
   });
 
   useEffect(() => {

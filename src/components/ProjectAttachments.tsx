@@ -70,9 +70,9 @@ const ProjectAttachments = ({
       for (const file of uploadFiles) {
         console.log('2. Processing file:', file.name, 'Size:', Math.round(file.size / 1024), 'KB');
         
-        // Check file size limit (2MB for localStorage compatibility)
-        if (file.size > 2 * 1024 * 1024) {
-          throw new Error(`File "${file.name}" is too large. Maximum size is 2MB for reliable storage.`);
+        // Much higher file size limit with IndexedDB (50MB)
+        if (file.size > 50 * 1024 * 1024) {
+          throw new Error(`File "${file.name}" is too large. Maximum size is 50MB.`);
         }
         
         const base64Data = await new Promise<string>((resolve, reject) => {
@@ -83,11 +83,6 @@ const ProjectAttachments = ({
         });
 
         console.log('3. File converted to base64, estimated storage size:', Math.round(base64Data.length / 1024), 'KB');
-
-        // Check if the base64 data is reasonable size for localStorage
-        if (base64Data.length > 3 * 1024 * 1024) { // 3MB in characters
-          throw new Error(`File "${file.name}" is too large when encoded. Please use a smaller file.`);
-        }
 
         const attachment = {
           projectId,
@@ -238,7 +233,7 @@ const ProjectAttachments = ({
                 <label className="cursor-pointer flex flex-col items-center">
                   <Upload className="w-12 h-12 text-blue-400 mb-4" />
                   <span className="text-lg text-blue-600 mb-2">Upload Documents</span>
-                  <span className="text-sm text-blue-500">PDF, DOC, XLS, TXT files supported (Max 2MB each)</span>
+                  <span className="text-sm text-blue-500">PDF, DOC, XLS, TXT files supported (Max 50MB each)</span>
                   <input
                     type="file"
                     multiple

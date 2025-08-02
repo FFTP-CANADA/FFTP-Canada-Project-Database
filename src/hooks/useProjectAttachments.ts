@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ProjectAttachment } from "@/types/project";
 import { LocalStorageManager } from "@/utils/localStorageManager";
+import { IndexedDBManager } from "@/utils/indexedDBManager";
 
 let globalAttachments: ProjectAttachment[] = [];
 let attachmentListeners: Array<(attachments: ProjectAttachment[]) => void> = [];
@@ -12,34 +13,19 @@ const notifyAttachmentListeners = (attachments: ProjectAttachment[]) => {
 };
 
 const saveAttachments = async (attachments: ProjectAttachment[]) => {
+  // Save all attachments individually to IndexedDB
   try {
-    console.log('=== SAVE DEBUG ===');
-    console.log('Attempting to save attachments:', attachments.length);
-    console.log('Total data size:', JSON.stringify(attachments).length, 'characters');
-    
-    // Check if any files are too large
-    attachments.forEach((att, index) => {
-      const size = att.fileUrl ? att.fileUrl.length : 0;
-      console.log(`File ${index}: ${att.fileName} - ${Math.round(size / 1024)}KB`);
-      if (size > 5 * 1024 * 1024) { // 5MB in characters
-        console.warn(`⚠️ Large file detected: ${att.fileName} (${Math.round(size / 1024)}KB)`);
+    for (const attachment of attachments) {
+      const success = await IndexedDBManager.saveAttachment(attachment);
+      if (!success) {
+        throw new Error(`Failed to save ${attachment.fileName}`);
       }
-    });
-    
-    const success = await LocalStorageManager.setItem('project-attachments', attachments);
-    console.log('LocalStorage save result:', success);
-    
-    if (success) {
-      // Verify it was actually saved
-      const verification = LocalStorageManager.getItem('project-attachments', []);
-      console.log('Verification: Found', verification.length, 'attachments after save');
-      
-      // Update global state and notify all listeners
-      globalAttachments = attachments;
-      notifyAttachmentListeners(attachments);
     }
     
-    return success;
+    // Update global state and notify listeners
+    globalAttachments = attachments;
+    notifyAttachmentListeners(attachments);
+    return true;
   } catch (error) {
     console.error('SAVE ERROR:', error);
     return false;
@@ -47,18 +33,18 @@ const saveAttachments = async (attachments: ProjectAttachment[]) => {
 };
 
 export const useProjectAttachments = () => {
-  const [attachments, setAttachments] = useState<ProjectAttachment[]>(() => {
-    // Always load from localStorage first, don't rely on global state
-    const saved = LocalStorageManager.getItem('project-attachments', []);
-    console.log('INITIALIZING ATTACHMENTS:', {
-      savedCount: saved.length,
-      globalCount: globalAttachments.length,
-      savedData: saved.map(a => ({ id: a.id, fileName: a.fileName, projectId: a.projectId }))
-    });
-    
-    globalAttachments = saved; // Update global state
-    return saved;
-  });
+  const [attachments, setAttachments] = useState<ProjectAttachment[]>([]);
+
+  // Load attachments from IndexedDB on initialization
+  useEffect(() => {
+    const loadAttachments = async () => {
+      const saved = await IndexedDBManager.getAllAttachments();
+      console.log('INITIALIZING ATTACHMENTS FROM INDEXEDDB:', saved.length);
+      globalAttachments = saved;
+      setAttachments(saved);
+    };
+    loadAttachments();
+  }, []);
 
   useEffect(() => {
     const listener = (newAttachments: ProjectAttachment[]) => {
@@ -107,8 +93,10 @@ export const useProjectAttachments = () => {
   }, []);
 
   const deleteAttachment = useCallback(async (id: string) => {
+    await IndexedDBManager.deleteAttachment(id);
     const updatedAttachments = globalAttachments.filter(attachment => attachment.id !== id);
-    await saveAttachments(updatedAttachments);
+    globalAttachments = updatedAttachments;
+    notifyAttachmentListeners(updatedAttachments);
   }, []);
 
   const getAttachmentsForProject = useCallback((projectId: string) => {

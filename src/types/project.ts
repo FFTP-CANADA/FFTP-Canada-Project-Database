@@ -6,7 +6,7 @@ export interface Project {
   projectName: string;
   country?: "Jamaica" | "Guyana" | "Haiti" | "Honduras" | "Canada";
   partnerName?: string;
-  impactArea: "Food Security" | "Education" | "Housing & Community" | "Health" | "Economic Empowerment";
+  impactArea: "Food Security" | "Education" | "Housing & Community" | "Health" | "Economic Empowerment" | "Greatest Needs";
   fundType: "Designated" | "Undesignated";
   isDesignated: boolean;
   currency: "CAD" | "USD";

@@ -286,7 +286,7 @@ const AnalyticsDashboard = ({ projects }: AnalyticsDashboardProps) => {
                 </tr>
               </thead>
               <tbody>
-                {['Food Security', 'Education', 'Housing & Community', 'Health', 'Economic Empowerment'].map((area) => {
+                {['Food Security', 'Education', 'Housing & Community', 'Health', 'Economic Empowerment', 'Greatest Needs'].map((area) => {
                   const areaProjects = projects.filter(p => p.impactArea === area);
                   const undesignatedProjects = areaProjects.filter(p => p.fundType === 'Undesignated');
                   const availableBalance = undesignatedProjects.reduce((sum, p) => sum + (p.totalCost - p.amountDisbursed), 0);

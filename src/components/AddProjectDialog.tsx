@@ -318,6 +318,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
                   <SelectItem value="Housing & Community">Housing & Community</SelectItem>
                   <SelectItem value="Health">Health</SelectItem>
                   <SelectItem value="Economic Empowerment">Economic Empowerment</SelectItem>
+                  <SelectItem value="Greatest Needs">Greatest Needs</SelectItem>
                 </SelectContent>
               </Select>
             </div>

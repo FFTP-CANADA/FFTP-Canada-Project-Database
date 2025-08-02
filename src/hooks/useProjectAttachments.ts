@@ -12,7 +12,15 @@ const notifyAttachmentListeners = (attachments: ProjectAttachment[]) => {
 };
 
 const saveAttachments = async (attachments: ProjectAttachment[]) => {
+  console.log('🔧 Saving attachments to storage:', attachments.length, 'attachments');
+  console.log('🔧 Attachment data preview:', attachments.map(a => ({ id: a.id, fileName: a.fileName, projectId: a.projectId })));
   await LocalStorageManager.setItem('project-attachments', attachments);
+  console.log('✅ Attachments saved to localStorage');
+  
+  // Verify the data was actually saved
+  const verified = LocalStorageManager.getItem('project-attachments', []);
+  console.log('🔍 Verification: Read back', verified.length, 'attachments from storage');
+  
   notifyAttachmentListeners(attachments);
 };
 
@@ -36,13 +44,20 @@ export const useProjectAttachments = () => {
   }, []);
 
   const addAttachment = useCallback(async (attachment: Omit<ProjectAttachment, "id">) => {
+    console.log('📎 Adding new attachment:', attachment.fileName, 'for project:', attachment.projectId);
+    console.log('📎 Current global attachments count:', globalAttachments.length);
+    
     const newAttachment: ProjectAttachment = {
       ...attachment,
       id: Date.now().toString(),
     };
     
+    console.log('📎 New attachment created with ID:', newAttachment.id);
     const updatedAttachments = [...globalAttachments, newAttachment];
+    console.log('📎 Updated attachments array length:', updatedAttachments.length);
+    
     await saveAttachments(updatedAttachments);
+    console.log('📎 Attachment save completed');
   }, []);
 
   const deleteAttachment = useCallback(async (id: string) => {

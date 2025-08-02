@@ -39,16 +39,14 @@ const ProjectAttachments = ({
     attachments: attachments.map(a => ({ id: a.id, fileName: a.fileName, projectId: a.projectId }))
   });
   
-  // Special debugging for Port Kaituma project
-  if (projectName && projectName.includes('Port Kaituma')) {
-    console.log('🚨 PORT KAITUMA DEBUGGING:', {
-      projectId,
-      projectIdIsString: typeof projectId === 'string',
-      projectIdLength: projectId?.toString().length,
-      projectIdValue: JSON.stringify(projectId),
-      attachmentsForThisProject: attachments.filter(a => a.projectId === projectId)
-    });
-  }
+  // Enhanced debugging for any project with attachment issues
+  console.log('🔍 ALL PROJECTS DEBUG:', {
+    dialogProjectId: projectId,
+    dialogProjectName: projectName,
+    allAttachmentsInSystem: attachments.length,
+    attachmentsForThisProject: attachments.filter(a => String(a.projectId) === String(projectId)).length,
+    attachmentProjectIds: [...new Set(attachments.map(a => a.projectId))]
+  });
 
   const handleFileUpload = (files: FileList | null) => {
     if (!files) return;

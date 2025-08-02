@@ -51,6 +51,11 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
     // Calculate project duration in days
     const totalDays = Math.ceil((projectEnd.getTime() - projectStart.getTime()) / (1000 * 60 * 60 * 24));
     
+    // Sort milestones by start date in ascending order
+    const sortedMilestones = [...milestones].sort((a, b) => 
+      new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    );
+    
     // Create timeline items with proper typing
     const items: Array<{
       id: string;
@@ -62,6 +67,7 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
       color: string;
       priority?: ProjectMilestone["priority"];
       milestoneType?: FFTPMilestoneType;
+      sortOrder: number;
     }> = [
       {
         id: "project",
@@ -70,9 +76,10 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
         end: projectEnd,
         type: "project",
         status: project.status,
-        color: getProjectColor(project.status)
+        color: getProjectColor(project.status),
+        sortOrder: 0
       },
-      ...milestones.map((milestone) => {
+      ...sortedMilestones.map((milestone, index) => {
         const start = new Date(milestone.startDate);
         const end = milestone.completedDate 
           ? new Date(milestone.completedDate)
@@ -92,7 +99,8 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
             status: milestone.status,
             priority: milestone.priority,
             milestoneType: milestone.milestoneType,
-            color: getMilestoneColor(milestone.milestoneType, milestone.status)
+            color: getMilestoneColor(milestone.milestoneType, milestone.status),
+            sortOrder: index + 1
           };
         }
         
@@ -109,7 +117,8 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
           status: milestone.status,
           priority: milestone.priority,
           milestoneType: milestone.milestoneType,
-          color: getMilestoneColor(milestone.milestoneType, milestone.status)
+          color: getMilestoneColor(milestone.milestoneType, milestone.status),
+          sortOrder: index + 1
         };
       })
     ];

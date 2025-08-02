@@ -22,6 +22,8 @@ import ProgramInfoDialog from "@/components/ProgramInfoDialog";
 import AutoFollowUpManager from "@/components/AutoFollowUpManager";
 import NotificationsAlert from "@/components/NotificationsAlert";
 import { useProjectData } from "@/hooks/useProjectData";
+import { useProjectAlerts } from "@/hooks/useProjectAlerts";
+import { ProjectAlertsPanel } from "@/components/ProjectAlertsPanel";
 import { Project } from "@/types/project";
 import ExchangeRateDisplay from "@/components/ExchangeRateDisplay";
 import { convertUsdToCad, formatWithExchange } from "@/utils/currencyUtils";
@@ -133,6 +135,14 @@ const Index = () => {
   } = useAutoFollowUp(projects, milestones, notes);
 
   const { donorPledges } = useProjectFunding();
+
+  // Project alerts system - 10 business days warning
+  const { 
+    alerts, 
+    unreadCount, 
+    markAlertAsRead, 
+    markAllAlertsAsRead 
+  } = useProjectAlerts(projects);
 
   const stats = {
     totalProjects: projects.length,
@@ -356,6 +366,16 @@ const Index = () => {
             />
           </div>
         )}
+
+        {/* Project Alerts System */}
+        <div className="mb-8">
+          <ProjectAlertsPanel
+            alerts={alerts}
+            unreadCount={unreadCount}
+            onMarkAsRead={markAlertAsRead}
+            onMarkAllAsRead={markAllAlertsAsRead}
+          />
+        </div>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="projects" className="space-y-6">

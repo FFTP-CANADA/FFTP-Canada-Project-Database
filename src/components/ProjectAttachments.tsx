@@ -31,11 +31,24 @@ const ProjectAttachments = ({
   // Debug current state when dialog opens
   console.log('🔍 ProjectAttachments Dialog State:', {
     projectId,
+    projectIdType: typeof projectId,
+    projectIdString: String(projectId),
     projectName,
     open,
     attachmentsCount: attachments.length,
-    attachments: attachments.map(a => ({ id: a.id, fileName: a.fileName }))
+    attachments: attachments.map(a => ({ id: a.id, fileName: a.fileName, projectId: a.projectId }))
   });
+  
+  // Special debugging for Port Kaituma project
+  if (projectName && projectName.includes('Port Kaituma')) {
+    console.log('🚨 PORT KAITUMA DEBUGGING:', {
+      projectId,
+      projectIdIsString: typeof projectId === 'string',
+      projectIdLength: projectId?.toString().length,
+      projectIdValue: JSON.stringify(projectId),
+      attachmentsForThisProject: attachments.filter(a => a.projectId === projectId)
+    });
+  }
 
   const handleFileUpload = (files: FileList | null) => {
     if (!files) return;

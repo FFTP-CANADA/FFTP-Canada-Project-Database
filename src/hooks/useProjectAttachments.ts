@@ -101,6 +101,22 @@ export const useProjectAttachments = () => {
   }, []);
 
   const getAttachmentsForProject = useCallback((projectId: string) => {
+    console.log('🔍 Getting attachments for project:', {
+      projectId,
+      projectIdType: typeof projectId,
+      totalAttachments: globalAttachments.length,
+      matchingAttachments: globalAttachments.filter(attachment => attachment.projectId === projectId).length
+    });
+    
+    // Special debugging for Port Kaituma
+    if (projectId === "5") {
+      console.log('🚨 PORT KAITUMA ATTACHMENTS DEBUG:', {
+        projectId,
+        allAttachments: globalAttachments.map(a => ({ id: a.id, projectId: a.projectId, fileName: a.fileName })),
+        matchingAttachments: globalAttachments.filter(attachment => attachment.projectId === projectId)
+      });
+    }
+    
     return globalAttachments.filter(attachment => attachment.projectId === projectId);
   }, []);
 

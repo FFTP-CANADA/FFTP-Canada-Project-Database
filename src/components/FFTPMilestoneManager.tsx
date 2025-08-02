@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { ProjectMilestone, FFTPMilestoneType } from "@/types/project";
 
 const FFTP_MILESTONE_OPTIONS: FFTPMilestoneType[] = [
-  "MOU Signed",
+  "Governance Document Signed",
   "First Disbursement Sent", 
   "Interim Report & Receipts Submitted (following Installment #1)",
   "Second Disbursement Sent",
@@ -30,7 +30,7 @@ const FFTP_MILESTONE_OPTIONS: FFTPMilestoneType[] = [
 ];
 
 const getMilestonePhaseColor = (milestoneType: FFTPMilestoneType) => {
-  if (milestoneType === "MOU Signed") return "bg-blue-100 border-blue-300";
+  if (milestoneType === "Governance Document Signed") return "bg-blue-100 border-blue-300";
   if (milestoneType.includes("Disbursement")) return "bg-green-100 border-green-300";
   if (milestoneType.includes("Receipts")) return "bg-yellow-100 border-yellow-300";
   if (milestoneType.includes("Report")) return "bg-orange-100 border-orange-300";

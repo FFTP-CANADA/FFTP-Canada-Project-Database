@@ -23,7 +23,7 @@ export interface Project {
 }
 
 export type FFTPMilestoneType = 
-  | "MOU Signed"
+  | "Governance Document Signed"
   | "First Disbursement Sent"
   | "Interim Report & Receipts Submitted (following Installment #1)"
   | "Second Disbursement Sent"

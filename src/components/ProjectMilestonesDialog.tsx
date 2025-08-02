@@ -25,7 +25,7 @@ const ProjectMilestonesDialog = ({
 
   const milestones = getMilestonesForProject(projectId);
   console.log("ProjectMilestonesDialog: Fresh milestones from hook:", milestones.length);
-  console.log("ProjectMilestonesDialog: MOU milestone data:", milestones.find(m => m.milestoneType === "MOU Signed"));
+  console.log("ProjectMilestonesDialog: Governance milestone data:", milestones.find(m => m.milestoneType === "Governance Document Signed"));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

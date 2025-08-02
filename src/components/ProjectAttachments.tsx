@@ -28,6 +28,15 @@ const ProjectAttachments = ({
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const { toast } = useToast();
 
+  // Debug current state when dialog opens
+  console.log('🔍 ProjectAttachments Dialog State:', {
+    projectId,
+    projectName,
+    open,
+    attachmentsCount: attachments.length,
+    attachments: attachments.map(a => ({ id: a.id, fileName: a.fileName }))
+  });
+
   const handleFileUpload = (files: FileList | null) => {
     if (!files) return;
     
@@ -86,6 +95,7 @@ const ProjectAttachments = ({
           
           console.log(`Adding attachment for file: ${file.name}`);
           console.log('Attachment data being passed:', attachment);
+          console.log('Current attachments before adding:', attachments.length);
           await onAddAttachment(attachment);
           console.log(`Successfully added attachment for file: ${file.name}`);
           
@@ -104,9 +114,12 @@ const ProjectAttachments = ({
       
       // Verify the attachments were actually saved by checking the current attachments
       console.log('🔍 Verifying saved attachments...');
+      console.log('🔍 Current attachments for project after save:', attachments.length);
+      
+      // Force a re-render to see updated data
       setTimeout(() => {
-        console.log('🔍 Current attachments for project after save:', attachments.length);
-      }, 100);
+        console.log('🔍 Attachments after delay:', attachments.length);
+      }, 500);
       
       setUploadFiles([]);
       toast({

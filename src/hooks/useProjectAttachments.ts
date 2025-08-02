@@ -14,14 +14,24 @@ const notifyAttachmentListeners = (attachments: ProjectAttachment[]) => {
 const saveAttachments = async (attachments: ProjectAttachment[]) => {
   console.log('🔧 Saving attachments to storage:', attachments.length, 'attachments');
   console.log('🔧 Attachment data preview:', attachments.map(a => ({ id: a.id, fileName: a.fileName, projectId: a.projectId })));
-  await LocalStorageManager.setItem('project-attachments', attachments);
-  console.log('✅ Attachments saved to localStorage');
   
-  // Verify the data was actually saved
-  const verified = LocalStorageManager.getItem('project-attachments', []);
-  console.log('🔍 Verification: Read back', verified.length, 'attachments from storage');
-  
-  notifyAttachmentListeners(attachments);
+  try {
+    await LocalStorageManager.setItem('project-attachments', attachments);
+    console.log('✅ Attachments saved to localStorage');
+    
+    // Verify the data was actually saved
+    const verified = LocalStorageManager.getItem('project-attachments', []);
+    console.log('🔍 Verification: Read back', verified.length, 'attachments from storage');
+    
+    // Update global state and notify all listeners
+    globalAttachments = attachments;
+    notifyAttachmentListeners(attachments);
+    
+    return true;
+  } catch (error) {
+    console.error('❌ Failed to save attachments:', error);
+    return false;
+  }
 };
 
 export const useProjectAttachments = () => {
@@ -57,7 +67,7 @@ export const useProjectAttachments = () => {
     
     const newAttachment: ProjectAttachment = {
       ...attachment,
-      id: Date.now().toString(),
+      id: Date.now().toString() + Math.random().toString(36),
     };
     
     console.log('📎 New attachment created with ID:', newAttachment.id);
@@ -65,8 +75,12 @@ export const useProjectAttachments = () => {
     console.log('📎 Updated attachments array length:', updatedAttachments.length);
     console.log('📎 About to save attachments...');
     
-    await saveAttachments(updatedAttachments);
-    console.log('📎 Attachment save completed - final count:', updatedAttachments.length);
+    const success = await saveAttachments(updatedAttachments);
+    console.log('📎 Attachment save completed - success:', success, 'final count:', updatedAttachments.length);
+    
+    if (!success) {
+      throw new Error('Failed to save attachment to storage');
+    }
   }, []);
 
   const deleteAttachment = useCallback(async (id: string) => {

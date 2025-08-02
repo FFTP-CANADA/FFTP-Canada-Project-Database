@@ -69,12 +69,12 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
   // Calculate total pledged from all donor pledges
   const totalPledgedFromDonors = projectPledges.reduce((sum, pledge) => sum + pledge.pledgedAmount, 0);
   
-  // Funding gap is based on scheduled disbursements minus actual receipts
-  const fundingGap = Math.max(0, totalScheduledDisbursements - totalReceivedFromDonors);
+  // Funding gap is based on pledged amount minus actual receipts
+  const fundingGap = Math.max(0, totalPledgedFromDonors - totalReceivedFromDonors);
   
-  // Funding percentage should only be based on actual receipts vs scheduled disbursements
-  const fundingPercentage = totalScheduledDisbursements > 0 
-    ? Math.round((totalReceivedFromDonors / totalScheduledDisbursements) * 100)
+  // Funding percentage should be based on actual receipts vs total pledges
+  const fundingPercentage = totalPledgedFromDonors > 0 
+    ? Math.round((totalReceivedFromDonors / totalPledgedFromDonors) * 100)
     : 0;
 
   const getFundingStatus = () => {

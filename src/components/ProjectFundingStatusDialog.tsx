@@ -16,20 +16,22 @@ const ProjectFundingStatusDialog = ({
   onOpenChange,
   onUpdateProject,
 }: ProjectFundingStatusDialogProps) => {
-  const { getMilestonesForProject } = useProjectData();
+  const { getMilestonesForProject, projects } = useProjectData();
 
   if (!project) return null;
 
+  // Always use the most current project data from global state to reflect real-time updates
+  const currentProject = projects.find(p => p.id === project.id) || project;
   const milestones = getMilestonesForProject(project.id);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl w-[90vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Funding Status - {project.projectName}</DialogTitle>
+          <DialogTitle>Funding Status - {currentProject.projectName}</DialogTitle>
         </DialogHeader>
         <ProjectFundingStatus
-          project={project}
+          project={currentProject}
           milestones={milestones}
           onUpdateProject={onUpdateProject}
         />

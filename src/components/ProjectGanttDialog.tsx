@@ -19,7 +19,7 @@ const ProjectGanttDialog = ({
 
   if (!project) return null;
 
-  // Get the current project data to ensure we have the latest status
+  // Always use the most current project data from global state to reflect real-time updates
   const currentProject = projects.find(p => p.id === project.id) || project;
   const milestones = getMilestonesForProject(project.id);
 

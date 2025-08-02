@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Upload, Download, Trash2, File, X } from "lucide-react";
-import { ProjectAttachment } from "@/hooks/useProjectData";
+import { ProjectAttachment } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProjectAttachmentsProps {

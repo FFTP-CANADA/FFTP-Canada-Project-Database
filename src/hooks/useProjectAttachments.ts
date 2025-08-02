@@ -13,13 +13,33 @@ const notifyAttachmentListeners = (attachments: ProjectAttachment[]) => {
 
 const saveAttachments = async (attachments: ProjectAttachment[]) => {
   try {
-    await LocalStorageManager.setItem('project-attachments', attachments);
+    console.log('=== SAVE DEBUG ===');
+    console.log('Attempting to save attachments:', attachments.length);
+    console.log('Total data size:', JSON.stringify(attachments).length, 'characters');
     
-    // Update global state and notify all listeners
-    globalAttachments = attachments;
-    notifyAttachmentListeners(attachments);
+    // Check if any files are too large
+    attachments.forEach((att, index) => {
+      const size = att.fileUrl ? att.fileUrl.length : 0;
+      console.log(`File ${index}: ${att.fileName} - ${Math.round(size / 1024)}KB`);
+      if (size > 5 * 1024 * 1024) { // 5MB in characters
+        console.warn(`⚠️ Large file detected: ${att.fileName} (${Math.round(size / 1024)}KB)`);
+      }
+    });
     
-    return true;
+    const success = await LocalStorageManager.setItem('project-attachments', attachments);
+    console.log('LocalStorage save result:', success);
+    
+    if (success) {
+      // Verify it was actually saved
+      const verification = LocalStorageManager.getItem('project-attachments', []);
+      console.log('Verification: Found', verification.length, 'attachments after save');
+      
+      // Update global state and notify all listeners
+      globalAttachments = attachments;
+      notifyAttachmentListeners(attachments);
+    }
+    
+    return success;
   } catch (error) {
     console.error('SAVE ERROR:', error);
     return false;

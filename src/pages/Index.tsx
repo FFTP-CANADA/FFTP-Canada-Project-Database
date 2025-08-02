@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -94,6 +94,28 @@ const Index = () => {
     updateMilestone,
     deleteMilestone
   } = useProjectData();
+
+  // Auto-correct project status based on milestones - run for all projects
+  useEffect(() => {
+    projects.forEach(project => {
+      const projectMilestones = getMilestonesForProject(project.id);
+      console.log(`Index: Checking project ${project.projectName} - Status: ${project.status}, Milestones: ${projectMilestones.length}`);
+      
+      if (projectMilestones.length > 0) {
+        const allMilestonesCompleted = projectMilestones.every(milestone => milestone.status === "Completed");
+        if (allMilestonesCompleted && project.status !== "Completed") {
+          console.log(`Index: Updating ${project.projectName} to Completed`);
+          updateProject(project.id, { status: "Completed" });
+        } else if (!allMilestonesCompleted && project.status === "Completed") {
+          console.log(`Index: Reverting ${project.projectName} from Completed to On-Track`);
+          updateProject(project.id, { status: "On-Track" });
+        }
+      } else if (project.status === "Completed") {
+        console.log(`Index: No milestones - reverting ${project.projectName} from Completed to On-Track`);
+        updateProject(project.id, { status: "On-Track" });
+      }
+    });
+  }, [projects, milestones, updateProject, getMilestonesForProject]);
 
   const {
     followUpEmails,

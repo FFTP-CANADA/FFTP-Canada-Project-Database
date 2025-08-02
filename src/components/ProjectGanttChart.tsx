@@ -44,6 +44,7 @@ const getMilestoneColor = (milestoneType: FFTPMilestoneType | undefined, status:
 };
 
 const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
+  console.log(`ProjectGanttChart: Rendering project ${project.projectName} with status: ${project.status}`);
   const chartData = useMemo(() => {
     const projectStart = new Date(project.startDate);
     const projectEnd = project.endDate ? new Date(project.endDate) : new Date();

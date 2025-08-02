@@ -41,9 +41,15 @@ const saveAttachments = async (attachments: ProjectAttachment[]) => {
 
 export const useProjectAttachments = () => {
   const [attachments, setAttachments] = useState<ProjectAttachment[]>(() => {
-    if (globalAttachments.length > 0) return globalAttachments;
+    // Always load from localStorage first, don't rely on global state
     const saved = LocalStorageManager.getItem('project-attachments', []);
-    globalAttachments = saved;
+    console.log('INITIALIZING ATTACHMENTS:', {
+      savedCount: saved.length,
+      globalCount: globalAttachments.length,
+      savedData: saved.map(a => ({ id: a.id, fileName: a.fileName, projectId: a.projectId }))
+    });
+    
+    globalAttachments = saved; // Update global state
     return saved;
   });
 
@@ -106,12 +112,16 @@ export const useProjectAttachments = () => {
   }, []);
 
   const getAttachmentsForProject = useCallback((projectId: string) => {
-    const projectAttachments = globalAttachments.filter(attachment => attachment.projectId === projectId);
-    console.log('GET ATTACHMENTS:', {
+    // Always get fresh data from localStorage to ensure we have the latest
+    const freshAttachments = LocalStorageManager.getItem('project-attachments', []);
+    globalAttachments = freshAttachments; // Update global state
+    
+    const projectAttachments = freshAttachments.filter(attachment => attachment.projectId === projectId);
+    console.log('GET ATTACHMENTS (FRESH):', {
       projectId,
-      totalAttachments: globalAttachments.length,
-      projectAttachments: projectAttachments.length,
-      allProjectIds: [...new Set(globalAttachments.map(a => a.projectId))]
+      totalInStorage: freshAttachments.length,
+      forThisProject: projectAttachments.length,
+      attachmentDetails: projectAttachments.map(a => ({ id: a.id, fileName: a.fileName }))
     });
     return projectAttachments;
   }, []);

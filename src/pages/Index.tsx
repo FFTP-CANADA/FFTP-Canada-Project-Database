@@ -97,6 +97,8 @@ const Index = () => {
 
   // Auto-correct project status based on milestones - run for all projects
   useEffect(() => {
+    let hasUpdates = false;
+    
     projects.forEach(project => {
       const projectMilestones = getMilestonesForProject(project.id);
       console.log(`Index: Checking project ${project.projectName} - Status: ${project.status}, Milestones: ${projectMilestones.length}`);
@@ -106,16 +108,23 @@ const Index = () => {
         if (allMilestonesCompleted && project.status !== "Completed") {
           console.log(`Index: Updating ${project.projectName} to Completed`);
           updateProject(project.id, { status: "Completed" });
+          hasUpdates = true;
         } else if (!allMilestonesCompleted && project.status === "Completed") {
           console.log(`Index: Reverting ${project.projectName} from Completed to On-Track`);
           updateProject(project.id, { status: "On-Track" });
+          hasUpdates = true;
         }
       } else if (project.status === "Completed") {
         console.log(`Index: No milestones - reverting ${project.projectName} from Completed to On-Track`);
         updateProject(project.id, { status: "On-Track" });
+        hasUpdates = true;
       }
     });
-  }, [projects, milestones, updateProject, getMilestonesForProject]);
+    
+    if (hasUpdates) {
+      console.log("Index: Status updates applied");
+    }
+  }, [projects.length, milestones.length]); // Only run when number of projects or milestones changes
 
   const {
     followUpEmails,

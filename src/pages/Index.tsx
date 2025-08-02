@@ -245,12 +245,16 @@ const Index = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Notifications Alert */}
-        <NotificationsAlert 
-          projects={projects} 
-          milestones={milestones} 
-          notes={notes} 
-        />
+        {/* Project Alerts System */}
+        <div className="mb-8">
+          <ProjectAlertsPanel
+            alerts={alerts}
+            unreadCount={unreadCount}
+            onMarkAsRead={markAlertAsRead}
+            onMarkAllAsRead={markAllAlertsAsRead}
+            demoMode={demoMode}
+          />
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
@@ -368,16 +372,6 @@ const Index = () => {
           </div>
         )}
 
-        {/* Project Alerts System */}
-        <div className="mb-8">
-          <ProjectAlertsPanel
-            alerts={alerts}
-            unreadCount={unreadCount}
-            onMarkAsRead={markAlertAsRead}
-            onMarkAllAsRead={markAllAlertsAsRead}
-            demoMode={demoMode}
-          />
-        </div>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="projects" className="space-y-6">

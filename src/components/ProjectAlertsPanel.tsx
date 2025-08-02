@@ -13,6 +13,7 @@ interface ProjectAlertsPanelProps {
   unreadCount: number;
   onMarkAsRead: (alertId: string) => void;
   onMarkAllAsRead: () => void;
+  demoMode?: boolean;
   className?: string;
 }
 
@@ -21,6 +22,7 @@ export const ProjectAlertsPanel = ({
   unreadCount, 
   onMarkAsRead, 
   onMarkAllAsRead,
+  demoMode = false,
   className 
 }: ProjectAlertsPanelProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -66,8 +68,25 @@ export const ProjectAlertsPanel = ({
     );
   }
 
-  return (
-    <Card className={cn("border-orange-200 bg-orange-50", className)}>
+   return (
+    <>
+      {/* Demo Mode Banner */}
+      {demoMode && (
+        <Card className="border-blue-200 bg-blue-50 mb-4">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-blue-600" />
+              <CardTitle className="text-sm text-blue-800">DEMONSTRATION MODE</CardTitle>
+            </div>
+            <CardDescription className="text-xs text-blue-600">
+              🎯 **ALERT DISPLAY LOCATION**: This is where all project alerts appear!<br/>
+              Below are 5 sample alerts showing funding deadlines and milestones using 10 business-day warning system.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+      
+      <Card className={cn("border-orange-200 bg-orange-50", className)}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -186,6 +205,7 @@ export const ProjectAlertsPanel = ({
           )}
         </ScrollArea>
       </CardContent>
-    </Card>
+      </Card>
+    </>
   );
 };

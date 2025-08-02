@@ -141,7 +141,8 @@ const Index = () => {
     alerts, 
     unreadCount, 
     markAlertAsRead, 
-    markAllAlertsAsRead 
+    markAllAlertsAsRead,
+    demoMode
   } = useProjectAlerts(projects);
 
   const stats = {
@@ -374,6 +375,7 @@ const Index = () => {
             unreadCount={unreadCount}
             onMarkAsRead={markAlertAsRead}
             onMarkAllAsRead={markAllAlertsAsRead}
+            demoMode={demoMode}
           />
         </div>
 

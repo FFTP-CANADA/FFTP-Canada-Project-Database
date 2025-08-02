@@ -90,12 +90,18 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
   const fundingStatus = getFundingStatus();
   const StatusIcon = fundingStatus.icon;
 
-  // Auto-update project status to "Completed" when funding reaches 100% - DISABLED
-  // useEffect(() => {
-  //   if (fundingPercentage >= 100 && project.status !== "Completed" && onUpdateProject) {
-  //     onUpdateProject(project.id, { status: "Completed" });
-  //   }
-  // }, [fundingPercentage, project.status, project.id, onUpdateProject]);
+  // Auto-update project status to "Completed" when all milestones are completed
+  useEffect(() => {
+    if (milestones.length > 0 && onUpdateProject) {
+      const allMilestonesCompleted = milestones.every(milestone => milestone.status === "Completed");
+      if (allMilestonesCompleted && project.status !== "Completed") {
+        onUpdateProject(project.id, { status: "Completed" });
+      } else if (!allMilestonesCompleted && project.status === "Completed") {
+        // If project was marked completed but not all milestones are done, revert to appropriate status
+        onUpdateProject(project.id, { status: "On-Track" });
+      }
+    }
+  }, [milestones, project.status, project.id, onUpdateProject]);
 
   const resetForm = () => {
     setReceiptForm({

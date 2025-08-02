@@ -70,9 +70,9 @@ const ProjectAttachments = ({
       for (const file of uploadFiles) {
         console.log('2. Processing file:', file.name, 'Size:', Math.round(file.size / 1024), 'KB');
         
-        // Check file size limit (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          throw new Error(`File "${file.name}" is too large. Maximum size is 5MB.`);
+        // Check file size limit (2MB for localStorage compatibility)
+        if (file.size > 2 * 1024 * 1024) {
+          throw new Error(`File "${file.name}" is too large. Maximum size is 2MB for reliable storage.`);
         }
         
         const base64Data = await new Promise<string>((resolve, reject) => {
@@ -238,7 +238,7 @@ const ProjectAttachments = ({
                 <label className="cursor-pointer flex flex-col items-center">
                   <Upload className="w-12 h-12 text-blue-400 mb-4" />
                   <span className="text-lg text-blue-600 mb-2">Upload Documents</span>
-                  <span className="text-sm text-blue-500">PDF, DOC, XLS, TXT files supported</span>
+                  <span className="text-sm text-blue-500">PDF, DOC, XLS, TXT files supported (Max 2MB each)</span>
                   <input
                     type="file"
                     multiple

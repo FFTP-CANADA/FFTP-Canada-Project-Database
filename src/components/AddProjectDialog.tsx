@@ -312,7 +312,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
                 <SelectTrigger className="border-blue-200 focus:border-blue-400">
                   <SelectValue placeholder="Select impact area" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white z-50">
                   <SelectItem value="Food Security">Food Security</SelectItem>
                   <SelectItem value="Education">Education</SelectItem>
                   <SelectItem value="Housing & Community">Housing & Community</SelectItem>

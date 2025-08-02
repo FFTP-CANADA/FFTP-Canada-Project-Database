@@ -85,7 +85,8 @@ const ProjectAttachments = ({
           };
           
           console.log(`Adding attachment for file: ${file.name}`);
-          onAddAttachment(attachment);
+          console.log('Attachment data being passed:', attachment);
+          await onAddAttachment(attachment);
           console.log(`Successfully added attachment for file: ${file.name}`);
           
         } catch (error) {
@@ -100,6 +101,13 @@ const ProjectAttachments = ({
       }
 
       console.log('All files processed successfully');
+      
+      // Verify the attachments were actually saved by checking the current attachments
+      console.log('🔍 Verifying saved attachments...');
+      setTimeout(() => {
+        console.log('🔍 Current attachments for project after save:', attachments.length);
+      }, 100);
+      
       setUploadFiles([]);
       toast({
         title: "Success",

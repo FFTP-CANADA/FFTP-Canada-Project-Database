@@ -16,10 +16,12 @@ import { useToast } from "@/hooks/use-toast";
 interface AddProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddProject: (project: Omit<Project, "id">) => void;
+  onAddProject: (project: Omit<Project, "id">) => Promise<string>;
+  onAddAttachment: (attachment: any) => Promise<void>;
+  onAddPhoto: (photo: any) => Promise<void>;
 }
 
-const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialogProps) => {
+const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, onAddPhoto }: AddProjectDialogProps) => {
   const [formData, setFormData] = useState({
     projectName: "",
     country: "",
@@ -103,7 +105,64 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
     };
 
     try {
-      onAddProject(project);
+      // First create the project and get the actual project ID
+      const projectId = await onAddProject(project);
+      
+      console.log('🔧 Processing files for new project. Project ID:', projectId);
+      console.log('🔧 Attachments to process:', attachments.length);
+      console.log('🔧 Photos to process:', photos.length);
+      
+      // Process attachments
+      for (const file of attachments) {
+        console.log('📎 Processing attachment:', file.name);
+        try {
+          const base64Data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+
+          const attachment = {
+            projectId: projectId,
+            fileName: file.name,
+            fileUrl: base64Data,
+            fileSize: file.size,
+            uploadDate: new Date().toISOString(),
+            fileType: file.type || "application/octet-stream"
+          };
+          
+          console.log('📎 Adding attachment:', attachment.fileName);
+          await onAddAttachment(attachment);
+        } catch (error) {
+          console.error('Failed to process attachment:', file.name, error);
+        }
+      }
+      
+      // Process photos
+      for (const file of photos) {
+        console.log('📷 Processing photo:', file.name);
+        try {
+          const base64Data = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+
+          const photo = {
+            projectId: projectId,
+            photoUrl: base64Data,
+            caption: file.name,
+            uploadDate: new Date().toISOString()
+          };
+          
+          console.log('📷 Adding photo:', photo.caption);
+          await onAddPhoto(photo);
+        } catch (error) {
+          console.error('Failed to process photo:', file.name, error);
+        }
+      }
       
       // Reset form only if successful
       setFormData({
@@ -130,11 +189,13 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject }: AddProjectDialog
       
       onOpenChange(false);
       
+      const fileCount = attachments.length + photos.length;
       toast({
         title: "Success",
-        description: "Project has been added successfully",
+        description: `Project has been added successfully${fileCount > 0 ? ` with ${fileCount} file(s)` : ''}`,
       });
     } catch (error) {
+      console.error('Failed to add project:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to add project",

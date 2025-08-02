@@ -45,7 +45,7 @@ export const useProjects = () => {
     );
   }, []);
 
-  const addProject = useCallback(async (project: Omit<Project, "id">) => {
+  const addProject = useCallback(async (project: Omit<Project, "id">): Promise<string> => {
     if (project.governanceNumber && project.governanceType) {
       if (!validateGovernanceNumber(project.governanceNumber, project.governanceType)) {
         throw new Error(`A project with ${project.governanceType} number "${project.governanceNumber}" already exists`);
@@ -59,6 +59,8 @@ export const useProjects = () => {
     
     const updatedProjects = [...globalProjects, newProject];
     await saveProjects(updatedProjects);
+    
+    return newProject.id;
   }, [validateGovernanceNumber]);
 
   const updateProject = useCallback(async (id: string, updates: Partial<Project>) => {

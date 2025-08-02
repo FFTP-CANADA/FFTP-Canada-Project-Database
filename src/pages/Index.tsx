@@ -419,10 +419,12 @@ const Index = () => {
         </Tabs>
       </div>
 
-      <AddProjectDialog 
+      <AddProjectDialog
         open={isAddProjectOpen}
         onOpenChange={setIsAddProjectOpen}
         onAddProject={addProject}
+        onAddAttachment={addAttachment}
+        onAddPhoto={addPhoto}
       />
 
       <ProjectEditDialog

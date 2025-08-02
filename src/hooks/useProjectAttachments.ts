@@ -46,6 +46,14 @@ export const useProjectAttachments = () => {
   const addAttachment = useCallback(async (attachment: Omit<ProjectAttachment, "id">) => {
     console.log('📎 Adding new attachment:', attachment.fileName, 'for project:', attachment.projectId);
     console.log('📎 Current global attachments count:', globalAttachments.length);
+    console.log('📎 Attachment data received:', {
+      projectId: attachment.projectId,
+      fileName: attachment.fileName,
+      fileSize: attachment.fileSize,
+      fileType: attachment.fileType,
+      hasFileUrl: !!attachment.fileUrl,
+      fileUrlLength: attachment.fileUrl?.length
+    });
     
     const newAttachment: ProjectAttachment = {
       ...attachment,
@@ -55,9 +63,10 @@ export const useProjectAttachments = () => {
     console.log('📎 New attachment created with ID:', newAttachment.id);
     const updatedAttachments = [...globalAttachments, newAttachment];
     console.log('📎 Updated attachments array length:', updatedAttachments.length);
+    console.log('📎 About to save attachments...');
     
     await saveAttachments(updatedAttachments);
-    console.log('📎 Attachment save completed');
+    console.log('📎 Attachment save completed - final count:', updatedAttachments.length);
   }, []);
 
   const deleteAttachment = useCallback(async (id: string) => {

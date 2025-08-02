@@ -54,34 +54,46 @@ export const useProjectAttachments = () => {
   }, []);
 
   const addAttachment = useCallback(async (attachment: Omit<ProjectAttachment, "id">) => {
-    console.log('📎 Adding new attachment:', attachment.fileName, 'for project:', attachment.projectId);
-    console.log('📎 Current global attachments count:', globalAttachments.length);
-    console.log('📎 Attachment data received:', {
-      projectId: attachment.projectId,
-      fileName: attachment.fileName,
-      fileSize: attachment.fileSize,
-      fileType: attachment.fileType,
-      hasFileUrl: !!attachment.fileUrl,
-      fileUrlLength: attachment.fileUrl?.length
-    });
+    console.log('📎 Hook: Adding new attachment:', attachment.fileName, 'for project:', attachment.projectId);
+    console.log('📎 Hook: Current global attachments count:', globalAttachments.length);
+    console.log('📎 Hook: Current local state count:', attachments.length);
+    
+    if (!attachment.projectId) {
+      console.error('❌ Hook: No projectId in attachment data');
+      throw new Error('ProjectId is required for attachment');
+    }
     
     const newAttachment: ProjectAttachment = {
       ...attachment,
-      id: Date.now().toString() + Math.random().toString(36),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     };
     
-    console.log('📎 New attachment created with ID:', newAttachment.id);
-    const updatedAttachments = [...globalAttachments, newAttachment];
-    console.log('📎 Updated attachments array length:', updatedAttachments.length);
-    console.log('📎 About to save attachments...');
+    console.log('📎 Hook: New attachment created:', {
+      id: newAttachment.id,
+      projectId: newAttachment.projectId,
+      fileName: newAttachment.fileName,
+      fileSize: newAttachment.fileSize
+    });
     
+    const updatedAttachments = [...globalAttachments, newAttachment];
+    console.log('📎 Hook: Updated attachments array:', {
+      oldCount: globalAttachments.length,
+      newCount: updatedAttachments.length,
+      newAttachmentIndex: updatedAttachments.length - 1
+    });
+    
+    // Save immediately and wait for completion
     const success = await saveAttachments(updatedAttachments);
-    console.log('📎 Attachment save completed - success:', success, 'final count:', updatedAttachments.length);
+    console.log('📎 Hook: Save result:', success);
     
     if (!success) {
       throw new Error('Failed to save attachment to storage');
     }
-  }, []);
+    
+    // Verify the attachment was saved by checking if it exists in the updated list
+    const savedAttachment = updatedAttachments.find(a => a.id === newAttachment.id);
+    console.log('📎 Hook: Verification - attachment exists in list:', !!savedAttachment);
+  }, [attachments.length]);
 
   const deleteAttachment = useCallback(async (id: string) => {
     const updatedAttachments = globalAttachments.filter(attachment => attachment.id !== id);

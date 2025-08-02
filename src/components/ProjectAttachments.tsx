@@ -50,7 +50,23 @@ const ProjectAttachments = ({
 
   const handleSaveAttachments = async () => {
     console.log('=== SAVE ATTACHMENTS START ===');
-    console.log('Number of files to upload:', uploadFiles.length);
+    console.log('Dialog state check:', {
+      projectId,
+      projectName,
+      uploadFilesCount: uploadFiles.length,
+      currentAttachmentsCount: attachments.length,
+      dialogOpen: open
+    });
+    
+    if (!projectId) {
+      console.error('❌ No projectId provided to attachment dialog');
+      toast({
+        title: "Error",
+        description: "No project selected for attachment upload",
+        variant: "destructive"
+      });
+      return;
+    }
     
     // Check file sizes first
     const maxFileSize = 10 * 1024 * 1024; // 10MB limit
@@ -66,19 +82,19 @@ const ProjectAttachments = ({
     }
 
     try {
-      for (const file of uploadFiles) {
-        console.log(`Processing file: ${file.name}, size: ${file.size}`);
+      for (const [index, file] of uploadFiles.entries()) {
+        console.log(`📁 Processing file ${index + 1}/${uploadFiles.length}: ${file.name}`);
         
         try {
           // Convert file to base64 for persistent storage
           const base64Data = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => {
-              console.log(`File ${file.name} converted to base64`);
+              console.log(`✅ File ${file.name} converted to base64 (${(reader.result as string).length} chars)`);
               resolve(reader.result as string);
             };
             reader.onerror = (error) => {
-              console.error(`FileReader error for ${file.name}:`, error);
+              console.error(`❌ FileReader error for ${file.name}:`, error);
               reject(error);
             };
             reader.readAsDataURL(file);
@@ -93,14 +109,19 @@ const ProjectAttachments = ({
             fileType: file.type || "application/octet-stream"
           };
           
-          console.log(`Adding attachment for file: ${file.name}`);
-          console.log('Attachment data being passed:', attachment);
-          console.log('Current attachments before adding:', attachments.length);
+          console.log(`📤 Calling onAddAttachment for: ${file.name}`, {
+            projectId: attachment.projectId,
+            fileName: attachment.fileName,
+            fileSize: attachment.fileSize,
+            dataLength: attachment.fileUrl.length
+          });
+          
+          // Wait for the attachment to be added
           await onAddAttachment(attachment);
-          console.log(`Successfully added attachment for file: ${file.name}`);
+          console.log(`✅ Successfully processed attachment for: ${file.name}`);
           
         } catch (error) {
-          console.error('Failed to process file:', file.name, error);
+          console.error('❌ Failed to process file:', file.name, error);
           toast({
             title: "Upload Error",
             description: `Failed to upload ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -110,20 +131,11 @@ const ProjectAttachments = ({
         }
       }
 
-      console.log('All files processed successfully');
-      
-      // Verify the attachments were actually saved by checking the current attachments
-      console.log('🔍 Verifying saved attachments...');
-      console.log('🔍 Current attachments for project after save:', attachments.length);
-      
-      // Force a re-render to see updated data
-      setTimeout(() => {
-        console.log('🔍 Attachments after delay:', attachments.length);
-      }, 500);
+      console.log('🎉 All files processed successfully');
       
       setUploadFiles([]);
       toast({
-        title: "Success",
+        title: "Success", 
         description: `${uploadFiles.length} file(s) uploaded successfully`,
       });
       console.log('=== SAVE ATTACHMENTS SUCCESS ===');

@@ -90,14 +90,19 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
   const fundingStatus = getFundingStatus();
   const StatusIcon = fundingStatus.icon;
 
-  // Auto-update project status to "Completed" when all milestones are completed
+  // Auto-update project status based on milestones completion
   useEffect(() => {
-    if (milestones.length > 0 && onUpdateProject) {
-      const allMilestonesCompleted = milestones.every(milestone => milestone.status === "Completed");
-      if (allMilestonesCompleted && project.status !== "Completed") {
-        onUpdateProject(project.id, { status: "Completed" });
-      } else if (!allMilestonesCompleted && project.status === "Completed") {
-        // If project was marked completed but not all milestones are done, revert to appropriate status
+    if (onUpdateProject) {
+      if (milestones.length > 0) {
+        const allMilestonesCompleted = milestones.every(milestone => milestone.status === "Completed");
+        if (allMilestonesCompleted && project.status !== "Completed") {
+          onUpdateProject(project.id, { status: "Completed" });
+        } else if (!allMilestonesCompleted && project.status === "Completed") {
+          // If project was marked completed but not all milestones are done, revert to appropriate status
+          onUpdateProject(project.id, { status: "On-Track" });
+        }
+      } else if (project.status === "Completed") {
+        // If project has no milestones but is marked completed, revert to appropriate status
         onUpdateProject(project.id, { status: "On-Track" });
       }
     }

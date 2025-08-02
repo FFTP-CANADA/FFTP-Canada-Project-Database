@@ -181,7 +181,6 @@ const Index = () => {
               <p className="text-blue-600 mt-1">Project Tracker & Analytics Dashboard</p>
             </div>
             <div className="flex gap-3">
-              <StatusReportDialog projects={projects} notes={notes} />
               <Button 
                 variant="outline"
                 onClick={() => setShowProgramInfo(true)}
@@ -190,6 +189,7 @@ const Index = () => {
                 <Info className="w-4 h-4 mr-2" />
                 Program Info
               </Button>
+              <StatusReportDialog projects={projects} notes={notes} />
               <Button 
                 onClick={() => setIsAddProjectOpen(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"

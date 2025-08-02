@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Upload, Download, Trash2, File, X } from "lucide-react";
 import { ProjectAttachment } from "@/types/project";
@@ -307,20 +308,41 @@ const ProjectAttachments = ({
                         <Download className="w-4 h-4 mr-1" />
                         Download
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-red-300 text-red-600 hover:bg-red-50"
-                        onClick={() => {
-                          onDeleteAttachment(attachment.id);
-                          toast({
-                            title: "File Deleted",
-                            description: `${attachment.fileName} has been deleted`,
-                          });
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-red-300 text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete File</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{attachment.fileName}"? 
+                              This action cannot be undone and the file will be permanently removed.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-red-600 hover:bg-red-700"
+                              onClick={() => {
+                                onDeleteAttachment(attachment.id);
+                                toast({
+                                  title: "File Deleted",
+                                  description: `${attachment.fileName} has been permanently deleted`,
+                                });
+                              }}
+                            >
+                              Delete File
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 ))}

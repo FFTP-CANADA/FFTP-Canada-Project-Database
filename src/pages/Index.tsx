@@ -445,21 +445,17 @@ const Index = () => {
       />
 
       <ProjectAttachments
-        key={`attachments-${attachmentsDialog.projectId}-${getAttachmentsForProject(attachmentsDialog.projectId).length}`}
+        key={`attachments-${attachmentsDialog.projectId}-${attachments.length}`}
         projectId={attachmentsDialog.projectId}
         projectName={attachmentsDialog.projectName}
         open={attachmentsDialog.open}
         onOpenChange={(open) => setAttachmentsDialog(prev => ({ ...prev, open }))}
         attachments={getAttachmentsForProject(attachmentsDialog.projectId)}
         onAddAttachment={async (attachment) => {
-          console.log('🔄 Index: Adding attachment for project:', attachment.projectId);
           await addAttachment(attachment);
-          console.log('🔄 Index: Attachment added, refreshing dialog...');
         }}
         onDeleteAttachment={async (id) => {
-          console.log('🗑️ Index: Deleting attachment:', id);
           await deleteAttachment(id);
-          console.log('🗑️ Index: Attachment deleted, refreshing dialog...');
         }}
       />
 

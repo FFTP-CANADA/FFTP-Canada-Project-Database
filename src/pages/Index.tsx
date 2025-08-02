@@ -445,33 +445,13 @@ const Index = () => {
       />
 
       <ProjectAttachments
-        key={`attachments-${attachmentsDialog.projectId}-${Date.now()}`}
         projectId={attachmentsDialog.projectId}
         projectName={attachmentsDialog.projectName}
         open={attachmentsDialog.open}
         onOpenChange={(open) => setAttachmentsDialog(prev => ({ ...prev, open }))}
-        attachments={getAttachmentsForProject(attachmentsDialog.projectId)}
-        onAddAttachment={async (attachment) => {
-          console.log('=== INDEX: BEFORE ADD ATTACHMENT ===');
-          console.log('Current attachments count:', getAttachmentsForProject(attachmentsDialog.projectId).length);
-          
-          await addAttachment(attachment);
-          
-          console.log('=== INDEX: AFTER ADD ATTACHMENT ===');
-          console.log('New attachments count:', getAttachmentsForProject(attachmentsDialog.projectId).length);
-          
-          // Force refresh by keeping the same projectId but triggering re-render
-          const currentProjectId = attachmentsDialog.projectId;
-          const currentProjectName = attachmentsDialog.projectName;
-          
-          setAttachmentsDialog({ open: false, projectId: '', projectName: '' });
-          setTimeout(() => {
-            setAttachmentsDialog({ open: true, projectId: currentProjectId, projectName: currentProjectName });
-          }, 50);
-        }}
-        onDeleteAttachment={async (id) => {
-          await deleteAttachment(id);
-        }}
+        attachments={attachments.filter(a => a.projectId === attachmentsDialog.projectId)}
+        onAddAttachment={addAttachment}
+        onDeleteAttachment={deleteAttachment}
       />
 
       <ProjectGallery

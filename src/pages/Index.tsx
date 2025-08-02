@@ -452,12 +452,22 @@ const Index = () => {
         onOpenChange={(open) => setAttachmentsDialog(prev => ({ ...prev, open }))}
         attachments={getAttachmentsForProject(attachmentsDialog.projectId)}
         onAddAttachment={async (attachment) => {
+          console.log('=== INDEX: BEFORE ADD ATTACHMENT ===');
+          console.log('Current attachments count:', getAttachmentsForProject(attachmentsDialog.projectId).length);
+          
           await addAttachment(attachment);
-          // Force component to re-render by closing and reopening
-          setAttachmentsDialog(prev => ({ ...prev, open: false }));
+          
+          console.log('=== INDEX: AFTER ADD ATTACHMENT ===');
+          console.log('New attachments count:', getAttachmentsForProject(attachmentsDialog.projectId).length);
+          
+          // Force refresh by keeping the same projectId but triggering re-render
+          const currentProjectId = attachmentsDialog.projectId;
+          const currentProjectName = attachmentsDialog.projectName;
+          
+          setAttachmentsDialog({ open: false, projectId: '', projectName: '' });
           setTimeout(() => {
-            setAttachmentsDialog(prev => ({ ...prev, open: true }));
-          }, 100);
+            setAttachmentsDialog({ open: true, projectId: currentProjectId, projectName: currentProjectName });
+          }, 50);
         }}
         onDeleteAttachment={async (id) => {
           await deleteAttachment(id);

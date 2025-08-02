@@ -40,6 +40,7 @@ export const ProjectAlertsPanel = ({
       case 'deadline': return <Calendar className="w-4 h-4" />;
       case 'milestone': return <CheckCircle className="w-4 h-4" />;
       case 'disbursement': return <AlertTriangle className="w-4 h-4" />;
+      case 'overdue': return <AlertTriangle className="w-4 h-4 text-red-600" />;
       default: return <Bell className="w-4 h-4" />;
     }
   };
@@ -69,23 +70,6 @@ export const ProjectAlertsPanel = ({
   }
 
    return (
-    <>
-      {/* Demo Mode Banner */}
-      {demoMode && (
-        <Card className="border-blue-200 bg-blue-50 mb-4">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-blue-600" />
-              <CardTitle className="text-sm text-blue-800">DEMONSTRATION MODE</CardTitle>
-            </div>
-            <CardDescription className="text-xs text-blue-600">
-              🎯 **ALERT DISPLAY LOCATION**: This is where all project alerts appear!<br/>
-              Below are 5 sample alerts showing funding deadlines and milestones using 10 business-day warning system.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      )}
-      
       <Card className={cn("border-orange-200 bg-orange-50", className)}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
@@ -120,7 +104,7 @@ export const ProjectAlertsPanel = ({
           </div>
         </div>
         <CardDescription className="text-orange-600">
-          {alerts.length} alert{alerts.length === 1 ? '' : 's'} - Items due within 10 business days
+          {alerts.length} alert{alerts.length === 1 ? '' : 's'} - Items due within 10 business days or overdue
         </CardDescription>
       </CardHeader>
 
@@ -129,7 +113,8 @@ export const ProjectAlertsPanel = ({
           <div className="space-y-3">
             {alerts
               .sort((a, b) => {
-                // Sort by: unread first, then by priority (high > medium > low), then by due date
+                // Sort by: overdue first, then unread, then by priority, then by due date
+                if (a.isOverdue !== b.isOverdue) return a.isOverdue ? -1 : 1;
                 if (a.isRead !== b.isRead) return a.isRead ? 1 : -1;
                 const priorityOrder = { high: 3, medium: 2, low: 1 };
                 if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
@@ -144,6 +129,7 @@ export const ProjectAlertsPanel = ({
                   className={cn(
                     "p-3 rounded-lg border-l-4 transition-all hover:shadow-sm",
                     alert.isRead ? "bg-gray-50 opacity-70" : "bg-white shadow-sm",
+                    alert.isOverdue ? "border-l-red-600 bg-red-50" : 
                     alert.priority === 'high' ? "border-l-red-500" : 
                     alert.priority === 'medium' ? "border-l-yellow-500" : "border-l-blue-500"
                   )}
@@ -157,9 +143,11 @@ export const ProjectAlertsPanel = ({
                         <div className="flex items-center gap-2 mb-1">
                           <Badge 
                             variant="outline" 
-                            className={cn("text-xs", getPriorityColor(alert.priority))}
+                            className={cn("text-xs", 
+                              alert.isOverdue ? "bg-red-100 text-red-800 border-red-200" :
+                              getPriorityColor(alert.priority))}
                           >
-                            {alert.priority.toUpperCase()}
+                            {alert.isOverdue ? 'OVERDUE' : alert.priority.toUpperCase()}
                           </Badge>
                           <span className="text-xs text-gray-500">
                             Due: {formatDate(alert.dueDate)}
@@ -172,7 +160,10 @@ export const ProjectAlertsPanel = ({
                           {alert.message}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          {alert.businessDaysUntilDue} business day{alert.businessDaysUntilDue === 1 ? '' : 's'} remaining
+                          {alert.isOverdue ? 
+                            `${Math.abs(alert.businessDaysUntilDue)} business day${Math.abs(alert.businessDaysUntilDue) === 1 ? '' : 's'} overdue` :
+                            `${alert.businessDaysUntilDue} business day${alert.businessDaysUntilDue === 1 ? '' : 's'} remaining`
+                          }
                         </p>
                       </div>
                     </div>
@@ -206,6 +197,5 @@ export const ProjectAlertsPanel = ({
         </ScrollArea>
       </CardContent>
       </Card>
-    </>
   );
 };

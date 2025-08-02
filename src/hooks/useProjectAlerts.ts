@@ -8,13 +8,14 @@ export interface ProjectAlert {
   id: string;
   projectId: string;
   projectName: string;
-  alertType: 'deadline' | 'milestone' | 'disbursement' | 'report';
+  alertType: 'deadline' | 'milestone' | 'disbursement' | 'report' | 'overdue';
   message: string;
   dueDate: Date;
   businessDaysUntilDue: number;
   priority: 'high' | 'medium' | 'low';
   isRead: boolean;
   createdAt: Date;
+  isOverdue?: boolean;
 }
 
 export const useProjectAlerts = (projects: Project[]) => {
@@ -22,7 +23,7 @@ export const useProjectAlerts = (projects: Project[]) => {
   const [alertSettings] = useState({
     warningDays: 10, // Alert 10 business days before
     enableAlerts: true,
-    demoMode: true // DEMO MODE - will be removed after review
+    demoMode: false // Demo removed as requested
   });
   const { milestones } = useProjectMilestones();
   const { donorPledges } = useProjectFunding();
@@ -35,81 +36,34 @@ export const useProjectAlerts = (projects: Project[]) => {
 
     const newAlerts: ProjectAlert[] = [];
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today for accurate comparison
 
-    // DEMO MODE: Add realistic dummy alerts to demonstrate the system
-    if (alertSettings.demoMode) {
-      const demoAlerts: ProjectAlert[] = [
-        {
-          id: 'demo-milestone-1',
-          projectId: 'demo-project-1',
-          projectName: '[DEMO] Port Kaituma Water System',
-          alertType: 'milestone',
-          message: 'MILESTONE: "First Disbursement Sent" is due in 3 business days',
-          dueDate: BusinessDayCalculator.addBusinessDays(today, 3),
-          businessDaysUntilDue: 3,
-          priority: 'high',
-          isRead: false,
-          createdAt: new Date()
-        },
-        {
-          id: 'demo-funding-1',
-          projectId: 'demo-project-2',
-          projectName: '[DEMO] Haiti School Construction',
-          alertType: 'disbursement',
-          message: 'FUNDING: Second disbursement ($25,000 CAD) is due in 7 business days',
-          dueDate: BusinessDayCalculator.addBusinessDays(today, 7),
-          businessDaysUntilDue: 7,
-          priority: 'medium',
-          isRead: false,
-          createdAt: new Date()
-        },
-        {
-          id: 'demo-milestone-2',
-          projectId: 'demo-project-3',
-          projectName: '[DEMO] Jamaica Housing Project',
-          alertType: 'milestone',
-          message: 'MILESTONE: "Interim Report & Receipts Submitted" is due in 9 business days',
-          dueDate: BusinessDayCalculator.addBusinessDays(today, 9),
-          businessDaysUntilDue: 9,
-          priority: 'low',
-          isRead: false,
-          createdAt: new Date()
-        },
-        {
-          id: 'demo-deadline-1',
-          projectId: 'demo-project-4',
-          projectName: '[DEMO] Guyana Education Initiative',
-          alertType: 'deadline',
-          message: 'PROJECT DEADLINE: Complete project is due in 5 business days',
-          dueDate: BusinessDayCalculator.addBusinessDays(today, 5),
-          businessDaysUntilDue: 5,
-          priority: 'high',
-          isRead: false,
-          createdAt: new Date()
-        },
-        {
-          id: 'demo-report-1',
-          projectId: 'demo-project-5',
-          projectName: '[DEMO] Honduras Health Clinic',
-          alertType: 'report',
-          message: 'REPORT: Final report submission is due in 2 business days',
-          dueDate: BusinessDayCalculator.addBusinessDays(today, 2),
-          businessDaysUntilDue: 2,
-          priority: 'high',
-          isRead: false,
-          createdAt: new Date()
-        }
-      ];
-      newAlerts.push(...demoAlerts);
-    }
-
+    // 1. CHECK PROJECT DEADLINES (upcoming and overdue)
     projects.forEach(project => {
-      // Check project completion deadline
       if (project.endDate) {
         const endDate = new Date(project.endDate);
+        endDate.setHours(0, 0, 0, 0);
         const businessDaysUntil = BusinessDayCalculator.getBusinessDaysBetween(today, endDate);
         
-        if (businessDaysUntil > 0 && businessDaysUntil <= alertSettings.warningDays) {
+        // Overdue project deadlines
+        if (endDate < today) {
+          const overdueDays = BusinessDayCalculator.getBusinessDaysBetween(endDate, today);
+          newAlerts.push({
+            id: `overdue-deadline-${project.id}`,
+            projectId: project.id,
+            projectName: project.projectName,
+            alertType: 'overdue',
+            message: `🚨 OVERDUE: Project "${project.projectName}" was due ${overdueDays} business day${overdueDays === 1 ? '' : 's'} ago`,
+            dueDate: endDate,
+            businessDaysUntilDue: -overdueDays,
+            priority: 'high',
+            isRead: false,
+            createdAt: new Date(),
+            isOverdue: true
+          });
+        }
+        // Upcoming project deadlines
+        else if (businessDaysUntil > 0 && businessDaysUntil <= alertSettings.warningDays) {
           newAlerts.push({
             id: `deadline-${project.id}`,
             projectId: project.id,
@@ -126,18 +80,38 @@ export const useProjectAlerts = (projects: Project[]) => {
       }
     });
 
-    // Check milestone deadlines for all projects
+    // 2. CHECK ALL MILESTONE DEADLINES (upcoming and overdue)
     milestones.forEach(milestone => {
       if (milestone.status !== 'Completed' && milestone.dueDate) {
         const dueDate = new Date(milestone.dueDate);
+        dueDate.setHours(0, 0, 0, 0);
         const businessDaysUntil = BusinessDayCalculator.getBusinessDaysBetween(today, dueDate);
+        const project = projects.find(p => p.id === milestone.projectId);
+        const projectName = project?.projectName || 'Unknown Project';
         
-        if (businessDaysUntil > 0 && businessDaysUntil <= alertSettings.warningDays) {
-          const project = projects.find(p => p.id === milestone.projectId);
+        // Overdue milestones
+        if (dueDate < today) {
+          const overdueDays = BusinessDayCalculator.getBusinessDaysBetween(dueDate, today);
+          newAlerts.push({
+            id: `overdue-milestone-${milestone.id}`,
+            projectId: milestone.projectId,
+            projectName: projectName,
+            alertType: 'overdue',
+            message: `🚨 OVERDUE: Milestone "${milestone.title}" was due ${overdueDays} business day${overdueDays === 1 ? '' : 's'} ago`,
+            dueDate: dueDate,
+            businessDaysUntilDue: -overdueDays,
+            priority: 'high',
+            isRead: false,
+            createdAt: new Date(),
+            isOverdue: true
+          });
+        }
+        // Upcoming milestones
+        else if (businessDaysUntil > 0 && businessDaysUntil <= alertSettings.warningDays) {
           newAlerts.push({
             id: `milestone-${milestone.id}`,
             projectId: milestone.projectId,
-            projectName: project?.projectName || 'Unknown Project',
+            projectName: projectName,
             alertType: 'milestone',
             message: `Milestone "${milestone.title}" is due in ${businessDaysUntil} business day${businessDaysUntil === 1 ? '' : 's'}`,
             dueDate: dueDate,
@@ -150,8 +124,28 @@ export const useProjectAlerts = (projects: Project[]) => {
       }
     });
 
-    // Funding/disbursement alerts will be added when proper data structure is available
-    // For now, demo shows realistic examples of what funding alerts would look like
+    // 3. CHECK FUNDING/DISBURSEMENT DEADLINES
+    // Note: Will be implemented when proper disbursement date structure is available
+    // Current DonorPledge structure has pledgedAmount and expectedDate but no disbursement schedule
+
+    // 4. CHECK FOR DELAYED PROJECTS (status-based)
+    projects.forEach(project => {
+      if (project.status === "Delayed" || project.status === "Needs Attention") {
+        newAlerts.push({
+          id: `status-${project.id}`,
+          projectId: project.id,
+          projectName: project.projectName,
+          alertType: 'overdue',
+          message: `⚠️ PROJECT STATUS: "${project.projectName}" is marked as ${project.status.toUpperCase()}`,
+          dueDate: project.endDate ? new Date(project.endDate) : new Date(),
+          businessDaysUntilDue: 0,
+          priority: project.status === "Delayed" ? 'high' : 'medium',
+          isRead: false,
+          createdAt: new Date(),
+          isOverdue: true
+        });
+      }
+    });
 
     return newAlerts;
   }, [projects, alertSettings, milestones, donorPledges]);

@@ -15,20 +15,22 @@ const ProjectGanttDialog = ({
   open,
   onOpenChange,
 }: ProjectGanttDialogProps) => {
-  const { getMilestonesForProject } = useProjectData();
+  const { getMilestonesForProject, projects } = useProjectData();
 
   if (!project) return null;
 
+  // Get the current project data to ensure we have the latest status
+  const currentProject = projects.find(p => p.id === project.id) || project;
   const milestones = getMilestonesForProject(project.id);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Project Timeline - {project.projectName}</DialogTitle>
+          <DialogTitle>Project Timeline - {currentProject.projectName}</DialogTitle>
         </DialogHeader>
         <ProjectGanttChart
-          project={project}
+          project={currentProject}
           milestones={milestones}
         />
       </DialogContent>

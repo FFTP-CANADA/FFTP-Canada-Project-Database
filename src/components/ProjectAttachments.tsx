@@ -48,41 +48,28 @@ const ProjectAttachments = ({
   };
 
   const handleSaveAttachments = async () => {
-    if (!projectId) {
+    console.log('=== DEBUGGING FILE UPLOAD ===');
+    console.log('1. Upload started with:', {
+      projectId,
+      projectName,
+      filesCount: uploadFiles.length,
+      currentAttachmentsCount: attachments.length
+    });
+
+    if (!projectId || uploadFiles.length === 0) {
+      console.log('ERROR: Missing projectId or no files');
       toast({
         title: "Error",
-        description: "No project selected for attachment upload",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (uploadFiles.length === 0) {
-      toast({
-        title: "No Files",
-        description: "Please select files to upload first",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Check file sizes
-    const maxFileSize = 10 * 1024 * 1024; // 10MB limit
-    const oversizedFiles = uploadFiles.filter(file => file.size > maxFileSize);
-    
-    if (oversizedFiles.length > 0) {
-      toast({
-        title: "File Size Error",
-        description: `Files too large (max 10MB): ${oversizedFiles.map(f => f.name).join(', ')}`,
+        description: "No project selected or no files to upload",
         variant: "destructive"
       });
       return;
     }
 
     try {
-      // Process files sequentially to avoid race conditions
       for (const file of uploadFiles) {
-        // Convert to base64
+        console.log('2. Processing file:', file.name);
+        
         const base64Data = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
@@ -90,7 +77,9 @@ const ProjectAttachments = ({
           reader.readAsDataURL(file);
         });
 
-        const attachment: Omit<ProjectAttachment, "id"> = {
+        console.log('3. File converted to base64, length:', base64Data.length);
+
+        const attachment = {
           projectId,
           fileName: file.name,
           fileUrl: base64Data,
@@ -99,22 +88,30 @@ const ProjectAttachments = ({
           fileType: file.type || "application/octet-stream"
         };
         
-        // Add attachment and wait for completion
+        console.log('4. Calling onAddAttachment with:', {
+          projectId: attachment.projectId,
+          fileName: attachment.fileName
+        });
+        
         await onAddAttachment(attachment);
+        console.log('5. onAddAttachment completed');
       }
 
-      // Clear upload files and show success
+      console.log('6. All files processed, clearing upload list');
       setUploadFiles([]);
+      
+      console.log('7. Checking what attachments we have now:', attachments.length);
+      
       toast({
-        title: "Success",
-        description: `${uploadFiles.length} file(s) uploaded successfully`,
+        title: "Upload Complete",
+        description: `${uploadFiles.length} file(s) uploaded`,
       });
       
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('8. ERROR during upload:', error);
       toast({
         title: "Upload Failed",
-        description: `Failed to save attachments: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        description: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       });
     }

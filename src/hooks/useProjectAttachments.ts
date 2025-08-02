@@ -52,7 +52,16 @@ export const useProjectAttachments = () => {
   }, []);
 
   const addAttachment = useCallback(async (attachment: Omit<ProjectAttachment, "id">) => {
+    console.log('=== HOOK: ADD ATTACHMENT ===');
+    console.log('A1. Received attachment:', {
+      projectId: attachment.projectId,
+      fileName: attachment.fileName,
+      hasFileUrl: !!attachment.fileUrl,
+      currentGlobalCount: globalAttachments.length
+    });
+    
     if (!attachment.projectId) {
+      console.log('A2. ERROR: No projectId');
       throw new Error('ProjectId is required for attachment');
     }
     
@@ -61,12 +70,20 @@ export const useProjectAttachments = () => {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     };
     
+    console.log('A3. Created new attachment with ID:', newAttachment.id);
+    
     const updatedAttachments = [...globalAttachments, newAttachment];
+    console.log('A4. Updated array length:', updatedAttachments.length);
+    
     const success = await saveAttachments(updatedAttachments);
+    console.log('A5. Save result:', success);
     
     if (!success) {
+      console.log('A6. ERROR: Save failed');
       throw new Error('Failed to save attachment to storage');
     }
+    
+    console.log('A7. Attachment successfully added');
   }, []);
 
   const deleteAttachment = useCallback(async (id: string) => {

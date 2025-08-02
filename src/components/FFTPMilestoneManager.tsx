@@ -177,9 +177,10 @@ const FFTPMilestoneManager = ({
   };
 
   const sortedMilestones = [...milestones].sort((a, b) => {
-    const aIndex = FFTP_MILESTONE_OPTIONS.indexOf(a.milestoneType as FFTPMilestoneType);
-    const bIndex = FFTP_MILESTONE_OPTIONS.indexOf(b.milestoneType as FFTPMilestoneType);
-    return aIndex - bIndex;
+    // Sort by start date in ascending order
+    const dateA = new Date(a.startDate);
+    const dateB = new Date(b.startDate);
+    return dateA.getTime() - dateB.getTime();
   });
 
   const totalDisbursements = sortedMilestones

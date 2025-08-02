@@ -68,7 +68,12 @@ const ProjectAttachments = ({
 
     try {
       for (const file of uploadFiles) {
-        console.log('2. Processing file:', file.name);
+        console.log('2. Processing file:', file.name, 'Size:', Math.round(file.size / 1024), 'KB');
+        
+        // Check file size limit (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          throw new Error(`File "${file.name}" is too large. Maximum size is 5MB.`);
+        }
         
         const base64Data = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
@@ -77,7 +82,12 @@ const ProjectAttachments = ({
           reader.readAsDataURL(file);
         });
 
-        console.log('3. File converted to base64, length:', base64Data.length);
+        console.log('3. File converted to base64, estimated storage size:', Math.round(base64Data.length / 1024), 'KB');
+
+        // Check if the base64 data is reasonable size for localStorage
+        if (base64Data.length > 3 * 1024 * 1024) { // 3MB in characters
+          throw new Error(`File "${file.name}" is too large when encoded. Please use a smaller file.`);
+        }
 
         const attachment = {
           projectId,

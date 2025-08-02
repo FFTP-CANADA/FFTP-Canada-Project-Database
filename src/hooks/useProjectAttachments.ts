@@ -12,16 +12,21 @@ const notifyAttachmentListeners = (attachments: ProjectAttachment[]) => {
 };
 
 const saveAttachments = async (attachments: ProjectAttachment[]) => {
-  console.log('🔧 Saving attachments to storage:', attachments.length, 'attachments');
-  console.log('🔧 Attachment data preview:', attachments.map(a => ({ id: a.id, fileName: a.fileName, projectId: a.projectId })));
-  
   try {
     await LocalStorageManager.setItem('project-attachments', attachments);
-    console.log('✅ Attachments saved to localStorage');
     
-    // Verify the data was actually saved
+    // Immediately verify the save worked
     const verified = LocalStorageManager.getItem('project-attachments', []);
-    console.log('🔍 Verification: Read back', verified.length, 'attachments from storage');
+    console.log('SAVE VERIFICATION:', {
+      attempted: attachments.length,
+      verified: verified.length,
+      success: attachments.length === verified.length
+    });
+    
+    if (attachments.length !== verified.length) {
+      console.error('SAVE FAILED: Data not properly saved to localStorage');
+      return false;
+    }
     
     // Update global state and notify all listeners
     globalAttachments = attachments;
@@ -29,7 +34,7 @@ const saveAttachments = async (attachments: ProjectAttachment[]) => {
     
     return true;
   } catch (error) {
-    console.error('❌ Failed to save attachments:', error);
+    console.error('SAVE ERROR:', error);
     return false;
   }
 };
@@ -101,23 +106,14 @@ export const useProjectAttachments = () => {
   }, []);
 
   const getAttachmentsForProject = useCallback((projectId: string) => {
-    console.log('🔍 Getting attachments for project:', {
+    const projectAttachments = globalAttachments.filter(attachment => attachment.projectId === projectId);
+    console.log('GET ATTACHMENTS:', {
       projectId,
-      projectIdType: typeof projectId,
       totalAttachments: globalAttachments.length,
-      matchingAttachments: globalAttachments.filter(attachment => attachment.projectId === projectId).length
+      projectAttachments: projectAttachments.length,
+      allProjectIds: [...new Set(globalAttachments.map(a => a.projectId))]
     });
-    
-    // Special debugging for Port Kaituma
-    if (projectId === "5") {
-      console.log('🚨 PORT KAITUMA ATTACHMENTS DEBUG:', {
-        projectId,
-        allAttachments: globalAttachments.map(a => ({ id: a.id, projectId: a.projectId, fileName: a.fileName })),
-        matchingAttachments: globalAttachments.filter(attachment => attachment.projectId === projectId)
-      });
-    }
-    
-    return globalAttachments.filter(attachment => attachment.projectId === projectId);
+    return projectAttachments;
   }, []);
 
   return {

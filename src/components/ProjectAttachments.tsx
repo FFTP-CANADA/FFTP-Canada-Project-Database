@@ -28,24 +28,12 @@ const ProjectAttachments = ({
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const { toast } = useToast();
 
-  // Debug current state when dialog opens
-  console.log('🔍 ProjectAttachments Dialog State:', {
+  // Debug when dialog opens
+  console.log('ATTACHMENT DIALOG OPENED:', {
     projectId,
-    projectIdType: typeof projectId,
-    projectIdString: String(projectId),
     projectName,
-    open,
     attachmentsCount: attachments.length,
-    attachments: attachments.map(a => ({ id: a.id, fileName: a.fileName, projectId: a.projectId }))
-  });
-  
-  // Enhanced debugging for any project with attachment issues
-  console.log('🔍 ALL PROJECTS DEBUG:', {
-    dialogProjectId: projectId,
-    dialogProjectName: projectName,
-    allAttachmentsInSystem: attachments.length,
-    attachmentsForThisProject: attachments.filter(a => String(a.projectId) === String(projectId)).length,
-    attachmentProjectIds: [...new Set(attachments.map(a => a.projectId))]
+    open
   });
 
   const handleFileUpload = (files: FileList | null) => {

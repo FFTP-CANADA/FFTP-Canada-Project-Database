@@ -445,7 +445,7 @@ const Index = () => {
       />
 
       <ProjectAttachments
-        key={`attachments-${attachmentsDialog.projectId}-${attachments.length}`}
+        key={`attachments-${attachmentsDialog.projectId}-${Date.now()}`}
         projectId={attachmentsDialog.projectId}
         projectName={attachmentsDialog.projectName}
         open={attachmentsDialog.open}
@@ -453,6 +453,11 @@ const Index = () => {
         attachments={getAttachmentsForProject(attachmentsDialog.projectId)}
         onAddAttachment={async (attachment) => {
           await addAttachment(attachment);
+          // Force component to re-render by closing and reopening
+          setAttachmentsDialog(prev => ({ ...prev, open: false }));
+          setTimeout(() => {
+            setAttachmentsDialog(prev => ({ ...prev, open: true }));
+          }, 100);
         }}
         onDeleteAttachment={async (id) => {
           await deleteAttachment(id);

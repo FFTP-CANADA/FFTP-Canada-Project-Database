@@ -90,12 +90,12 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
   const fundingStatus = getFundingStatus();
   const StatusIcon = fundingStatus.icon;
 
-  // Auto-update project status to "Completed" when funding reaches 100%
-  useEffect(() => {
-    if (fundingPercentage >= 100 && project.status !== "Completed" && onUpdateProject) {
-      onUpdateProject(project.id, { status: "Completed" });
-    }
-  }, [fundingPercentage, project.status, project.id, onUpdateProject]);
+  // Auto-update project status to "Completed" when funding reaches 100% - DISABLED
+  // useEffect(() => {
+  //   if (fundingPercentage >= 100 && project.status !== "Completed" && onUpdateProject) {
+  //     onUpdateProject(project.id, { status: "Completed" });
+  //   }
+  // }, [fundingPercentage, project.status, project.id, onUpdateProject]);
 
   const resetForm = () => {
     setReceiptForm({

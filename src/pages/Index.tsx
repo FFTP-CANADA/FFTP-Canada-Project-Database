@@ -19,6 +19,7 @@ import ProjectFundingStatusDialog from "@/components/ProjectFundingStatusDialog"
 import ProjectGanttDialog from "@/components/ProjectGanttDialog";
 import StatusReportDialog from "@/components/StatusReportDialog";
 import ProgramInfoDialog from "@/components/ProgramInfoDialog";
+import { FundReallocationDialog } from "@/components/FundReallocationDialog";
 import AutoFollowUpManager from "@/components/AutoFollowUpManager";
 import NotificationsAlert from "@/components/NotificationsAlert";
 import { useProjectData } from "@/hooks/useProjectData";
@@ -57,6 +58,10 @@ const Index = () => {
     project: null
   });
   const [disbursementDialog, setDisbursementDialog] = useState<{ open: boolean; project: Project | null }>({
+    open: false,
+    project: null
+  });
+  const [reallocationDialog, setReallocationDialog] = useState<{ open: boolean; project: Project | null }>({
     open: false,
     project: null
   });
@@ -219,6 +224,10 @@ const Index = () => {
 
   const handleOpenDisbursement = (project: Project) => {
     setDisbursementDialog({ open: true, project });
+  };
+
+  const handleOpenReallocation = (project: Project) => {
+    setReallocationDialog({ open: true, project });
   };
 
   return (
@@ -429,6 +438,7 @@ const Index = () => {
                   onOpenGantt={handleOpenGantt}
                   onOpenFunding={handleOpenFunding}
                   onOpenDisbursement={handleOpenDisbursement}
+                  onOpenReallocation={handleOpenReallocation}
                   onEditProject={handleEditProject}
                   onDeleteProject={deleteProject}
                   onManagePrograms={() => setProgramManagementOpen(true)}
@@ -526,6 +536,13 @@ const Index = () => {
         project={disbursementDialog.project}
         open={disbursementDialog.open}
         onOpenChange={(open) => setDisbursementDialog({open, project: null})}
+      />
+
+      <FundReallocationDialog
+        open={reallocationDialog.open}
+        onOpenChange={(open) => setReallocationDialog({open, project: null})}
+        projects={projects}
+        currentProject={reallocationDialog.project || undefined}
       />
 
       <ProgramInfoDialog 

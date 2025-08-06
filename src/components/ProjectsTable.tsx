@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt, Banknote, Calendar, Trash2 } from "lucide-react";
+import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt, Banknote, Calendar, Trash2, ArrowRightLeft } from "lucide-react";
 import { Project } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
 import { formatWithExchange } from "@/utils/currencyUtils";
@@ -23,6 +23,7 @@ interface ProjectsTableProps {
   onEditProject?: (project: Project) => void;
   onDeleteProject?: (projectId: string) => void;
   onManagePrograms?: () => void;
+  onOpenReallocation?: (project: Project) => void;
   donorPledges?: Array<{id: string; projectId: string; pledgedAmount: number}>;
 }
 
@@ -39,6 +40,7 @@ const ProjectsTable = ({
   onEditProject,
   onDeleteProject,
   onManagePrograms,
+  onOpenReallocation,
   donorPledges = []
 }: ProjectsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -374,9 +376,22 @@ const ProjectsTable = ({
                       variant="outline"
                       className="border-teal-300 text-teal-600 hover:bg-teal-50 text-xs px-2 py-1 h-7"
                       onClick={() => onOpenDisbursement?.(project)}
+                      title="Disbursement Schedule"
                     >
                       <Calendar className="w-3 h-3 mr-1" />
                       Schedule
+                    </Button>
+                    
+                    {/* Reallocation */}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-cyan-300 text-cyan-600 hover:bg-cyan-50 text-xs px-2 py-1 h-7"
+                      onClick={() => onOpenReallocation?.(project)}
+                      title="Fund Reallocation"
+                    >
+                      <ArrowRightLeft className="w-3 h-3 mr-1" />
+                      Reallocate
                     </Button>
                     
                     {/* Conditional Actions */}

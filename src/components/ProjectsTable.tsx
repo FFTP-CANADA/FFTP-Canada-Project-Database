@@ -180,7 +180,7 @@ const ProjectsTable = ({
 
       {/* Table */}
       <div className="border border-blue-200 rounded-lg overflow-auto">
-        <Table className="table-fixed w-full min-w-[1400px]">
+        <Table className="table-fixed w-full min-w-[1200px]">
           <TableHeader className="bg-blue-600">
             <TableRow>
               <TableHead className="text-white w-32 px-6">Governance</TableHead>
@@ -192,7 +192,6 @@ const ProjectsTable = ({
               <TableHead className="text-white w-32 px-4">Total Cost</TableHead>
               <TableHead className="text-white w-32 px-4">Disbursed</TableHead>
               <TableHead className="text-white w-32 px-4">Balance Due</TableHead>
-              <TableHead className="text-white w-32 px-4">Progress</TableHead>
               <TableHead className="text-white w-96 px-6">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -242,25 +241,6 @@ const ProjectsTable = ({
                     </span>
                     : "N/A"
                   }
-                </TableCell>
-                <TableCell className="px-4">
-                  {project.totalCost ? (
-                    <div className="space-y-1">
-                      <div className="w-full bg-blue-100 rounded-md h-3 overflow-hidden">
-                        <div 
-                          className="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-md transition-all duration-300"
-                          style={{ 
-                            width: `${Math.min((project.amountDisbursed / project.totalCost) * 100, 100)}%` 
-                          }}
-                        />
-                      </div>
-                      <div className="text-xs text-blue-700 font-medium text-center">
-                        {Math.round((project.amountDisbursed / project.totalCost) * 100)}%
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-xs text-blue-600 text-center">No total cost</div>
-                  )}
                 </TableCell>
                 <TableCell className="w-96 px-6">
                   <div className="flex flex-wrap gap-1.5 w-full">

@@ -164,10 +164,16 @@ const Index = () => {
       return sum + cost;
     }, 0),
     totalPledgesCAD: (() => {
-      // Calculate total pledges by summing pledges for each project (matching table logic)
+      // Calculate total pledges by summing pledges for each project with currency conversion
       return projects.reduce((sum, project) => {
         const projectPledges = donorPledges.filter(pledge => pledge.projectId === project.id);
-        const totalPledgedForProject = projectPledges.reduce((pledgeSum, pledge) => pledgeSum + pledge.pledgedAmount, 0);
+        const totalPledgedForProject = projectPledges.reduce((pledgeSum, pledge) => {
+          // Convert pledge amount to CAD if project is in USD
+          if (project.currency === 'USD') {
+            return pledgeSum + convertUsdToCad(pledge.pledgedAmount);
+          }
+          return pledgeSum + pledge.pledgedAmount;
+        }, 0);
         return sum + totalPledgedForProject;
       }, 0);
     })(),

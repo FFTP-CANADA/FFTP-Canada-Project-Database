@@ -30,8 +30,19 @@ export const useProjects = () => {
     };
     listeners.push(listener);
     
+    // Listen for milestone-triggered project updates
+    const handleProjectsUpdated = (event: CustomEvent) => {
+      const updatedProjects = event.detail;
+      globalProjects = updatedProjects;
+      setProjects(updatedProjects);
+      listeners.forEach(l => l(updatedProjects));
+    };
+    
+    window.addEventListener('projects-updated', handleProjectsUpdated as EventListener);
+    
     return () => {
       listeners = listeners.filter(l => l !== listener);
+      window.removeEventListener('projects-updated', handleProjectsUpdated as EventListener);
     };
   }, []);
 

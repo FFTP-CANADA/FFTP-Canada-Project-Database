@@ -31,7 +31,6 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
     isDesignated: false,
     currency: "",
     totalCost: "",
-    amountDisbursed: "",
     reportedSpend: "",
     startDate: undefined as Date | undefined,
     endDate: undefined as Date | undefined,
@@ -93,7 +92,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
       isDesignated: formData.isDesignated,
       currency: formData.currency as Project["currency"],
       totalCost: formData.totalCost ? parseFloat(formData.totalCost) : undefined,
-      amountDisbursed: parseFloat(formData.amountDisbursed) || 0,
+      amountDisbursed: 0, // Auto-calculated from milestones
       reportedSpend: parseFloat(formData.reportedSpend) || 0,
       startDate: format(formData.startDate, "yyyy-MM-dd"),
       endDate: formData.endDate ? format(formData.endDate, "yyyy-MM-dd") : undefined,
@@ -174,7 +173,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
         isDesignated: false,
         currency: "",
         totalCost: "",
-        amountDisbursed: "",
+        
         reportedSpend: "",
         startDate: undefined,
         endDate: undefined,
@@ -367,17 +366,6 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="amountDisbursed" className="text-blue-900">Amount Disbursed</Label>
-              <Input
-                id="amountDisbursed"
-                type="number"
-                value={formData.amountDisbursed}
-                onChange={(e) => setFormData(prev => ({ ...prev, amountDisbursed: e.target.value }))}
-                className="border-blue-200 focus:border-blue-400"
-                placeholder="0"
-              />
-            </div>
 
             <div className="space-y-2">
               <Label htmlFor="reportedSpend" className="text-blue-900">Reported Spend</Label>

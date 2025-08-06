@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ProjectMilestone } from "@/types/project";
 import { LocalStorageManager } from "@/utils/localStorageManager";
+import { calculateProjectDisbursedAmount } from "@/utils/disbursementCalculator";
 
 let globalMilestones: ProjectMilestone[] = [];
 let milestoneListeners: Array<(milestones: ProjectMilestone[]) => void> = [];
@@ -11,8 +12,32 @@ const notifyMilestoneListeners = (milestones: ProjectMilestone[]) => {
   milestoneListeners.forEach(listener => listener(milestones));
 };
 
+const updateProjectDisbursedAmounts = async (milestones: ProjectMilestone[]) => {
+  // Get all unique project IDs that have disbursement milestones
+  const projectIds = [...new Set(milestones.map(m => m.projectId))];
+  
+  for (const projectId of projectIds) {
+    const projectMilestones = milestones.filter(m => m.projectId === projectId);
+    const calculatedAmount = calculateProjectDisbursedAmount(projectMilestones);
+    
+    // Get current projects and update the specific project's amountDisbursed
+    const projects = LocalStorageManager.getItem('projects', []);
+    const updatedProjects = projects.map(project => 
+      project.id === projectId 
+        ? { ...project, amountDisbursed: calculatedAmount }
+        : project
+    );
+    
+    await LocalStorageManager.setItem('projects', updatedProjects);
+    
+    // Notify project listeners about the updates by triggering a custom event
+    window.dispatchEvent(new CustomEvent('projects-updated', { detail: updatedProjects }));
+  }
+};
+
 const saveMilestones = async (milestones: ProjectMilestone[]) => {
   await LocalStorageManager.setItem('project-milestones', milestones);
+  await updateProjectDisbursedAmounts(milestones);
   notifyMilestoneListeners(milestones);
 };
 

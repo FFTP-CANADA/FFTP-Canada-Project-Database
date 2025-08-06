@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Project, PROGRAM_OPTIONS } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
+import { useProjectData } from "@/hooks/useProjectData";
+import { calculateProjectDisbursedAmount } from "@/utils/disbursementCalculator";
 
 interface ProjectEditDialogProps {
   project: Project | null;
@@ -27,10 +29,14 @@ const ProjectEditDialog = ({
 }: ProjectEditDialogProps) => {
   const [formData, setFormData] = useState<Partial<Project>>({});
   const { toast } = useToast();
+  const { getMilestonesForProject } = useProjectData();
 
   // Initialize form data when project changes
   useEffect(() => {
     if (project) {
+      const milestones = getMilestonesForProject(project.id);
+      const calculatedDisbursedAmount = calculateProjectDisbursedAmount(milestones);
+      
       setFormData({
         projectName: project.projectName,
         partnerName: project.partnerName,
@@ -40,7 +46,7 @@ const ProjectEditDialog = ({
         status: project.status,
         currency: project.currency,
         totalCost: project.totalCost,
-        amountDisbursed: project.amountDisbursed,
+        amountDisbursed: calculatedDisbursedAmount, // Auto-calculated from milestones
         startDate: project.startDate,
         endDate: project.endDate,
         followUpNeeded: project.followUpNeeded,
@@ -48,7 +54,7 @@ const ProjectEditDialog = ({
         governanceNumber: project.governanceNumber
       });
     }
-  }, [project]);
+  }, [project, getMilestonesForProject]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -263,14 +269,18 @@ const ProjectEditDialog = ({
             </div>
 
             <div>
-              <Label htmlFor="amountDisbursed">Amount Disbursed</Label>
+              <Label htmlFor="amountDisbursed">Amount Disbursed (Auto-calculated)</Label>
               <Input
                 id="amountDisbursed"
                 type="number"
                 value={formData.amountDisbursed || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, amountDisbursed: Number(e.target.value) }))}
-                required
+                disabled
+                className="bg-muted cursor-not-allowed"
+                placeholder="Calculated from completed disbursement milestones"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                This amount is automatically calculated from completed disbursement milestones
+              </p>
             </div>
           </div>
 

@@ -6,6 +6,7 @@ import { useProjectAttachments } from "./useProjectAttachments";
 import { useProjectPhotos } from "./useProjectPhotos";
 import { useProjectMilestones } from "./useProjectMilestones";
 import { usePrograms } from "./usePrograms";
+import { migrateDisbursedAmounts } from "@/utils/migrateDisbursedAmounts";
 
 export const useProjectData = () => {
   const projectsHook = useProjects();
@@ -25,8 +26,11 @@ export const useProjectData = () => {
   };
 };
 
-// Initialize auto-backup system
+// Initialize auto-backup system and migration
 BackupManager.initializeAutoBackup();
+
+// Run one-time migration for disbursed amounts
+migrateDisbursedAmounts();
 
 // Re-export types for backwards compatibility
 export type { Project, ProjectMilestone, ProjectNote, ProjectAttachment, ProjectPhoto } from "@/types/project";

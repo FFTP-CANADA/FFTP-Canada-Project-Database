@@ -163,7 +163,15 @@ const Index = () => {
       }
       return sum + cost;
     }, 0),
-    totalPledgesCAD: donorPledges.reduce((sum, pledge) => sum + pledge.pledgedAmount, 0),
+    totalPledgesCAD: (() => {
+      const total = donorPledges.reduce((sum, pledge) => sum + pledge.pledgedAmount, 0);
+      console.log('Dashboard pledges calculation:', { 
+        donorPledgesCount: donorPledges.length, 
+        totalPledges: total,
+        donorPledges: donorPledges 
+      });
+      return total;
+    })(),
     completedProjects: projects.filter(p => p.status === "Completed").length,
     projectsAtRisk: projects.filter(p => p.status === "Delayed" || p.status === "Needs Attention").length,
     avgProjectValue: projects.length > 0 ? projects.reduce((sum, p) => {

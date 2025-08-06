@@ -106,8 +106,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
   const handleAddReceipt = () => {
     if (!receiptForm.donorName || !receiptForm.amount || !receiptForm.dateReceived) return;
     
-    // Convert date to ISO string and split to get just the date part (fixes timezone issues)
-    const dateReceived = format(new Date(receiptForm.dateReceived), 'yyyy-MM-dd');
+    // Use the date string directly to avoid timezone conversion issues
+    const dateReceived = receiptForm.dateReceived;
     
     fundingHook.addReceipt({
       projectId: project.id,
@@ -137,8 +137,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
   const handleUpdateReceipt = () => {
     if (!receiptForm.donorName || !receiptForm.amount || !receiptForm.dateReceived || !editingReceiptId) return;
     
-    // Convert date to ISO string and split to get just the date part (fixes timezone issues)
-    const dateReceived = format(new Date(receiptForm.dateReceived), 'yyyy-MM-dd');
+    // Use the date string directly to avoid timezone conversion issues
+    const dateReceived = receiptForm.dateReceived;
     
     fundingHook.updateReceipt(editingReceiptId, {
       donorName: receiptForm.donorName,
@@ -172,9 +172,9 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
   const handleAddPledge = () => {
     if (!pledgeForm.donorName || !pledgeForm.pledgedAmount || !pledgeForm.datePledged) return;
     
-    // Convert dates to ISO string and split to get just the date part (fixes timezone issues)
-    const datePledged = format(new Date(pledgeForm.datePledged), 'yyyy-MM-dd');
-    const expectedDate = pledgeForm.expectedDate ? format(new Date(pledgeForm.expectedDate), 'yyyy-MM-dd') : '';
+    // Use the date strings directly to avoid timezone conversion issues
+    const datePledged = pledgeForm.datePledged;
+    const expectedDate = pledgeForm.expectedDate || '';
     
     fundingHook.addPledge({
       projectId: project.id,
@@ -206,9 +206,9 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
   const handleUpdatePledge = () => {
     if (!pledgeForm.donorName || !pledgeForm.pledgedAmount || !pledgeForm.datePledged || !editingPledgeId) return;
     
-    // Convert dates to ISO string and split to get just the date part (fixes timezone issues)
-    const datePledged = format(new Date(pledgeForm.datePledged), 'yyyy-MM-dd');
-    const expectedDate = pledgeForm.expectedDate ? format(new Date(pledgeForm.expectedDate), 'yyyy-MM-dd') : '';
+    // Use the date strings directly to avoid timezone conversion issues
+    const datePledged = pledgeForm.datePledged;
+    const expectedDate = pledgeForm.expectedDate || '';
     
     fundingHook.updatePledge(editingPledgeId, {
       donorName: pledgeForm.donorName,

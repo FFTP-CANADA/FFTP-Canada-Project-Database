@@ -94,7 +94,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
       totalCost: formData.totalCost ? parseFloat(formData.totalCost) : undefined,
       amountDisbursed: 0, // Auto-calculated from milestones
       reportedSpend: parseFloat(formData.reportedSpend) || 0,
-      startDate: format(formData.startDate, "yyyy-MM-dd"),
+      startDate: formData.startDate ? format(formData.startDate, "yyyy-MM-dd") : "",
       endDate: formData.endDate ? format(formData.endDate, "yyyy-MM-dd") : undefined,
       status: formData.status as Project["status"],
       followUpNeeded: formData.followUpNeeded,

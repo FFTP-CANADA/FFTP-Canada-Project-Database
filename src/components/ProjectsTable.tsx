@@ -184,7 +184,7 @@ const ProjectsTable = ({
           <TableHeader className="bg-blue-600">
             <TableRow>
               <TableHead className="text-white">Governance</TableHead>
-              <TableHead className="text-white w-64">Project Name</TableHead>
+              <TableHead className="text-white w-96">Project Name</TableHead>
               <TableHead className="text-white">Program</TableHead>
               <TableHead className="text-white">Country</TableHead>
               <TableHead className="text-white">Impact Area</TableHead>
@@ -193,7 +193,7 @@ const ProjectsTable = ({
               <TableHead className="text-white">Disbursed</TableHead>
               <TableHead className="text-white">Balance Due</TableHead>
               <TableHead className="text-white">Progress</TableHead>
-              <TableHead className="text-white w-96">Actions</TableHead>
+              <TableHead className="text-white w-[500px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -263,7 +263,7 @@ const ProjectsTable = ({
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex flex-wrap gap-1 max-w-sm">
+                  <div className="flex flex-wrap gap-1 max-w-lg">
                     {/* Primary Actions */}
                     <Button
                       size="sm"

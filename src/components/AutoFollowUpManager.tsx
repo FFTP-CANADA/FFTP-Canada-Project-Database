@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Mail, Clock, AlertTriangle, Copy, CheckCircle, X } from "lucide-react";
 import { FollowUpEmail } from "@/hooks/useAutoFollowUp";
 import { useToast } from "@/hooks/use-toast";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface AutoFollowUpManagerProps {
   followUpEmails: FollowUpEmail[];
@@ -122,10 +123,10 @@ const AutoFollowUpManager = ({
                       <div className="flex items-center gap-4 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          Due: {new Date(email.milestoneDueDate).toLocaleDateString()}
+                          Due: {formatDateForDisplay(email.milestoneDueDate)}
                         </span>
                         <span>
-                          Generated: {new Date(email.generated).toLocaleDateString()}
+                          Generated: {formatDateForDisplay(email.generated)}
                         </span>
                         <span className={daysUntilDue <= 5 ? "text-red-600 font-medium" : ""}>
                           {daysUntilDue} days until due
@@ -153,7 +154,7 @@ const AutoFollowUpManager = ({
                           <div className="space-y-4">
                             <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
                               <p><strong>To:</strong> joannt@foodforthepoor.ca</p>
-                              <p><strong>Due Date:</strong> {new Date(email.milestoneDueDate).toLocaleDateString()}</p>
+                              <p><strong>Due Date:</strong> {formatDateForDisplay(email.milestoneDueDate)}</p>
                               <p><strong>Trigger:</strong> {email.trigger === "note" ? "New project note" : "Upcoming milestone"}</p>
                             </div>
                             <div>

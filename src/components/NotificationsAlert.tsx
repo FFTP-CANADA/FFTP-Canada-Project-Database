@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Clock, FileText, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Project, ProjectMilestone, ProjectNote } from "@/types/project";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface NotificationsAlertProps {
   projects: Project[];
@@ -96,7 +97,7 @@ const NotificationsAlert = ({ projects, milestones, notes }: NotificationsAlertP
                       {getProjectName(milestone.projectId)} - {milestone.title}
                     </p>
                     <p className="text-sm text-red-700">
-                      Due {new Date(milestone.dueDate).toLocaleDateString()} 
+                      Due {formatDateForDisplay(milestone.dueDate)} 
                       <span className={daysUntil <= 2 ? "font-bold ml-1" : "ml-1"}>
                         ({daysUntil === 0 ? "Today" : daysUntil === 1 ? "Tomorrow" : `${daysUntil} days`})
                       </span>
@@ -132,7 +133,7 @@ const NotificationsAlert = ({ projects, milestones, notes }: NotificationsAlertP
                     {note.content.length > 80 ? note.content.substring(0, 80) + "..." : note.content}
                   </p>
                   <p className="text-xs text-red-600 mt-1">
-                    Added {new Date(note.dateOfNote).toLocaleDateString()}
+                    Added {formatDateForDisplay(note.dateOfNote)}
                   </p>
                 </div>
               </div>

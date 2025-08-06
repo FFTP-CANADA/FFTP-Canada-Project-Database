@@ -4,9 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
 import { ProjectNote } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface ProjectNotesDialogProps {
   projectId: string;
@@ -33,7 +33,7 @@ const ProjectNotesDialog = ({
       onAddNote({
         projectId,
         content: newNote.trim(),
-        dateOfNote: format(new Date(), 'yyyy-MM-dd')
+        dateOfNote: getTodayString()
       });
       setNewNote("");
       toast({

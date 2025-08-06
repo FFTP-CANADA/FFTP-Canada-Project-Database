@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Plus, Trash2, Edit } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toDateString } from "@/utils/dateUtils";
 import { ProjectMilestone, FFTPMilestoneType } from "@/types/project";
 
 const FFTP_MILESTONE_OPTIONS: FFTPMilestoneType[] = [
@@ -83,8 +84,8 @@ const FFTPMilestoneManager = ({
       projectId,
       title: newMilestone.milestoneType, // Use milestoneType as the title
       milestoneType: newMilestone.milestoneType,
-      startDate: format(newMilestone.startDate, 'yyyy-MM-dd'),
-      dueDate: format(newMilestone.dueDate, 'yyyy-MM-dd'),
+      startDate: toDateString(newMilestone.startDate),
+      dueDate: toDateString(newMilestone.dueDate),
       status: newMilestone.status,
       priority: newMilestone.priority,
       disbursementAmount: newMilestone.disbursementAmount
@@ -151,8 +152,8 @@ const FFTPMilestoneManager = ({
     const updateData = {
       title: editMilestone.milestoneType,
       milestoneType: editMilestone.milestoneType,
-      startDate: format(editMilestone.startDate, 'yyyy-MM-dd'),
-      dueDate: format(editMilestone.dueDate, 'yyyy-MM-dd'),
+      startDate: toDateString(editMilestone.startDate),
+      dueDate: toDateString(editMilestone.dueDate),
       status: editMilestone.status,
       priority: editMilestone.priority,
       disbursementAmount: editMilestone.disbursementAmount

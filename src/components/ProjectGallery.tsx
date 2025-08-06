@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, X, Camera, Trash2, Edit } from "lucide-react";
 import { ProjectPhoto } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface ProjectGalleryProps {
@@ -172,7 +173,7 @@ const ProjectGallery = ({
                               <p className="mt-2 text-sm text-blue-700 line-clamp-2">{photo.caption}</p>
                             )}
                             <p className="text-xs text-blue-500 mt-1">
-                              {new Date(photo.uploadDate).toLocaleDateString()}
+                              {formatDateForDisplay(photo.uploadDate)}
                             </p>
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                               <Button

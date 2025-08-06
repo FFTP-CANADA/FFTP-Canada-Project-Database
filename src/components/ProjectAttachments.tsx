@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Upload, Download, Trash2, File, X } from "lucide-react";
 import { ProjectAttachment } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface ProjectAttachmentsProps {
   projectId: string;
@@ -294,7 +295,7 @@ const ProjectAttachments = ({
                         <p className="font-medium text-blue-900">{attachment.fileName}</p>
                         <div className="flex gap-4 text-sm text-blue-600">
                           <span>{formatFileSize(attachment.fileSize)}</span>
-                          <span>Uploaded: {new Date(attachment.uploadDate).toLocaleDateString()}</span>
+                          <span>Uploaded: {formatDateForDisplay(attachment.uploadDate)}</span>
                         </div>
                       </div>
                     </div>

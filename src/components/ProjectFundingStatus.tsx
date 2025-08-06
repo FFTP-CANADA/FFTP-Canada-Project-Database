@@ -13,6 +13,7 @@ import { Project, ProjectMilestone } from "@/types/project";
 import { formatWithExchange } from "@/utils/currencyUtils";
 import { useState, useEffect } from "react";
 import { useProjectFunding, DonorReceipt, DonorPledge } from "@/hooks/useProjectFunding";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface ProjectFundingStatusProps {
   project: Project;
@@ -320,9 +321,9 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                       <TableCell className="text-blue-600 font-medium">
                         {formatWithExchange(pledge.pledgedAmount, project.currency)}
                       </TableCell>
-                      <TableCell>{new Date(pledge.datePledged + 'T00:00:00').toLocaleDateString()}</TableCell>
+                      <TableCell>{formatDateForDisplay(pledge.datePledged)}</TableCell>
                       <TableCell>
-                        {pledge.expectedDate ? new Date(pledge.expectedDate + 'T00:00:00').toLocaleDateString() : 'TBD'}
+                        {pledge.expectedDate ? formatDateForDisplay(pledge.expectedDate) : 'TBD'}
                       </TableCell>
                       <TableCell>
                         <Badge className={
@@ -494,7 +495,7 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                       <TableCell className="text-green-600 font-medium">
                         {formatWithExchange(receipt.amount, project.currency)}
                       </TableCell>
-                      <TableCell>{new Date(receipt.dateReceived + 'T00:00:00').toLocaleDateString()}</TableCell>
+                      <TableCell>{formatDateForDisplay(receipt.dateReceived)}</TableCell>
                       <TableCell>{receipt.paymentMethod}</TableCell>
                       <TableCell className="max-w-md w-80">
                         <div className="text-sm text-gray-600 whitespace-normal break-words leading-relaxed" title={receipt.notes || "No notes"}>

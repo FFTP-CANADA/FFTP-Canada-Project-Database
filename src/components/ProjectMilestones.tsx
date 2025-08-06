@@ -8,9 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Milestone, Plus, Calendar, CheckCircle2 } from "lucide-react";
-import { format } from "date-fns";
 import { ProjectMilestone } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
+import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface ProjectMilestonesProps {
   projectId: string;
@@ -107,7 +107,7 @@ const ProjectMilestones = ({
     const updates: Partial<ProjectMilestone> = { status: newStatus };
     
     if (newStatus === "Completed") {
-      updates.completedDate = format(new Date(), 'yyyy-MM-dd');
+      updates.completedDate = getTodayString();
     } else {
       updates.completedDate = undefined;
     }
@@ -235,11 +235,11 @@ const ProjectMilestones = ({
                     )}
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Calendar className="h-4 w-4" />
-                      <span>Start: {new Date(milestone.startDate).toLocaleDateString()}</span>
-                      <span>• Due: {new Date(milestone.dueDate).toLocaleDateString()}</span>
+                      <span>Start: {formatDateForDisplay(milestone.startDate)}</span>
+                      <span>• Due: {formatDateForDisplay(milestone.dueDate)}</span>
                       {milestone.completedDate && (
                         <span className="text-green-600">
-                          • Completed: {new Date(milestone.completedDate).toLocaleDateString()}
+                          • Completed: {formatDateForDisplay(milestone.completedDate)}
                         </span>
                       )}
                     </div>

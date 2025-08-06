@@ -11,6 +11,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 import { useProjectData } from "@/hooks/useProjectData";
+import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 
 // Extend jsPDF type to include autoTable
 declare module 'jspdf' {
@@ -168,7 +169,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
     if (recentProjectNotes.length === 0) return "No recent project activity recorded in the last 30 days.";
     
     return recentProjectNotes.map(note => 
-      `${new Date(note.dateOfNote).toLocaleDateString()}: ${note.content}`
+      `${formatDateForDisplay(note.dateOfNote)}: ${note.content}`
     ).join('. ');
   };
 
@@ -183,7 +184,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
 
   const generatePDFReport = () => {
     const doc = new jsPDF();
-    const reportDate = new Date().toLocaleDateString();
+    const reportDate = formatDateForDisplay(getTodayString());
 
     // Add company logo
     const logoImg = new Image();
@@ -428,7 +429,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
   };
 
   const generateWordReport = () => {
-    const reportDate = new Date().toLocaleDateString();
+    const reportDate = formatDateForDisplay(getTodayString());
     
     const htmlContent = `
       <html>
@@ -508,7 +509,7 @@ const StatusReportDialog = ({ projects, notes }: StatusReportDialogProps) => {
   };
 
   const generateTextReport = () => {
-    const reportDate = new Date().toLocaleDateString();
+    const reportDate = formatDateForDisplay(getTodayString());
     const reportContent = `
 FOOD FOR THE POOR CANADA - PROJECT STATUS REPORT
 Generated: ${reportDate}

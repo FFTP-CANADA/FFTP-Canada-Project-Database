@@ -180,7 +180,7 @@ const ProjectsTable = ({
 
       {/* Table */}
       <div className="border border-blue-200 rounded-lg overflow-hidden">
-        <Table>
+        <Table className="table-fixed w-full min-w-[1600px]">
           <TableHeader className="bg-blue-600">
             <TableRow>
               <TableHead className="text-white">Governance</TableHead>
@@ -213,7 +213,7 @@ const ProjectsTable = ({
                     "N/A"
                   )}
                 </TableCell>
-                <TableCell className="font-medium text-blue-900">
+                <TableCell className="font-medium text-blue-900 w-96">
                   {project.projectName}
                   {project.followUpNeeded && (
                     <Badge variant="outline" className="ml-2 text-orange-600 border-orange-300">
@@ -262,8 +262,8 @@ const ProjectsTable = ({
                     <span className="text-xs text-blue-600">No total cost</span>
                   )}
                 </TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1 max-w-lg">
+                <TableCell className="w-[500px]">
+                  <div className="flex flex-wrap gap-1 w-full">
                     {/* Primary Actions */}
                     <Button
                       size="sm"

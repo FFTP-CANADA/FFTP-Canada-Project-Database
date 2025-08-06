@@ -193,7 +193,7 @@ const ProjectsTable = ({
               <TableHead className="text-white">Disbursed</TableHead>
               <TableHead className="text-white">Balance Due</TableHead>
               <TableHead className="text-white">Progress</TableHead>
-              <TableHead className="text-white w-96">Actions</TableHead>
+              <TableHead className="text-white w-80">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -263,85 +263,85 @@ const ProjectsTable = ({
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex flex-wrap gap-1 max-w-md">
-                    {/* Primary Actions */}
+                  <div className="flex flex-wrap gap-1 max-w-xs">
+                    {/* Primary Actions - Compact Icons */}
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-blue-300 text-blue-600 hover:bg-blue-50 text-xs px-2 py-1"
+                      className="border-blue-300 text-blue-600 hover:bg-blue-50 h-7 w-7 p-0"
                       onClick={() => onEditProject?.(project)}
+                      title="Edit Project"
                     >
-                      <Edit className="w-3 h-3 mr-1" />
-                      Edit
+                      <Edit className="w-3 h-3" />
                     </Button>
                     
                     {/* Documentation Group */}
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-blue-300 text-blue-600 hover:bg-blue-50 text-xs px-2 py-1"
+                      className="border-blue-300 text-blue-600 hover:bg-blue-50 h-7 w-7 p-0"
                       onClick={() => onOpenNotes?.(project.id, project.projectName)}
+                      title="Project Notes"
                     >
-                      <FileText className="w-3 h-3 mr-1" />
-                      Notes
+                      <FileText className="w-3 h-3" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-purple-300 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1"
+                      className="border-purple-300 text-purple-600 hover:bg-purple-50 h-7 w-7 p-0"
                       onClick={() => onOpenAttachments?.(project.id, project.projectName)}
+                      title="Attachments"
                     >
-                      <Paperclip className="w-3 h-3 mr-1" />
-                      Files
+                      <Paperclip className="w-3 h-3" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-green-300 text-green-600 hover:bg-green-50 text-xs px-2 py-1"
+                      className="border-green-300 text-green-600 hover:bg-green-50 h-7 w-7 p-0"
                       onClick={() => onOpenGallery?.(project.id, project.projectName)}
+                      title="Photo Gallery"
                     >
-                      <Camera className="w-3 h-3 mr-1" />
-                      Photos
+                      <Camera className="w-3 h-3" />
                     </Button>
                     
                     {/* Project Management Group */}
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 text-xs px-2 py-1"
+                      className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 h-7 w-7 p-0"
                       onClick={() => onOpenMilestones?.(project.id, project.projectName)}
+                      title="Milestones"
                     >
-                      <Milestone className="w-3 h-3 mr-1" />
-                      Milestones
+                      <Milestone className="w-3 h-3" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-violet-300 text-violet-600 hover:bg-violet-50 text-xs px-2 py-1"
+                      className="border-violet-300 text-violet-600 hover:bg-violet-50 h-7 w-7 p-0"
                       onClick={() => onOpenGantt?.(project)}
+                      title="Gantt Chart"
                     >
-                      <ChartGantt className="w-3 h-3 mr-1" />
-                      Gantt
+                      <ChartGantt className="w-3 h-3" />
                     </Button>
                     
                     {/* Financial Group */}
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-emerald-300 text-emerald-600 hover:bg-emerald-50 text-xs px-2 py-1"
+                      className="border-emerald-300 text-emerald-600 hover:bg-emerald-50 h-7 w-7 p-0"
                       onClick={() => onOpenFunding?.(project)}
+                      title="Funding Status"
                     >
-                      <Banknote className="w-3 h-3 mr-1" />
-                      Funding
+                      <Banknote className="w-3 h-3" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-teal-300 text-teal-600 hover:bg-teal-50 text-xs px-2 py-1"
+                      className="border-teal-300 text-teal-600 hover:bg-teal-50 h-7 w-7 p-0"
                       onClick={() => onOpenDisbursement?.(project)}
+                      title="Disbursement Schedule"
                     >
-                      <Calendar className="w-3 h-3 mr-1" />
-                      Schedule
+                      <Calendar className="w-3 h-3" />
                     </Button>
                     
                     {/* Conditional Actions */}
@@ -349,11 +349,11 @@ const ProjectsTable = ({
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-orange-300 text-orange-600 hover:bg-orange-50 text-xs px-2 py-1"
+                        className="border-orange-300 text-orange-600 hover:bg-orange-50 h-7 w-7 p-0"
                         onClick={() => handleSendFollowUp(project)}
+                        title="Send Follow-up"
                       >
-                        <Mail className="w-3 h-3 mr-1" />
-                        Follow-up
+                        <Mail className="w-3 h-3" />
                       </Button>
                     )}
                     
@@ -361,11 +361,11 @@ const ProjectsTable = ({
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-red-300 text-red-600 hover:bg-red-50 text-xs px-2 py-1"
+                      className="border-red-300 text-red-600 hover:bg-red-50 h-7 w-7 p-0"
                       onClick={() => handleDeleteClick(project)}
+                      title="Delete Project"
                     >
-                      <Trash2 className="w-3 h-3 mr-1" />
-                      Delete
+                      <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>
                 </TableCell>

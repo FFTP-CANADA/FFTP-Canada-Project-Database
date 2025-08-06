@@ -71,15 +71,6 @@ const ProjectsTable = ({
     const projectValue = project.totalCost || 0;
     const shortfall = projectValue - totalPledged;
     
-    // Debug logging
-    console.log(`Project ${project.projectName}:`, {
-      projectId: project.id,
-      projectPledges: projectPledges.length,
-      totalPledged,
-      projectValue,
-      shortfall
-    });
-    
     return {
       totalPledged,
       projectValue,

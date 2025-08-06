@@ -164,13 +164,12 @@ const Index = () => {
       return sum + cost;
     }, 0),
     totalPledgesCAD: (() => {
-      const total = donorPledges.reduce((sum, pledge) => sum + pledge.pledgedAmount, 0);
-      console.log('Dashboard pledges calculation:', { 
-        donorPledgesCount: donorPledges.length, 
-        totalPledges: total,
-        donorPledges: donorPledges 
-      });
-      return total;
+      // Calculate total pledges by summing pledges for each project (matching table logic)
+      return projects.reduce((sum, project) => {
+        const projectPledges = donorPledges.filter(pledge => pledge.projectId === project.id);
+        const totalPledgedForProject = projectPledges.reduce((pledgeSum, pledge) => pledgeSum + pledge.pledgedAmount, 0);
+        return sum + totalPledgedForProject;
+      }, 0);
     })(),
     completedProjects: projects.filter(p => p.status === "Completed").length,
     projectsAtRisk: projects.filter(p => p.status === "Delayed" || p.status === "Needs Attention").length,

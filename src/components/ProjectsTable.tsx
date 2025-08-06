@@ -23,6 +23,7 @@ interface ProjectsTableProps {
   onEditProject?: (project: Project) => void;
   onDeleteProject?: (projectId: string) => void;
   onManagePrograms?: () => void;
+  donorPledges?: Array<{id: string; projectId: string; pledgedAmount: number}>;
 }
 
 const ProjectsTable = ({ 
@@ -37,7 +38,8 @@ const ProjectsTable = ({
   onOpenDisbursement,
   onEditProject,
   onDeleteProject,
-  onManagePrograms
+  onManagePrograms,
+  donorPledges = []
 }: ProjectsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [countryFilter, setCountryFilter] = useState("all");
@@ -61,6 +63,20 @@ const ProjectsTable = ({
       case "Needs Attention": return "bg-orange-100 text-orange-800 border-orange-200";
       default: return "bg-gray-100 text-gray-800 border-gray-200";
     }
+  };
+
+  const getPledgeStatus = (project: Project) => {
+    const projectPledges = donorPledges.filter(pledge => pledge.projectId === project.id);
+    const totalPledged = projectPledges.reduce((sum, pledge) => sum + pledge.pledgedAmount, 0);
+    const projectValue = project.totalCost || 0;
+    const shortfall = projectValue - totalPledged;
+    
+    return {
+      totalPledged,
+      projectValue,
+      shortfall,
+      hasShortfall: shortfall > 0
+    };
   };
 
   const filteredProjects = projects.filter(project => {
@@ -190,6 +206,8 @@ const ProjectsTable = ({
               <TableHead className="text-white px-4 text-center">Impact Area</TableHead>
               <TableHead className="text-white px-4 text-center">Status</TableHead>
               <TableHead className="text-white px-4 text-center">Total Cost</TableHead>
+              <TableHead className="text-white px-4 text-center">Pledged</TableHead>
+              <TableHead className="text-white px-4 text-center">Pledge Gap</TableHead>
               <TableHead className="text-white px-4 text-center">Disbursed</TableHead>
               <TableHead className="text-white px-4 text-center">Balance Due</TableHead>
               <TableHead className="text-white px-4 text-center">Progress</TableHead>
@@ -197,7 +215,10 @@ const ProjectsTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProjects.map((project) => (
+            {filteredProjects.map((project) => {
+              const pledgeStatus = getPledgeStatus(project);
+              
+              return (
               <TableRow key={project.id} className="hover:bg-blue-50">
                 <TableCell className="text-blue-700 px-6">
                   {project.governanceType && project.governanceNumber ? (
@@ -231,6 +252,20 @@ const ProjectsTable = ({
                 </TableCell>
                 <TableCell className="text-blue-900">
                   {project.totalCost ? formatWithExchange(project.totalCost, project.currency) : "N/A"}
+                </TableCell>
+                <TableCell className="text-blue-900">
+                  {pledgeStatus.totalPledged > 0 ? formatWithExchange(pledgeStatus.totalPledged, project.currency) : "No pledges"}
+                </TableCell>
+                <TableCell className="text-blue-900">
+                  {pledgeStatus.hasShortfall ? (
+                    <span className="text-red-600 font-medium">
+                      -{formatWithExchange(pledgeStatus.shortfall, project.currency)}
+                    </span>
+                  ) : pledgeStatus.totalPledged > 0 ? (
+                    <span className="text-green-600">Fully pledged</span>
+                  ) : (
+                    <span className="text-gray-500">N/A</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-blue-900">
                   {formatWithExchange(project.amountDisbursed, project.currency)}
@@ -370,7 +405,8 @@ const ProjectsTable = ({
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
       </div>

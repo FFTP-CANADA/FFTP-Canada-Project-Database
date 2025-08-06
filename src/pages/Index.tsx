@@ -408,6 +408,7 @@ const Index = () => {
                 <ProjectsTable 
                   projects={projects}
                   availablePrograms={allPrograms}
+                  donorPledges={donorPledges}
                   onOpenAttachments={handleOpenAttachments}
                   onOpenGallery={handleOpenGallery}
                   onOpenNotes={handleOpenNotes}

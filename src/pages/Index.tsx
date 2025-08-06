@@ -444,10 +444,16 @@ const Index = () => {
                   return sortedCountries.map(country => {
                     // Sort projects within country by governance number
                     const sortedProjects = projectsByCountry[country].sort((a, b) => {
-                      // If both have governance numbers, sort numerically
+                      // If both have governance numbers, sort them properly
                       if (a.governanceNumber && b.governanceNumber) {
-                        const aNum = parseInt(a.governanceNumber) || 0;
-                        const bNum = parseInt(b.governanceNumber) || 0;
+                        // Extract numeric part from governance number (handle formats like "001", "123", etc.)
+                        const aNum = parseInt(a.governanceNumber.replace(/\D/g, '')) || 0;
+                        const bNum = parseInt(b.governanceNumber.replace(/\D/g, '')) || 0;
+                        
+                        // If numbers are the same, sort by the full governance number string
+                        if (aNum === bNum) {
+                          return a.governanceNumber.localeCompare(b.governanceNumber, undefined, { numeric: true });
+                        }
                         return aNum - bNum;
                       }
                       // If only one has governance number, prioritize it

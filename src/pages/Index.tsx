@@ -421,28 +421,72 @@ const Index = () => {
           <TabsContent value="projects" className="space-y-6">
             <Card className="border-blue-200 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-blue-900">Project Management</CardTitle>
+                <CardTitle className="text-blue-900">Projects by Country & Governance</CardTitle>
                 <CardDescription className="text-blue-600">
-                  Track and manage charitable projects across the Caribbean and Latin America
+                  Projects organized by country and governance number sequence
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ProjectsTable 
-                  projects={projects}
-                  availablePrograms={allPrograms}
-                  donorPledges={donorPledges}
-                  onOpenAttachments={handleOpenAttachments}
-                  onOpenGallery={handleOpenGallery}
-                  onOpenNotes={handleOpenNotes}
-                  onOpenMilestones={handleOpenMilestones}
-                  onOpenGantt={handleOpenGantt}
-                  onOpenFunding={handleOpenFunding}
-                  onOpenDisbursement={handleOpenDisbursement}
-                  onOpenReallocation={handleOpenReallocation}
-                  onEditProject={handleEditProject}
-                  onDeleteProject={deleteProject}
-                  onManagePrograms={() => setProgramManagementOpen(true)}
-                />
+                {(() => {
+                  // Group projects by country
+                  const projectsByCountry = projects.reduce((acc, project) => {
+                    const country = project.country || "Unassigned";
+                    if (!acc[country]) {
+                      acc[country] = [];
+                    }
+                    acc[country].push(project);
+                    return acc;
+                  }, {} as Record<string, Project[]>);
+
+                  // Sort countries and then sort projects within each country by governance number
+                  const sortedCountries = Object.keys(projectsByCountry).sort();
+                  
+                  return sortedCountries.map(country => {
+                    // Sort projects within country by governance number
+                    const sortedProjects = projectsByCountry[country].sort((a, b) => {
+                      // If both have governance numbers, sort numerically
+                      if (a.governanceNumber && b.governanceNumber) {
+                        const aNum = parseInt(a.governanceNumber) || 0;
+                        const bNum = parseInt(b.governanceNumber) || 0;
+                        return aNum - bNum;
+                      }
+                      // If only one has governance number, prioritize it
+                      if (a.governanceNumber && !b.governanceNumber) return -1;
+                      if (!a.governanceNumber && b.governanceNumber) return 1;
+                      // If neither has governance number, sort by project name
+                      return a.projectName.localeCompare(b.projectName);
+                    });
+
+                    return (
+                      <div key={country} className="mb-8">
+                        <div className="flex items-center gap-3 mb-4">
+                          <h3 className="text-lg font-semibold text-blue-900 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+                            {country}
+                          </h3>
+                          <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                            {sortedProjects.length} project{sortedProjects.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <ProjectsTable 
+                          projects={sortedProjects}
+                          availablePrograms={allPrograms}
+                          donorPledges={donorPledges}
+                          onOpenAttachments={handleOpenAttachments}
+                          onOpenGallery={handleOpenGallery}
+                          onOpenNotes={handleOpenNotes}
+                          onOpenMilestones={handleOpenMilestones}
+                          onOpenGantt={handleOpenGantt}
+                          onOpenFunding={handleOpenFunding}
+                          onOpenDisbursement={handleOpenDisbursement}
+                          onOpenReallocation={handleOpenReallocation}
+                          onEditProject={handleEditProject}
+                          onDeleteProject={deleteProject}
+                          onManagePrograms={() => setProgramManagementOpen(true)}
+                        />
+                      </div>
+                    );
+                  });
+                })()}
               </CardContent>
             </Card>
           </TabsContent>

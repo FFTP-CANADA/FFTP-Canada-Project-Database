@@ -183,17 +183,17 @@ const ProjectsTable = ({
         <Table className="w-full">
           <TableHeader className="bg-blue-600">
             <TableRow>
-              <TableHead className="text-white px-6">Governance</TableHead>
-              <TableHead className="text-white px-6">Project Name</TableHead>
-              <TableHead className="text-white px-4">Program</TableHead>
-              <TableHead className="text-white px-4">Country</TableHead>
-              <TableHead className="text-white px-4">Impact Area</TableHead>
-              <TableHead className="text-white px-4">Status</TableHead>
-              <TableHead className="text-white px-4">Total Cost</TableHead>
-              <TableHead className="text-white px-4">Disbursed</TableHead>
-              <TableHead className="text-white px-4">Balance Due</TableHead>
-              <TableHead className="text-white px-4">Progress</TableHead>
-              <TableHead className="text-white px-6 min-w-[400px]">Actions</TableHead>
+              <TableHead className="text-white px-6 text-center">Governance</TableHead>
+              <TableHead className="text-white px-6 text-center">Project Name</TableHead>
+              <TableHead className="text-white px-4 text-center">Program</TableHead>
+              <TableHead className="text-white px-4 text-center">Country</TableHead>
+              <TableHead className="text-white px-4 text-center">Impact Area</TableHead>
+              <TableHead className="text-white px-4 text-center">Status</TableHead>
+              <TableHead className="text-white px-4 text-center">Total Cost</TableHead>
+              <TableHead className="text-white px-4 text-center">Disbursed</TableHead>
+              <TableHead className="text-white px-4 text-center">Balance Due</TableHead>
+              <TableHead className="text-white px-4 text-center">Progress</TableHead>
+              <TableHead className="text-white px-6 min-w-[400px] text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ProjectNote } from "@/hooks/useProjectData";
+import { ProjectNote } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
 import { getTodayString } from "@/utils/dateUtils";
 
@@ -30,16 +30,25 @@ const ProjectNotesDialog = ({
 
   const handleAddNote = () => {
     if (newNote.trim()) {
-      onAddNote({
-        projectId,
-        content: newNote.trim(),
-        dateOfNote: getTodayString()
-      });
-      setNewNote("");
-      toast({
-        title: "Note Added",
-        description: "Your note has been added successfully.",
-      });
+      try {
+        onAddNote({
+          projectId,
+          content: newNote.trim(),
+          dateOfNote: getTodayString()
+        });
+        setNewNote("");
+        toast({
+          title: "Note Added",
+          description: "Your note has been saved successfully.",
+        });
+      } catch (error) {
+        console.error("Error adding note:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save note. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -69,17 +78,21 @@ const ProjectNotesDialog = ({
             </Button>
           </div>
 
-          <div>
-            <Label>Existing Notes</Label>
+            <div>
+            <Label>Existing Notes ({notes.length})</Label>
             <div className="max-h-96 overflow-y-auto space-y-3 mt-2">
               {notes.map((note) => (
-                <div key={note.id} className="p-3 border rounded-lg bg-gray-50">
-                  <div className="text-sm text-gray-500 mb-1">{note.dateOfNote}</div>
-                  <div className="text-sm">{note.content}</div>
+                <div key={note.id} className="p-3 border rounded-lg bg-muted/50">
+                  <div className="text-sm text-muted-foreground mb-1">
+                    {note.dateOfNote} • ID: {note.id}
+                  </div>
+                  <div className="text-sm whitespace-pre-wrap">{note.content}</div>
                 </div>
               ))}
               {notes.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">No notes available</p>
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No notes available for this project
+                </p>
               )}
             </div>
           </div>

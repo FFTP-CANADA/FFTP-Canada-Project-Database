@@ -179,21 +179,21 @@ const ProjectsTable = ({
       </div>
 
       {/* Table */}
-      <div className="border border-blue-200 rounded-lg overflow-auto">
-        <Table className="table-fixed w-full min-w-[1400px]">
+      <div className="border border-blue-200 rounded-lg overflow-x-auto">
+        <Table className="w-full">
           <TableHeader className="bg-blue-600">
             <TableRow>
-              <TableHead className="text-white w-32 px-6">Governance</TableHead>
-              <TableHead className="text-white w-80 px-6">Project Name</TableHead>
-              <TableHead className="text-white w-40 px-4">Program</TableHead>
-              <TableHead className="text-white w-28 px-4">Country</TableHead>
-              <TableHead className="text-white w-36 px-4">Impact Area</TableHead>
-              <TableHead className="text-white w-32 px-4">Status</TableHead>
-              <TableHead className="text-white w-32 px-4">Total Cost</TableHead>
-              <TableHead className="text-white w-32 px-4">Disbursed</TableHead>
-              <TableHead className="text-white w-32 px-4">Balance Due</TableHead>
-              <TableHead className="text-white w-32 px-4">Progress</TableHead>
-              <TableHead className="text-white w-96 px-6">Actions</TableHead>
+              <TableHead className="text-white px-6">Governance</TableHead>
+              <TableHead className="text-white px-6">Project Name</TableHead>
+              <TableHead className="text-white px-4">Program</TableHead>
+              <TableHead className="text-white px-4">Country</TableHead>
+              <TableHead className="text-white px-4">Impact Area</TableHead>
+              <TableHead className="text-white px-4">Status</TableHead>
+              <TableHead className="text-white px-4">Total Cost</TableHead>
+              <TableHead className="text-white px-4">Disbursed</TableHead>
+              <TableHead className="text-white px-4">Balance Due</TableHead>
+              <TableHead className="text-white px-4">Progress</TableHead>
+              <TableHead className="text-white px-6 min-w-[400px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -213,7 +213,7 @@ const ProjectsTable = ({
                     "N/A"
                   )}
                 </TableCell>
-                <TableCell className="font-medium text-blue-900 w-80 px-6">
+                <TableCell className="font-medium text-blue-900 px-6">
                   {project.projectName}
                   {project.followUpNeeded && (
                     <Badge variant="outline" className="ml-2 text-orange-600 border-orange-300">
@@ -262,8 +262,8 @@ const ProjectsTable = ({
                     <div className="text-xs text-blue-600 text-center">No total cost</div>
                   )}
                 </TableCell>
-                <TableCell className="w-96 px-6">
-                  <div className="flex flex-wrap gap-1.5 w-full">
+                <TableCell className="px-6 min-w-[400px]">
+                  <div className="flex flex-wrap gap-1.5 max-w-none">
                     {/* Primary Actions */}
                     <Button
                       size="sm"

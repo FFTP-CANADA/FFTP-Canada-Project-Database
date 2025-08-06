@@ -183,23 +183,23 @@ const ProjectsTable = ({
         <Table className="table-fixed w-full min-w-[1600px]">
           <TableHeader className="bg-blue-600">
             <TableRow>
-              <TableHead className="text-white">Governance</TableHead>
-              <TableHead className="text-white w-96">Project Name</TableHead>
-              <TableHead className="text-white">Program</TableHead>
-              <TableHead className="text-white">Country</TableHead>
-              <TableHead className="text-white">Impact Area</TableHead>
-              <TableHead className="text-white">Status</TableHead>
-              <TableHead className="text-white">Total Cost</TableHead>
-              <TableHead className="text-white">Disbursed</TableHead>
-              <TableHead className="text-white">Balance Due</TableHead>
-              <TableHead className="text-white">Progress</TableHead>
-              <TableHead className="text-white w-[500px]">Actions</TableHead>
+              <TableHead className="text-white w-32 px-6">Governance</TableHead>
+              <TableHead className="text-white w-80 px-6">Project Name</TableHead>
+              <TableHead className="text-white w-40 px-4">Program</TableHead>
+              <TableHead className="text-white w-28 px-4">Country</TableHead>
+              <TableHead className="text-white w-36 px-4">Impact Area</TableHead>
+              <TableHead className="text-white w-32 px-4">Status</TableHead>
+              <TableHead className="text-white w-32 px-4">Total Cost</TableHead>
+              <TableHead className="text-white w-32 px-4">Disbursed</TableHead>
+              <TableHead className="text-white w-32 px-4">Balance Due</TableHead>
+              <TableHead className="text-white w-32 px-4">Progress</TableHead>
+              <TableHead className="text-white w-96 px-6">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredProjects.map((project) => (
               <TableRow key={project.id} className="hover:bg-blue-50">
-                <TableCell className="text-blue-700">
+                <TableCell className="text-blue-700 px-6">
                   {project.governanceType && project.governanceNumber ? (
                     <div className="text-sm">
                       <Badge variant="outline" className="text-xs">
@@ -213,7 +213,7 @@ const ProjectsTable = ({
                     "N/A"
                   )}
                 </TableCell>
-                <TableCell className="font-medium text-blue-900 w-96">
+                <TableCell className="font-medium text-blue-900 w-80 px-6">
                   {project.projectName}
                   {project.followUpNeeded && (
                     <Badge variant="outline" className="ml-2 text-orange-600 border-orange-300">
@@ -243,27 +243,27 @@ const ProjectsTable = ({
                     : "N/A"
                   }
                 </TableCell>
-                <TableCell>
+                <TableCell className="px-4">
                   {project.totalCost ? (
-                    <>
-                      <div className="w-full bg-blue-100 rounded-full h-2">
+                    <div className="space-y-1">
+                      <div className="w-full bg-blue-100 rounded-md h-3 overflow-hidden">
                         <div 
-                          className="bg-blue-600 h-2 rounded-full transition-all"
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-md transition-all duration-300"
                           style={{ 
                             width: `${Math.min((project.amountDisbursed / project.totalCost) * 100, 100)}%` 
                           }}
                         />
                       </div>
-                      <span className="text-xs text-blue-600 mt-1">
+                      <div className="text-xs text-blue-700 font-medium text-center">
                         {Math.round((project.amountDisbursed / project.totalCost) * 100)}%
-                      </span>
-                    </>
+                      </div>
+                    </div>
                   ) : (
-                    <span className="text-xs text-blue-600">No total cost</span>
+                    <div className="text-xs text-blue-600 text-center">No total cost</div>
                   )}
                 </TableCell>
-                <TableCell className="w-[500px]">
-                  <div className="flex flex-wrap gap-1 w-full">
+                <TableCell className="w-96 px-6">
+                  <div className="flex flex-wrap gap-1.5 w-full">
                     {/* Primary Actions */}
                     <Button
                       size="sm"

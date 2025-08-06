@@ -97,9 +97,9 @@ const ProjectsTable = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+      <div className="flex flex-wrap gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-blue-600" />
           <span className="text-sm font-medium text-blue-700">Filters:</span>
@@ -179,8 +179,8 @@ const ProjectsTable = ({
       </div>
 
       {/* Table */}
-      <div className="border border-blue-200 rounded-lg overflow-hidden">
-        <Table className="table-fixed w-full min-w-[1600px]">
+      <div className="border border-blue-200 rounded-lg overflow-auto">
+        <Table className="table-fixed w-full min-w-[1400px]">
           <TableHeader className="bg-blue-600">
             <TableRow>
               <TableHead className="text-white w-32 px-6">Governance</TableHead>

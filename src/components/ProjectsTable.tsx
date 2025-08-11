@@ -25,6 +25,7 @@ interface ProjectsTableProps {
   onManagePrograms?: () => void;
   onOpenReallocation?: (project: Project) => void;
   donorPledges?: Array<{id: string; projectId: string; pledgedAmount: number}>;
+  donorReceipts?: Array<{id: string; projectId: string; amount: number}>;
 }
 
 const ProjectsTable = ({ 
@@ -41,7 +42,8 @@ const ProjectsTable = ({
   onDeleteProject,
   onManagePrograms,
   onOpenReallocation,
-  donorPledges = []
+  donorPledges = [],
+  donorReceipts = []
 }: ProjectsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [countryFilter, setCountryFilter] = useState("all");
@@ -69,15 +71,18 @@ const ProjectsTable = ({
 
   const getPledgeStatus = (project: Project) => {
     const projectPledges = donorPledges.filter(pledge => pledge.projectId === project.id);
+    const projectReceipts = donorReceipts.filter(receipt => receipt.projectId === project.id);
     const totalPledged = projectPledges.reduce((sum, pledge) => sum + pledge.pledgedAmount, 0);
+    const totalReceived = projectReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
     const projectValue = project.totalCost || 0;
-    const shortfall = projectValue - totalPledged;
+    const pledgeShortfall = projectValue - totalPledged;
     
     return {
       totalPledged,
+      totalReceived,
       projectValue,
-      shortfall,
-      hasShortfall: shortfall > 0
+      pledgeShortfall,
+      hasPledgeShortfall: pledgeShortfall > 0
     };
   };
 
@@ -209,6 +214,7 @@ const ProjectsTable = ({
               <TableHead className="text-white px-4 text-center">Status</TableHead>
               <TableHead className="text-white px-4 text-center">Total Cost</TableHead>
               <TableHead className="text-white px-4 text-center">Pledged</TableHead>
+              <TableHead className="text-white px-4 text-center">Received</TableHead>
               <TableHead className="text-white px-4 text-center">Pledge Gap</TableHead>
               <TableHead className="text-white px-4 text-center">Disbursed</TableHead>
               <TableHead className="text-white px-4 text-center">Balance Due</TableHead>
@@ -259,9 +265,16 @@ const ProjectsTable = ({
                   {pledgeStatus.totalPledged > 0 ? formatWithExchange(pledgeStatus.totalPledged, project.currency) : "No pledges"}
                 </TableCell>
                 <TableCell className="text-blue-900">
-                  {pledgeStatus.hasShortfall ? (
+                  {pledgeStatus.totalReceived > 0 ? (
+                    <span className="text-green-600 font-medium">
+                      {formatWithExchange(pledgeStatus.totalReceived, project.currency)}
+                    </span>
+                  ) : "No receipts"}
+                </TableCell>
+                <TableCell className="text-blue-900">
+                  {pledgeStatus.hasPledgeShortfall ? (
                     <span className="text-red-600 font-medium">
-                      -{formatWithExchange(pledgeStatus.shortfall, project.currency)}
+                      -{formatWithExchange(pledgeStatus.pledgeShortfall, project.currency)}
                     </span>
                   ) : pledgeStatus.totalPledged > 0 ? (
                     <span className="text-green-600">Fully pledged</span>

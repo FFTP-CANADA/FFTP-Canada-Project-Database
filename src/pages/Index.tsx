@@ -139,7 +139,7 @@ const Index = () => {
     dismissFollowUp
   } = useAutoFollowUp(projects, milestones, notes);
 
-  const { donorPledges } = useProjectFunding();
+  const { donorPledges, donorReceipts } = useProjectFunding();
 
   // Project alerts system - 10 business days warning
   const { 
@@ -477,6 +477,7 @@ const Index = () => {
                           projects={sortedProjects}
                           availablePrograms={allPrograms}
                           donorPledges={donorPledges}
+                          donorReceipts={donorReceipts}
                           onOpenAttachments={handleOpenAttachments}
                           onOpenGallery={handleOpenGallery}
                           onOpenNotes={handleOpenNotes}

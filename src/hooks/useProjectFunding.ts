@@ -7,6 +7,8 @@ export interface DonorReceipt {
   amount: number;
   dateReceived: string;
   paymentMethod: string;
+  governanceType?: "MOU";
+  governanceNumber?: string;
   notes?: string;
 }
 
@@ -18,6 +20,8 @@ export interface DonorPledge {
   datePledged: string;
   expectedDate?: string;
   status: "Pending" | "Partially Fulfilled" | "Fulfilled";
+  governanceType?: "MOU";
+  governanceNumber?: string;
   notes?: string;
 }
 

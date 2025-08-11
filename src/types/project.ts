@@ -1,5 +1,5 @@
 
-export type GovernanceType = "MOU" | "AGENCY AGREEMENT" | "LOD";
+export type GovernanceType = "AGENCY AGREEMENT" | "LOD";
 
 export interface Project {
   id: string;

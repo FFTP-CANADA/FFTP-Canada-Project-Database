@@ -153,6 +153,11 @@ export const ProjectAlertsPanel = ({
                             Due: {formatDate(alert.dueDate)}
                           </span>
                         </div>
+                        <div className="mb-1">
+                          <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded">
+                            {alert.projectName}
+                          </span>
+                        </div>
                         <p className={cn(
                           "text-sm leading-5",
                           alert.isRead ? "text-gray-600" : "text-gray-900 font-medium"
@@ -161,8 +166,8 @@ export const ProjectAlertsPanel = ({
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                           {alert.isOverdue ? 
-                            `${Math.abs(alert.businessDaysUntilDue)} business day${Math.abs(alert.businessDaysUntilDue) === 1 ? '' : 's'} overdue` :
-                            `${alert.businessDaysUntilDue} business day${alert.businessDaysUntilDue === 1 ? '' : 's'} remaining`
+                            `${Math.abs(alert.businessDaysUntilDue)} business day${Math.abs(alert.businessDaysUntilDue) === 1 ? "" : "s"} overdue` :
+                            `${alert.businessDaysUntilDue} business day${alert.businessDaysUntilDue === 1 ? "" : "s"} remaining`
                           }
                         </p>
                       </div>

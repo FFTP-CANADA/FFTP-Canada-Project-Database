@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Plus, Trash2, Edit } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toDateString } from "@/utils/dateUtils";
+import { toDateString, fromDateString } from "@/utils/dateUtils";
 import { ProjectMilestone, FFTPMilestoneType } from "@/types/project";
 
 const FFTP_MILESTONE_OPTIONS: FFTPMilestoneType[] = [
@@ -70,8 +70,8 @@ const FFTPMilestoneManager = ({
   });
   const [editMilestone, setEditMilestone] = useState({
     milestoneType: "" as FFTPMilestoneType,
-    startDate: undefined as Date | undefined,
-    dueDate: undefined as Date | undefined,
+    startDate: "" as string, // Changed to string to prevent timezone issues
+    dueDate: "" as string, // Changed to string to prevent timezone issues
     status: "Not Started" as ProjectMilestone["status"],
     priority: "Medium" as ProjectMilestone["priority"],
     disbursementAmount: undefined as number | undefined
@@ -107,8 +107,8 @@ const FFTPMilestoneManager = ({
     console.log("Original milestone data:", milestone);
     const editData = {
       milestoneType: milestone.milestoneType as FFTPMilestoneType,
-      startDate: new Date(milestone.startDate),
-      dueDate: new Date(milestone.dueDate),
+      startDate: milestone.startDate, // Keep as string to prevent timezone conversion
+      dueDate: milestone.dueDate, // Keep as string to prevent timezone conversion
       status: milestone.status,
       priority: milestone.priority,
       disbursementAmount: milestone.disbursementAmount
@@ -152,8 +152,8 @@ const FFTPMilestoneManager = ({
     const updateData = {
       title: editMilestone.milestoneType,
       milestoneType: editMilestone.milestoneType,
-      startDate: toDateString(editMilestone.startDate),
-      dueDate: toDateString(editMilestone.dueDate),
+      startDate: editMilestone.startDate, // Already a string, no conversion needed
+      dueDate: editMilestone.dueDate, // Already a string, no conversion needed
       status: editMilestone.status,
       priority: editMilestone.priority,
       disbursementAmount: editMilestone.disbursementAmount
@@ -168,8 +168,8 @@ const FFTPMilestoneManager = ({
     setEditingMilestone(null);
     setEditMilestone({
       milestoneType: "" as FFTPMilestoneType,
-      startDate: undefined,
-      dueDate: undefined,
+      startDate: "",
+      dueDate: "",
       status: "Not Started",
       priority: "Medium",
       disbursementAmount: undefined
@@ -178,9 +178,9 @@ const FFTPMilestoneManager = ({
   };
 
   const sortedMilestones = [...milestones].sort((a, b) => {
-    // Sort by start date in ascending order
-    const dateA = new Date(a.startDate);
-    const dateB = new Date(b.startDate);
+    // Sort by start date in ascending order using timezone-safe comparison
+    const dateA = fromDateString(a.startDate);
+    const dateB = fromDateString(b.startDate);
     return dateA.getTime() - dateB.getTime();
   });
 
@@ -379,16 +379,16 @@ const FFTPMilestoneManager = ({
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {editMilestone.startDate ? format(editMilestone.startDate, "PPP") : "Pick start date"}
+                      {editMilestone.startDate ? editMilestone.startDate : "Pick start date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={editMilestone.startDate}
+                      selected={editMilestone.startDate ? fromDateString(editMilestone.startDate) : undefined}
                       onSelect={(date) => {
                         console.log("Start date selected:", date);
-                        setEditMilestone(prev => ({ ...prev, startDate: date }));
+                        setEditMilestone(prev => ({ ...prev, startDate: date ? toDateString(date) : "" }));
                       }}
                       initialFocus
                       className="p-3 pointer-events-auto"
@@ -409,16 +409,16 @@ const FFTPMilestoneManager = ({
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {editMilestone.dueDate ? format(editMilestone.dueDate, "PPP") : "Pick end date"}
+                      {editMilestone.dueDate ? editMilestone.dueDate : "Pick end date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={editMilestone.dueDate}
+                      selected={editMilestone.dueDate ? fromDateString(editMilestone.dueDate) : undefined}
                       onSelect={(date) => {
                         console.log("End date selected:", date);
-                        setEditMilestone(prev => ({ ...prev, dueDate: date }));
+                        setEditMilestone(prev => ({ ...prev, dueDate: date ? toDateString(date) : "" }));
                       }}
                       initialFocus
                       className="p-3 pointer-events-auto"

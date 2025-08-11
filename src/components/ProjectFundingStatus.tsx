@@ -37,6 +37,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
     amount: "",
     dateReceived: "",
     paymentMethod: "",
+    governanceType: "" as "MOU" | "",
+    governanceNumber: "",
     notes: ""
   });
 
@@ -49,6 +51,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
     datePledged: string;
     expectedDate: string;
     status: "Pending" | "Partially Fulfilled" | "Fulfilled";
+    governanceType: "MOU" | "";
+    governanceNumber: string;
     notes: string;
   }>({
     donorName: "",
@@ -56,6 +60,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
     datePledged: "",
     expectedDate: "",
     status: "Pending",
+    governanceType: "",
+    governanceNumber: "",
     notes: ""
   });
 
@@ -99,6 +105,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
       amount: "",
       dateReceived: "",
       paymentMethod: "",
+      governanceType: "",
+      governanceNumber: "",
       notes: ""
     });
     setEditingReceiptId(null);
@@ -116,6 +124,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
       amount: parseFloat(receiptForm.amount),
       dateReceived: dateReceived,
       paymentMethod: receiptForm.paymentMethod,
+      governanceType: receiptForm.governanceType === "MOU" ? "MOU" : undefined,
+      governanceNumber: receiptForm.governanceNumber || undefined,
       notes: receiptForm.notes
     });
     
@@ -129,6 +139,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
       amount: receipt.amount.toString(),
       dateReceived: receipt.dateReceived,
       paymentMethod: receipt.paymentMethod,
+      governanceType: receipt.governanceType || "",
+      governanceNumber: receipt.governanceNumber || "",
       notes: receipt.notes || ""
     });
     setEditingReceiptId(receipt.id);
@@ -146,6 +158,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
       amount: parseFloat(receiptForm.amount),
       dateReceived: dateReceived,
       paymentMethod: receiptForm.paymentMethod,
+      governanceType: receiptForm.governanceType === "MOU" ? "MOU" : undefined,
+      governanceNumber: receiptForm.governanceNumber || undefined,
       notes: receiptForm.notes
     });
     
@@ -165,6 +179,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
       datePledged: "",
       expectedDate: "",
       status: "Pending",
+      governanceType: "",
+      governanceNumber: "",
       notes: ""
     });
     setEditingPledgeId(null);
@@ -184,6 +200,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
       datePledged: datePledged,
       expectedDate: expectedDate,
       status: pledgeForm.status,
+      governanceType: pledgeForm.governanceType === "MOU" ? "MOU" : undefined,
+      governanceNumber: pledgeForm.governanceNumber || undefined,
       notes: pledgeForm.notes
     });
     
@@ -198,6 +216,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
       datePledged: pledge.datePledged,
       expectedDate: pledge.expectedDate || "",
       status: pledge.status,
+      governanceType: pledge.governanceType || "",
+      governanceNumber: pledge.governanceNumber || "",
       notes: pledge.notes || ""
     });
     setEditingPledgeId(pledge.id);
@@ -217,6 +237,8 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
       datePledged: datePledged,
       expectedDate: expectedDate,
       status: pledgeForm.status,
+      governanceType: pledgeForm.governanceType === "MOU" ? "MOU" : undefined,
+      governanceNumber: pledgeForm.governanceNumber || undefined,
       notes: pledgeForm.notes
     });
     
@@ -310,6 +332,7 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                     <TableHead className="font-medium">Date Pledged</TableHead>
                     <TableHead className="font-medium">Expected Date</TableHead>
                     <TableHead className="font-medium">Status</TableHead>
+                    <TableHead className="font-medium">MOU</TableHead>
                     <TableHead className="font-medium">Notes</TableHead>
                     <TableHead className="font-medium">Actions</TableHead>
                   </TableRow>
@@ -333,6 +356,20 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                         }>
                           {pledge.status}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {pledge.governanceType && pledge.governanceNumber ? (
+                          <div className="text-sm">
+                            <Badge variant="outline" className="text-xs">
+                              {pledge.governanceType}
+                            </Badge>
+                            <div className="mt-1 font-mono text-xs">
+                              {pledge.governanceNumber}
+                            </div>
+                          </div>
+                        ) : (
+                          "N/A"
+                        )}
                       </TableCell>
                       <TableCell className="max-w-md w-80">
                         <div className="text-sm text-gray-600 whitespace-normal break-words leading-relaxed" title={pledge.notes || "No notes"}>
@@ -432,6 +469,27 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                 </select>
               </div>
               <div>
+                <Label>Governance Type (Optional)</Label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  value={pledgeForm.governanceType}
+                  onChange={(e) => setPledgeForm(prev => ({ ...prev, governanceType: e.target.value as any }))}
+                >
+                  <option value="">None</option>
+                  <option value="MOU">MOU</option>
+                </select>
+              </div>
+              {pledgeForm.governanceType === "MOU" && (
+                <div>
+                  <Label>MOU Number</Label>
+                  <Input
+                    placeholder="e.g. MOU-2024-001"
+                    value={pledgeForm.governanceNumber}
+                    onChange={(e) => setPledgeForm(prev => ({ ...prev, governanceNumber: e.target.value }))}
+                  />
+                </div>
+              )}
+              <div>
                 <Label>Notes (Optional)</Label>
                 <Input
                   placeholder="Additional notes about this pledge"
@@ -484,6 +542,7 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                     <TableHead className="font-medium">Amount</TableHead>
                     <TableHead className="font-medium">Date Received</TableHead>
                     <TableHead className="font-medium">Method</TableHead>
+                    <TableHead className="font-medium">MOU</TableHead>
                     <TableHead className="font-medium">Notes</TableHead>
                     <TableHead className="font-medium">Actions</TableHead>
                   </TableRow>
@@ -497,6 +556,20 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                       </TableCell>
                       <TableCell>{formatDateForDisplay(receipt.dateReceived)}</TableCell>
                       <TableCell>{receipt.paymentMethod}</TableCell>
+                      <TableCell>
+                        {receipt.governanceType && receipt.governanceNumber ? (
+                          <div className="text-sm">
+                            <Badge variant="outline" className="text-xs">
+                              {receipt.governanceType}
+                            </Badge>
+                            <div className="mt-1 font-mono text-xs">
+                              {receipt.governanceNumber}
+                            </div>
+                          </div>
+                        ) : (
+                          "N/A"
+                        )}
+                      </TableCell>
                       <TableCell className="max-w-md w-80">
                         <div className="text-sm text-gray-600 whitespace-normal break-words leading-relaxed" title={receipt.notes || "No notes"}>
                           {receipt.notes || "No notes"}
@@ -582,6 +655,27 @@ const ProjectFundingStatus = ({ project, milestones, onUpdateProject }: ProjectF
                   onChange={(e) => setReceiptForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
                 />
               </div>
+              <div>
+                <Label>Governance Type (Optional)</Label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  value={receiptForm.governanceType}
+                  onChange={(e) => setReceiptForm(prev => ({ ...prev, governanceType: e.target.value as any }))}
+                >
+                  <option value="">None</option>
+                  <option value="MOU">MOU</option>
+                </select>
+              </div>
+              {receiptForm.governanceType === "MOU" && (
+                <div>
+                  <Label>MOU Number</Label>
+                  <Input
+                    placeholder="e.g. MOU-2024-001"
+                    value={receiptForm.governanceNumber}
+                    onChange={(e) => setReceiptForm(prev => ({ ...prev, governanceNumber: e.target.value }))}
+                  />
+                </div>
+              )}
               <div>
                 <Label>Notes (Optional)</Label>
                 <Input

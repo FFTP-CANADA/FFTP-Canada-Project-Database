@@ -9,11 +9,10 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  base: '/FFTP-Canada-Project-Database/', // 👈 added here
+  base: "/FFTP-Canada-Project-Database/", // IMPORTANT for GitHub Pages subpath
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === "development" && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {

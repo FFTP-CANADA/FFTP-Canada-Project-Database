@@ -75,14 +75,16 @@ const ProjectsTable = ({
     const totalPledged = projectPledges.reduce((sum, pledge) => sum + pledge.pledgedAmount, 0);
     const totalReceived = projectReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
     const projectValue = project.totalCost || 0;
-    const pledgeShortfall = projectValue - totalPledged;
+    const pledgeGap = totalPledged - totalReceived;
+    const isFullyReceived = totalReceived >= projectValue && projectValue > 0;
     
     return {
       totalPledged,
       totalReceived,
       projectValue,
-      pledgeShortfall,
-      hasPledgeShortfall: pledgeShortfall > 0
+      pledgeGap,
+      isFullyReceived,
+      hasPledgeGap: pledgeGap > 0
     };
   };
 
@@ -272,12 +274,14 @@ const ProjectsTable = ({
                   ) : "No receipts"}
                 </TableCell>
                 <TableCell className="text-blue-900">
-                  {pledgeStatus.hasPledgeShortfall ? (
+                  {pledgeStatus.isFullyReceived ? (
+                    <span className="text-green-600 font-medium">Full Pledge Received</span>
+                  ) : pledgeStatus.hasPledgeGap ? (
                     <span className="text-red-600 font-medium">
-                      -{formatWithExchange(pledgeStatus.pledgeShortfall, project.currency)}
+                      {formatWithExchange(pledgeStatus.pledgeGap, project.currency)}
                     </span>
                   ) : pledgeStatus.totalPledged > 0 ? (
-                    <span className="text-green-600">Fully pledged</span>
+                    <span className="text-green-600">No Gap</span>
                   ) : (
                     <span className="text-gray-500">N/A</span>
                   )}

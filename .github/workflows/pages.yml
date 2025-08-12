@@ -18,12 +18,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Configure GitHub Pages (sets up the 'github-pages' environment properly)
+      - uses: actions/configure-pages@v5
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-      - run: npm install
+
+      # Install deps (works with or without a lockfile)
+      - run: npm ci || npm install
+
+      # Build the Vite app to 'dist'
       - run: npm run build
+
+      # Upload the built site as the artifact for Pages
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -37,3 +47,4 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+

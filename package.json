@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://fftp-canada.github.io/FFTP-Canada-Project-Database/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -86,3 +87,4 @@
     "vite": "^5.4.1"
   }
 }
+

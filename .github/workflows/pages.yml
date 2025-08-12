@@ -33,7 +33,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Optional but harmless: helps single-page apps with deep links
+      # Fallback so SPA deep links don't 404
       - name: Create 404.html for SPA routing
         run: cp dist/index.html dist/404.html || echo "no index.html yet"
 

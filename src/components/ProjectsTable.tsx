@@ -219,7 +219,7 @@ const ProjectsTable = ({
               <TableHead className="text-white px-4 text-center">Received</TableHead>
               <TableHead className="text-white px-4 text-center">Pledge Gap</TableHead>
               <TableHead className="text-white px-4 text-center">Disbursed</TableHead>
-              <TableHead className="text-white px-4 text-center">Balance Due</TableHead>
+              <TableHead className="text-white px-4 text-center">Balance Due To Country</TableHead>
               <TableHead className="text-white px-4 text-center">Progress</TableHead>
               <TableHead className="text-white px-6 min-w-[400px] text-center">Actions</TableHead>
             </TableRow>

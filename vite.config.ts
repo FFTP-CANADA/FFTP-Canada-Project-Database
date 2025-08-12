@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  base: '/FFTP-Canada-Project-Database/', // 👈 added here
   plugins: [
     react(),
     mode === 'development' &&

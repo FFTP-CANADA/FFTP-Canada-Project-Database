@@ -271,7 +271,11 @@ const ProjectsTable = ({
                     <span className="text-green-600 font-medium">
                       {formatWithExchange(pledgeStatus.totalReceived, project.currency)}
                     </span>
-                  ) : "No receipts"}
+                  ) : (
+                    <span className="text-gray-600">
+                      {formatWithExchange(0, project.currency)}
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell className="text-blue-900">
                   {pledgeStatus.isFullyReceived ? (

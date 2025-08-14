@@ -125,7 +125,16 @@ export const useProjectFunding = () => {
       // Return funds to undesignated fund balance
       const amount = "amount" in item ? item.amount : item.pledgedAmount;
       
-      // Update the fund reallocation status to cancelled
+      // Update undesignated fund balance directly by adding the amount back
+      const currentFunds = JSON.parse(localStorage.getItem('undesignated-funds') || '[]');
+      const fundIndex = currentFunds.findIndex((f: any) => f.id === item.sourceUndesignatedFundId);
+      if (fundIndex !== -1) {
+        currentFunds[fundIndex].balance += amount;
+        currentFunds[fundIndex].lastUpdated = new Date().toISOString();
+        localStorage.setItem('undesignated-funds', JSON.stringify(currentFunds));
+      }
+      
+      // Mark the fund reallocation as cancelled
       const fundReallocations = JSON.parse(localStorage.getItem('fund-reallocations-to-pledge') || '[]');
       const reallocationIndex = fundReallocations.findIndex((r: any) => r.id === item.reallocationId);
       if (reallocationIndex !== -1) {

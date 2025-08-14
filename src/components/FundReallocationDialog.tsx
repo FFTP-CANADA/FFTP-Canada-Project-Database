@@ -38,7 +38,7 @@ export const FundReallocationDialog = ({
   } = useReallocation();
   
   const { undesignatedFunds, getAvailableBalance: getUndesignatedBalance, addFundReallocation } = useUndesignatedFunds();
-  const { addPledge } = useProjectFunding();
+  const { addPledge, addReceipt } = useProjectFunding();
 
   // Project-to-project reallocation state
   const [fromProjectId, setFromProjectId] = useState(currentProject?.id || "");
@@ -103,6 +103,8 @@ export const FundReallocationDialog = ({
     }
 
     try {
+      const reallocationDate = new Date().toISOString().split('T')[0];
+      
       await addReallocation({
         fromProjectId,
         fromProjectName: fromProject!.projectName,
@@ -110,10 +112,28 @@ export const FundReallocationDialog = ({
         toProjectName: toProject!.projectName,
         amount: reallocationAmount,
         currency: fromProject!.currency,
-        reallocationDate: new Date().toISOString().split('T')[0],
+        reallocationDate,
         reason,
         approvedBy,
         status: "Completed"
+      });
+
+      // Create donor pledge entry for the receiving project
+      await addPledge({
+        projectId: toProjectId,
+        donorName: `Reallocation from ${fromProject!.projectName}`,
+        pledgedAmount: reallocationAmount,
+        datePledged: reallocationDate,
+        status: "Fulfilled"
+      });
+
+      // Create donor receipt entry for the receiving project
+      await addReceipt({
+        projectId: toProjectId,
+        donorName: `Reallocation from ${fromProject!.projectName}`,
+        amount: reallocationAmount,
+        dateReceived: reallocationDate,
+        paymentMethod: "Fund Reallocation"
       });
 
       toast({
@@ -169,13 +189,15 @@ export const FundReallocationDialog = ({
     }
 
     try {
+      const reallocationDate = new Date().toISOString().split('T')[0];
+      
       // Create fund reallocation record
       await addFundReallocation({
         fromUndesignatedFundId: selectedFundId,
         toProjectId: undesignatedToProjectId,
         amount: reallocationAmount,
         currency: selectedFund!.currency,
-        reallocationDate: new Date().toISOString().split('T')[0],
+        reallocationDate,
         reason: undesignatedReason,
         approvedBy: undesignatedApprovedBy,
         status: "Completed"
@@ -186,8 +208,17 @@ export const FundReallocationDialog = ({
         projectId: undesignatedToProjectId,
         donorName: `${selectedFund!.impactArea} Fund Allocation`,
         pledgedAmount: reallocationAmount,
-        datePledged: new Date().toISOString().split('T')[0],
+        datePledged: reallocationDate,
         status: "Fulfilled"
+      });
+
+      // Create receipt for the project
+      await addReceipt({
+        projectId: undesignatedToProjectId,
+        donorName: `${selectedFund!.impactArea} Fund Allocation`,
+        amount: reallocationAmount,
+        dateReceived: reallocationDate,
+        paymentMethod: "Fund Allocation"
       });
 
       toast({

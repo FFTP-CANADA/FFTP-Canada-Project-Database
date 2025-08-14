@@ -125,13 +125,12 @@ export const useProjectFunding = () => {
       // Return funds to undesignated fund balance
       const amount = "amount" in item ? item.amount : item.pledgedAmount;
       
-      // Update undesignated fund balance directly via localStorage
-      const currentFunds = JSON.parse(localStorage.getItem('undesignated-funds') || '[]');
-      const fundIndex = currentFunds.findIndex((f: any) => f.id === item.sourceUndesignatedFundId);
-      if (fundIndex !== -1) {
-        currentFunds[fundIndex].balance += amount;
-        currentFunds[fundIndex].lastUpdated = new Date().toISOString();
-        localStorage.setItem('undesignated-funds', JSON.stringify(currentFunds));
+      // Update the fund reallocation status to cancelled
+      const fundReallocations = JSON.parse(localStorage.getItem('fund-reallocations-to-pledge') || '[]');
+      const reallocationIndex = fundReallocations.findIndex((r: any) => r.id === item.reallocationId);
+      if (reallocationIndex !== -1) {
+        fundReallocations[reallocationIndex].status = "Cancelled";
+        localStorage.setItem('fund-reallocations-to-pledge', JSON.stringify(fundReallocations));
       }
     }
   };

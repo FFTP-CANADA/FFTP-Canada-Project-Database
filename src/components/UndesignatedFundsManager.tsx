@@ -305,7 +305,6 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
             <TableRow>
               <TableHead>Impact Area</TableHead>
               <TableHead>Currency</TableHead>
-              <TableHead>Total Balance</TableHead>
               <TableHead>Available Balance</TableHead>
               <TableHead>Last Updated</TableHead>
               <TableHead>Actions</TableHead>
@@ -318,7 +317,6 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
                 <TableRow key={fund.id}>
                   <TableCell>{fund.impactArea}</TableCell>
                   <TableCell>{fund.currency}</TableCell>
-                  <TableCell>{formatCurrency(fund.balance, fund.currency)}</TableCell>
                   <TableCell>{formatCurrency(availableBalance, fund.currency)}</TableCell>
                   <TableCell>{new Date(fund.lastUpdated).toLocaleDateString()}</TableCell>
                   <TableCell>

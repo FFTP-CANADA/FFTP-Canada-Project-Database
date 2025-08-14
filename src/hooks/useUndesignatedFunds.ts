@@ -68,12 +68,16 @@ export const useUndesignatedFunds = () => {
 
   const getAvailableBalance = useCallback((fundId: string) => {
     const fund = undesignatedFunds.find(f => f.id === fundId);
-    if (!fund) return 0;
+    if (!fund) {
+      console.log(`Fund not found for ID: ${fundId}`);
+      return 0;
+    }
 
     const allocatedAmount = fundReallocations
       .filter(r => r.fromUndesignatedFundId === fundId && r.status === 'Completed')
       .reduce((sum, r) => sum + r.amount, 0);
 
+    console.log(`Fund ${fundId}: balance=${fund.balance}, allocated=${allocatedAmount}, available=${fund.balance - allocatedAmount}`);
     return fund.balance - allocatedAmount;
   }, [undesignatedFunds, fundReallocations]);
 

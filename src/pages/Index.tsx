@@ -30,6 +30,7 @@ import ExchangeRateDisplay from "@/components/ExchangeRateDisplay";
 import { convertUsdToCad, formatWithExchange } from "@/utils/currencyUtils";
 import { useAutoFollowUp } from "@/hooks/useAutoFollowUp";
 import { useProjectFunding } from "@/hooks/useProjectFunding";
+import UndesignatedFundsManager from "@/components/UndesignatedFundsManager";
 
 const Index = () => {
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
@@ -397,7 +398,7 @@ const Index = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="projects" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-[600px] bg-blue-50 border border-blue-200">
+          <TabsList className="grid w-full grid-cols-4 lg:w-[800px] bg-blue-50 border border-blue-200">
             <TabsTrigger 
               value="projects" 
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
@@ -409,6 +410,12 @@ const Index = () => {
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               Analytics
+            </TabsTrigger>
+            <TabsTrigger 
+              value="funding" 
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              Fund Management
             </TabsTrigger>
             <TabsTrigger 
               value="backup" 
@@ -500,6 +507,10 @@ const Index = () => {
 
           <TabsContent value="analytics" className="space-y-6">
             <AnalyticsDashboard projects={projects} />
+          </TabsContent>
+
+          <TabsContent value="funding" className="space-y-6">
+            <UndesignatedFundsManager projects={projects} />
           </TabsContent>
 
           <TabsContent value="backup" className="space-y-6">

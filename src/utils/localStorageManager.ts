@@ -1,5 +1,5 @@
 // Bulletproof localStorage management with zero data loss
-type StorageKey = 'projects' | 'project-attachments' | 'project-milestones' | 'project-photos' | 'project-notes' | 'donorReceipts' | 'donorPledges' | 'exchangeRate' | 'disbursed-amounts-migrated' | 'fund-reallocations';
+type StorageKey = 'projects' | 'project-attachments' | 'project-milestones' | 'project-photos' | 'project-notes' | 'donorReceipts' | 'donorPledges' | 'exchangeRate' | 'disbursed-amounts-migrated' | 'fund-reallocations' | 'undesignated-funds' | 'fund-reallocations-to-pledge';
 
 export class LocalStorageManager {
   private static readonly PREFIX = 'fftp_';

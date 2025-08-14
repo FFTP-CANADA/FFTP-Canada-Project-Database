@@ -92,12 +92,6 @@ export const useUndesignatedFunds = () => {
     return undesignatedFunds.filter(f => f.impactArea === impactArea);
   }, [undesignatedFunds]);
 
-  const clearAllReallocations = useCallback(() => {
-    console.log('Clearing all reallocations');
-    setFundReallocations([]);
-    LocalStorageManager.setItem('fund-reallocations-to-pledge', []);
-  }, []);
-
   return {
     undesignatedFunds,
     fundReallocations,
@@ -108,6 +102,5 @@ export const useUndesignatedFunds = () => {
     updateFundReallocation,
     getAvailableBalance,
     getFundsByImpactArea,
-    clearAllReallocations,
   };
 };

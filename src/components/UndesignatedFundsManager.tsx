@@ -35,7 +35,9 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
     updateUndesignatedFund, 
     deleteUndesignatedFund,
     addFundReallocation,
-    getAvailableBalance 
+    getAvailableBalance,
+    clearAllReallocations,
+    fundReallocations
   } = useUndesignatedFunds();
   const { addPledge } = useProjectFunding();
   const { toast } = useToast();
@@ -231,13 +233,29 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>Undesignated Fund Balances</CardTitle>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={resetForm}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Fund Balance
-              </Button>
-            </DialogTrigger>
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                console.log('All undesignated funds:', undesignatedFunds);
+                console.log('All fund reallocations:', fundReallocations);
+                clearAllReallocations();
+                toast({
+                  title: "Debug",
+                  description: "Cleared all reallocations. Check console for data."
+                });
+              }}
+            >
+              Debug & Clear Reallocations
+            </Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={resetForm}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Fund Balance
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add Undesignated Fund Balance</DialogTitle>
@@ -296,7 +314,8 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
                 </div>
               </form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
       </CardHeader>
       <CardContent>

@@ -73,17 +73,30 @@ export const useUndesignatedFunds = () => {
       return 0;
     }
 
-    const allocatedAmount = fundReallocations
-      .filter(r => r.fromUndesignatedFundId === fundId && r.status === 'Completed')
-      .reduce((sum, r) => sum + r.amount, 0);
+    console.log(`All reallocations:`, fundReallocations);
+    
+    const completedReallocations = fundReallocations
+      .filter(r => r.fromUndesignatedFundId === fundId && r.status === 'Completed');
+    
+    console.log(`Completed reallocations for fund ${fundId}:`, completedReallocations);
+    
+    const allocatedAmount = completedReallocations.reduce((sum, r) => sum + r.amount, 0);
 
     console.log(`Fund ${fundId}: balance=${fund.balance}, allocated=${allocatedAmount}, available=${fund.balance - allocatedAmount}`);
+    console.log(`Fund details:`, fund);
+    
     return fund.balance - allocatedAmount;
   }, [undesignatedFunds, fundReallocations]);
 
   const getFundsByImpactArea = useCallback((impactArea: string) => {
     return undesignatedFunds.filter(f => f.impactArea === impactArea);
   }, [undesignatedFunds]);
+
+  const clearAllReallocations = useCallback(() => {
+    console.log('Clearing all reallocations');
+    setFundReallocations([]);
+    LocalStorageManager.setItem('fund-reallocations-to-pledge', []);
+  }, []);
 
   return {
     undesignatedFunds,
@@ -95,5 +108,6 @@ export const useUndesignatedFunds = () => {
     updateFundReallocation,
     getAvailableBalance,
     getFundsByImpactArea,
+    clearAllReallocations,
   };
 };

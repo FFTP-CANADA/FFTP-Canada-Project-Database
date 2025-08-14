@@ -15,12 +15,14 @@ import {
   Line
 } from "recharts";
 import { Project } from "@/hooks/useProjectData";
+import { useUndesignatedFunds } from "@/hooks/useUndesignatedFunds";
 
 interface AnalyticsDashboardProps {
   projects: Project[];
 }
 
 const AnalyticsDashboard = ({ projects }: AnalyticsDashboardProps) => {
+  const { undesignatedFunds, getAvailableBalance } = useUndesignatedFunds();
   // Data for disbursements by country
   const disbursementsByCountry = projects.reduce((acc, project) => {
     const existing = acc.find(item => item.country === project.country);
@@ -289,7 +291,8 @@ const AnalyticsDashboard = ({ projects }: AnalyticsDashboardProps) => {
                 {['Food Security', 'Education', 'Housing & Community', 'Health', 'Economic Empowerment', 'Greatest Needs'].map((area) => {
                   const areaProjects = projects.filter(p => p.impactArea === area);
                   const undesignatedProjects = areaProjects.filter(p => p.fundType === 'Undesignated');
-                  const availableBalance = undesignatedProjects.reduce((sum, p) => sum + (p.totalCost - p.amountDisbursed), 0);
+                  const areaFunds = undesignatedFunds.filter(f => f.impactArea === area);
+                  const totalAvailableBalance = areaFunds.reduce((sum, fund) => sum + getAvailableBalance(fund.id), 0);
                   
                   return (
                     <tr key={area} className="border-b border-blue-100 hover:bg-blue-50">
@@ -297,7 +300,7 @@ const AnalyticsDashboard = ({ projects }: AnalyticsDashboardProps) => {
                       <td className="py-3 px-4 text-right text-blue-800">{areaProjects.length}</td>
                       <td className="py-3 px-4 text-right text-blue-800">{undesignatedProjects.length}</td>
                       <td className="py-3 px-4 text-right text-blue-900 font-semibold">
-                        ${availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ${totalAvailableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                     </tr>
                   );

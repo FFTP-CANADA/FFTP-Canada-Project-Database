@@ -141,6 +141,9 @@ export const useProjectFunding = () => {
         fundReallocations[reallocationIndex].status = "Cancelled";
         localStorage.setItem('fund-reallocations-to-pledge', JSON.stringify(fundReallocations));
       }
+      
+      // Force a page refresh to update all UI components
+      window.location.reload();
     }
   };
 

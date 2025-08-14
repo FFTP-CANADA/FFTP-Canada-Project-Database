@@ -52,12 +52,13 @@ export const useProjectFunding = () => {
     return donorPledges.filter(pledge => pledge.projectId === projectId);
   };
 
-  const addReceipt = (receipt: Omit<DonorReceipt, "id">) => {
+  const addReceipt = async (receipt: Omit<DonorReceipt, "id">) => {
     const newReceipt: DonorReceipt = {
       ...receipt,
       id: Date.now().toString(),
     };
     setDonorReceipts(prev => [...prev, newReceipt]);
+    return newReceipt.id;
   };
 
   const updateReceipt = (id: string, updates: Partial<DonorReceipt>) => {
@@ -70,12 +71,13 @@ export const useProjectFunding = () => {
     setDonorReceipts(prev => prev.filter(receipt => receipt.id !== id));
   };
 
-  const addPledge = (pledge: Omit<DonorPledge, "id">) => {
+  const addPledge = async (pledge: Omit<DonorPledge, "id">) => {
     const newPledge: DonorPledge = {
       ...pledge,
       id: Date.now().toString(),
     };
     setDonorPledges(prev => [...prev, newPledge]);
+    return newPledge.id;
   };
 
   const updatePledge = (id: string, updates: Partial<DonorPledge>) => {

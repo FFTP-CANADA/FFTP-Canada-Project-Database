@@ -142,8 +142,12 @@ export const useProjectFunding = () => {
         localStorage.setItem('fund-reallocations-to-pledge', JSON.stringify(fundReallocations));
       }
       
-      // Force a page refresh to update all UI components
-      window.location.reload();
+      // Trigger a storage event to force all components to refresh
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'undesignated-funds',
+        newValue: localStorage.getItem('undesignated-funds'),
+        storageArea: localStorage
+      }));
     }
   };
 

@@ -75,16 +75,16 @@ const ProjectsTable = ({
     const totalPledged = projectPledges.reduce((sum, pledge) => sum + pledge.pledgedAmount, 0);
     const totalReceived = projectReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
     const projectValue = project.totalCost || 0;
-    const pledgeGap = totalPledged - totalReceived;
+    const fundingGap = projectValue - totalReceived;
     const isFullyReceived = totalReceived >= projectValue && projectValue > 0;
     
     return {
       totalPledged,
       totalReceived,
       projectValue,
-      pledgeGap,
+      fundingGap,
       isFullyReceived,
-      hasPledgeGap: pledgeGap > 0
+      hasFundingGap: fundingGap > 0
     };
   };
 
@@ -217,7 +217,7 @@ const ProjectsTable = ({
               <TableHead className="text-white px-4 text-center">Project Cost</TableHead>
               <TableHead className="text-white px-4 text-center">Pledged</TableHead>
               <TableHead className="text-white px-4 text-center">Funds Received</TableHead>
-              <TableHead className="text-white px-4 text-center">Pledge Gap</TableHead>
+              <TableHead className="text-white px-4 text-center">Funding Gap</TableHead>
               <TableHead className="text-white px-4 text-center">Funds Disbursed</TableHead>
               <TableHead className="text-white px-4 text-center">Balance Due To Country</TableHead>
               <TableHead className="text-white px-4 text-center">Disbursement Progress</TableHead>
@@ -279,13 +279,13 @@ const ProjectsTable = ({
                 </TableCell>
                 <TableCell className="text-blue-900">
                   {pledgeStatus.isFullyReceived ? (
-                    <span className="text-green-600 font-medium">Full Pledge Received</span>
-                  ) : pledgeStatus.hasPledgeGap ? (
+                    <span className="text-green-600 font-medium">Fully Funded</span>
+                  ) : pledgeStatus.hasFundingGap ? (
                     <span className="text-red-600 font-medium">
-                      {formatWithExchange(pledgeStatus.pledgeGap, project.currency)}
+                      {formatWithExchange(pledgeStatus.fundingGap, project.currency)}
                     </span>
-                  ) : pledgeStatus.totalPledged > 0 ? (
-                    <span className="text-green-600">No Gap</span>
+                  ) : pledgeStatus.projectValue > 0 ? (
+                    <span className="text-green-600">Fully Funded</span>
                   ) : (
                     <span className="text-gray-500">N/A</span>
                   )}

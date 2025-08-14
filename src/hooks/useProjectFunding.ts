@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useReallocation } from "@/hooks/useReallocation";
 
 export interface DonorReceipt {
   id: string;
@@ -37,7 +36,6 @@ export interface DonorPledge {
 }
 
 export const useProjectFunding = () => {
-  const { updateReallocation } = useReallocation();
   const [donorReceipts, setDonorReceipts] = useState<DonorReceipt[]>(() => {
     const saved = localStorage.getItem('donorReceipts');
     return saved ? JSON.parse(saved) : [];
@@ -113,7 +111,12 @@ export const useProjectFunding = () => {
   const reverseReallocation = async (item: DonorReceipt | DonorPledge) => {
     if (item.reallocationSource === "project" && item.sourceProjectId && item.reallocationId) {
       // Reverse project-to-project reallocation by marking it as cancelled
-      await updateReallocation(item.reallocationId, { status: "Cancelled" });
+      const reallocations = JSON.parse(localStorage.getItem('fund-reallocations') || '[]');
+      const reallocationIndex = reallocations.findIndex((r: any) => r.id === item.reallocationId);
+      if (reallocationIndex !== -1) {
+        reallocations[reallocationIndex].status = "Cancelled";
+        localStorage.setItem('fund-reallocations', JSON.stringify(reallocations));
+      }
     } else if (item.reallocationSource === "undesignated" && item.sourceUndesignatedFundId) {
       // Return funds to undesignated fund balance
       const amount = "amount" in item ? item.amount : item.pledgedAmount;
@@ -125,9 +128,6 @@ export const useProjectFunding = () => {
         currentFunds[fundIndex].balance += amount;
         currentFunds[fundIndex].lastUpdated = new Date().toISOString();
         localStorage.setItem('undesignated-funds', JSON.stringify(currentFunds));
-        
-        // Trigger a page refresh to update the UI
-        window.location.reload();
       }
     }
   };

@@ -81,6 +81,8 @@ export const useProjectFunding = () => {
     const receipt = donorReceipts.find(r => r.id === id);
     if (receipt?.reallocationId) {
       await reverseReallocation(receipt);
+      // Also delete corresponding pledge with same reallocation ID
+      setDonorPledges(prev => prev.filter(pledge => pledge.reallocationId !== receipt.reallocationId));
     }
     setDonorReceipts(prev => prev.filter(receipt => receipt.id !== id));
   };
@@ -104,6 +106,8 @@ export const useProjectFunding = () => {
     const pledge = donorPledges.find(p => p.id === id);
     if (pledge?.reallocationId) {
       await reverseReallocation(pledge);
+      // Also delete corresponding receipt with same reallocation ID
+      setDonorReceipts(prev => prev.filter(receipt => receipt.reallocationId !== pledge.reallocationId));
     }
     setDonorPledges(prev => prev.filter(pledge => pledge.id !== id));
   };

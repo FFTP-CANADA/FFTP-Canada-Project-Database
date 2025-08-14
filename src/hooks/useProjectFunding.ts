@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useReallocation } from "@/hooks/useReallocation";
 
 export interface DonorReceipt {
   id: string;
@@ -10,6 +11,11 @@ export interface DonorReceipt {
   governanceType?: "MOU";
   governanceNumber?: string;
   notes?: string;
+  // Reallocation tracking
+  reallocationId?: string;
+  reallocationSource?: "project" | "undesignated";
+  sourceProjectId?: string;
+  sourceUndesignatedFundId?: string;
 }
 
 export interface DonorPledge {
@@ -23,9 +29,15 @@ export interface DonorPledge {
   governanceType?: "MOU";
   governanceNumber?: string;
   notes?: string;
+  // Reallocation tracking
+  reallocationId?: string;
+  reallocationSource?: "project" | "undesignated";
+  sourceProjectId?: string;
+  sourceUndesignatedFundId?: string;
 }
 
 export const useProjectFunding = () => {
+  const { updateReallocation } = useReallocation();
   const [donorReceipts, setDonorReceipts] = useState<DonorReceipt[]>(() => {
     const saved = localStorage.getItem('donorReceipts');
     return saved ? JSON.parse(saved) : [];
@@ -67,7 +79,11 @@ export const useProjectFunding = () => {
     ));
   };
 
-  const deleteReceipt = (id: string) => {
+  const deleteReceipt = async (id: string) => {
+    const receipt = donorReceipts.find(r => r.id === id);
+    if (receipt?.reallocationId) {
+      await reverseReallocation(receipt);
+    }
     setDonorReceipts(prev => prev.filter(receipt => receipt.id !== id));
   };
 
@@ -86,8 +102,34 @@ export const useProjectFunding = () => {
     ));
   };
 
-  const deletePledge = (id: string) => {
+  const deletePledge = async (id: string) => {
+    const pledge = donorPledges.find(p => p.id === id);
+    if (pledge?.reallocationId) {
+      await reverseReallocation(pledge);
+    }
     setDonorPledges(prev => prev.filter(pledge => pledge.id !== id));
+  };
+
+  const reverseReallocation = async (item: DonorReceipt | DonorPledge) => {
+    if (item.reallocationSource === "project" && item.sourceProjectId && item.reallocationId) {
+      // Reverse project-to-project reallocation by marking it as cancelled
+      await updateReallocation(item.reallocationId, { status: "Cancelled" });
+    } else if (item.reallocationSource === "undesignated" && item.sourceUndesignatedFundId) {
+      // Return funds to undesignated fund balance
+      const amount = "amount" in item ? item.amount : item.pledgedAmount;
+      
+      // Update undesignated fund balance directly via localStorage
+      const currentFunds = JSON.parse(localStorage.getItem('undesignated-funds') || '[]');
+      const fundIndex = currentFunds.findIndex((f: any) => f.id === item.sourceUndesignatedFundId);
+      if (fundIndex !== -1) {
+        currentFunds[fundIndex].balance += amount;
+        currentFunds[fundIndex].lastUpdated = new Date().toISOString();
+        localStorage.setItem('undesignated-funds', JSON.stringify(currentFunds));
+        
+        // Trigger a page refresh to update the UI
+        window.location.reload();
+      }
+    }
   };
 
   return {

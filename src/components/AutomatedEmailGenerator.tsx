@@ -27,6 +27,7 @@ export const AutomatedEmailGenerator = ({
   const [senderPosition, setSenderPosition] = useState("Project Coordinator");
   const [senderOrganization, setSenderOrganization] = useState("Food For The Poor Canada");
   const [partnerName, setPartnerName] = useState(project.partnerName || "[Partner Name]");
+  const [officerName, setOfficerName] = useState("[Officer Name]");
 
   const getEmailTemplate = () => {
     const milestoneType = milestone.milestoneType || milestone.title;
@@ -42,7 +43,12 @@ export const AutomatedEmailGenerator = ({
     } else if (milestoneType === "Interim Report & Receipts Submitted (following Installment #1)" ||
                milestone.title.toLowerCase().includes("interim report") ||
                milestone.title.toLowerCase().includes("receipts submitted")) {
-      return "interimReport";
+      // Check if milestone is completed to determine which template to use
+      if (milestone.status === "Completed") {
+        return "interimReportInternal";
+      } else {
+        return "interimReport";
+      }
     }
     return "generic";
   };
@@ -152,6 +158,30 @@ ${senderPosition}
 ${senderOrganization}`;
 
       return { subject, emailBody };
+    
+    } else if (emailTemplate === "interimReportInternal") {
+      // Calculate second disbursement date (typically 30 days after interim report received)
+      const secondDisbursementDate = new Date(milestone.completedDate || milestone.dueDate);
+      secondDisbursementDate.setDate(secondDisbursementDate.getDate() + 30);
+      
+      const subject = `Interim Report Received – ${project.projectName} (For Review & Donor Update)`;
+
+      const emailBody = `Dear ${officerName},
+
+The Interim Report & Receipts for the ${project.projectName} have been received from ${partnerName}, as per the ${governanceType} (Reference: ${governanceNumber}). The report and supporting documentation are attached for your detailed review.
+
+Please prepare the relevant donor update to keep our donor informed of the project's progress. This update should be finalized promptly, as the second disbursement under this project is scheduled for ${formatDateForDisplay(secondDisbursementDate.toISOString().split('T')[0])}, pending confirmation that there are no concerns with the submitted report.
+
+Kindly review the attached documentation and confirm within the next three (3) business days whether you have any questions or concerns. If no concerns are raised, we will proceed with the disbursement to the partner as scheduled.
+
+Thank you for your attention to this matter and for ensuring our donor remains up to date.
+
+Kind regards,
+${senderName}
+${senderPosition}
+${senderOrganization}`;
+
+      return { subject, emailBody };
     }
 
     // Generic template fallback
@@ -186,6 +216,7 @@ ${senderOrganization}`;
       case "governance": return "Governance Document Reminder Email";
       case "firstDisbursement": return "First Disbursement Confirmation Email";
       case "interimReport": return "Interim Report & Receipts Reminder Email";
+      case "interimReportInternal": return "Internal Donor Engagement Advisory Email";
       default: return "Project Milestone Email";
     }
   };
@@ -231,7 +262,9 @@ ${senderOrganization}`;
                   />
                 </div>
                 <div>
-                  <Label htmlFor="partnerName">Partner Name</Label>
+                  <Label htmlFor="partnerName">
+                    {emailTemplate === "interimReportInternal" ? "Partner Name" : "Partner Name"}
+                  </Label>
                   <Input
                     id="partnerName"
                     value={partnerName}
@@ -239,6 +272,17 @@ ${senderOrganization}`;
                     placeholder="Enter partner organization name"
                   />
                 </div>
+                {emailTemplate === "interimReportInternal" && (
+                  <div>
+                    <Label htmlFor="officerName">Donor Engagement Officer Name</Label>
+                    <Input
+                      id="officerName"
+                      value={officerName}
+                      onChange={(e) => setOfficerName(e.target.value)}
+                      placeholder="Enter officer name"
+                    />
+                  </div>
+                )}
                 <div>
                   <Label htmlFor="senderPosition">Position</Label>
                   <Input

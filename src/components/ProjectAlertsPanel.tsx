@@ -94,9 +94,10 @@ export const ProjectAlertsPanel = ({
   };
 
   const hasEmailTemplate = (alert: ProjectAlert) => {
+    const milestone = milestones.find(m => m.id === alert.id.replace('milestone-', ''));
     return isGovernanceDocumentMilestone(alert) || 
            isFirstDisbursementMilestone(alert) || 
-           isInterimReportMilestone(alert);
+           (isInterimReportMilestone(alert) && (milestone?.status !== "Completed" || milestone?.status === "Completed"));
   };
 
   if (alerts.length === 0) {

@@ -18,14 +18,8 @@ const saveProjects = async (projects: Project[]) => {
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>(() => {
-    console.log("🚀 INITIALIZING PROJECTS HOOK");
-    if (globalProjects.length > 0) {
-      console.log("Using cached global projects:", globalProjects.length);
-      return globalProjects;
-    }
+    if (globalProjects.length > 0) return globalProjects;
     const saved = LocalStorageManager.getItem('projects', []);
-    console.log("Loading projects from localStorage:", saved.length);
-    console.log("Project names from localStorage:", saved.map(p => p.projectName));
     globalProjects = saved;
     return saved;
   });

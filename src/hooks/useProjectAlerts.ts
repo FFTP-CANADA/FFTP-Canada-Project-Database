@@ -18,18 +18,15 @@ export interface ProjectAlert {
   isOverdue?: boolean;
 }
 
-export const useProjectAlerts = (projects: Project[], providedMilestones?: ProjectMilestone[]) => {
+export const useProjectAlerts = (projects: Project[]) => {
   const [alerts, setAlerts] = useState<ProjectAlert[]>([]);
   const [alertSettings] = useState({
     warningDays: 10, // Alert 10 business days before
     enableAlerts: true,
     demoMode: false // Demo removed as requested
   });
-  const { milestones: hookMilestones } = useProjectMilestones();
+  const { milestones } = useProjectMilestones();
   const { donorPledges } = useProjectFunding();
-  
-  // Use provided milestones if available, otherwise use hook milestones
-  const milestones = providedMilestones || hookMilestones;
 
   /**
    * Generate alerts for all projects
@@ -37,17 +34,9 @@ export const useProjectAlerts = (projects: Project[], providedMilestones?: Proje
   const generateAlerts = useCallback(() => {
     if (!alertSettings.enableAlerts) return [];
 
-    console.log("🚨 ALERT GENERATION STARTING 🚨");
-    console.log("Projects received:", projects.length);
-    console.log("Milestones received:", milestones.length);
-    console.log("All project names:", projects.map(p => p.projectName));
-
     const newAlerts: ProjectAlert[] = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Start of today for accurate comparison
-    
-    console.log("Today's date:", today.toISOString());
-    console.log("Warning days setting:", alertSettings.warningDays);
 
     // 1. CHECK PROJECT DEADLINES (upcoming and overdue)
     projects.forEach(project => {
@@ -185,19 +174,12 @@ export const useProjectAlerts = (projects: Project[], providedMilestones?: Proje
   }, [projects, alertSettings, milestones, donorPledges]);
 
   /**
-   * Update alerts when projects or milestones change - with immediate sync
+   * Update alerts when projects change
    */
   useEffect(() => {
-    console.log("🔄 ALERT SYNC: Projects or milestones changed, regenerating alerts");
-    console.log("Current projects count:", projects.length);
-    console.log("Current milestones count:", milestones.length);
-    
     const newAlerts = generateAlerts();
     setAlerts(newAlerts);
-    
-    console.log("📊 FINAL ALERT COUNT:", newAlerts.length);
-    console.log("Alert projects:", newAlerts.map(a => a.projectName));
-  }, [projects, milestones, generateAlerts]); // React to ANY change in projects or milestones
+  }, [generateAlerts]);
 
   /**
    * Mark an alert as read

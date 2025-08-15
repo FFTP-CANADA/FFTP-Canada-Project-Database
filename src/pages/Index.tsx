@@ -33,6 +33,7 @@ import { useProjectFunding } from "@/hooks/useProjectFunding";
 import UndesignatedFundsManager from "@/components/UndesignatedFundsManager";
 
 const Index = () => {
+  console.log("Index component is rendering!");
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
   const [editProject, setEditProject] = useState<{ open: boolean; project: any }>({
     open: false,

@@ -242,6 +242,42 @@ Director of Programs
 Food For The Poor Canada`;
   };
 
+  const generateFinalReportInternalEmail = (project: Project, milestone: ProjectMilestone, milestones: ProjectMilestone[]): string => {
+    const totalDisbursed = project.amountDisbursed || 0;
+    const formattedDisbursed = formatCurrency(totalDisbursed, project.currency);
+    
+    // Find the final disbursement milestone to get the date
+    const finalDisbursementMilestone = milestones.find(m => 
+      m.projectId === project.id && 
+      m.milestoneType === "Final Disbursement Sent"
+    );
+    
+    const finalDisbursementDate = finalDisbursementMilestone 
+      ? new Date(finalDisbursementMilestone.dueDate).toLocaleDateString('en-CA', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        })
+      : '[FINAL DISBURSEMENT DATE]';
+    
+    return `Subject: Final Report Received – ${project.projectName} (For Review & Donor Update)
+
+Dear [OFFICER NAME],
+
+The Final Report & Receipts for the ${project.projectName} have been received from ${project.partnerName || '[PARTNER NAME]'}, as per the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}). The report and supporting documentation are attached for your detailed review.
+
+To date, ${formattedDisbursed} has been disbursed under this project. Please prepare the final donor update to provide them with a comprehensive project completion summary. Where the need exists, the final disbursement will be issued to the partner following this review, in line with the project agreement.
+
+Kindly confirm within the next three (3) business days whether you have any questions or concerns regarding the report. If no concerns are raised, we will proceed with the final disbursement as scheduled for ${finalDisbursementDate}.
+
+Thank you for your attention to this matter and for ensuring our donor receives a timely update on the successful completion of this project.
+
+Kind regards,
+Joan Tulloch
+Director of Programs
+Food For The Poor Canada`;
+  };
+
   const generateSecondDisbursementInternalEmail = (project: Project, milestone: ProjectMilestone): string => {
     const disbursementAmount = milestone.disbursementAmount || 0;
     const formattedDisbursementAmount = formatCurrency(disbursementAmount, project.currency);
@@ -493,6 +529,35 @@ joannt@foodforthepoor.ca`;
               
               newFollowUps.push({
                 id: `${project.id}-${milestone.id}-second-disbursement-${Date.now()}`,
+                projectId: project.id,
+                projectName: project.projectName,
+                milestoneTitle: `Internal: ${milestone.title}`,
+                milestoneDueDate: milestone.dueDate,
+                draftEmail,
+                generated: new Date().toISOString(),
+                priority: milestone.priority,
+                trigger: "milestone"
+              });
+            }
+          }
+
+          // Generate internal email when Final Report milestone is completed
+          if (milestone.milestoneType === "Final Report and Receipts Submitted" && 
+              milestone.status === "Completed") {
+            
+            const existingFinalReportFollowUp = followUpEmails.find(
+              email => email.projectId === project.id && 
+                      email.milestoneTitle === milestone.title &&
+                      email.trigger === "milestone" &&
+                      email.draftEmail.includes("Final Report Received – ")
+            );
+            
+            if (!existingFinalReportFollowUp) {
+              console.log(`Generating internal follow-up for completed final report: ${milestone.title}`);
+              const draftEmail = generateFinalReportInternalEmail(project, milestone, milestones);
+              
+              newFollowUps.push({
+                id: `${project.id}-${milestone.id}-final-report-${Date.now()}`,
                 projectId: project.id,
                 projectName: project.projectName,
                 milestoneTitle: `Internal: ${milestone.title}`,

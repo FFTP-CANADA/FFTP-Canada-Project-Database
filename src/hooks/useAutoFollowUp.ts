@@ -200,6 +200,60 @@ Director of Programs
 Food For The Poor Canada`;
   };
 
+  const generateSecondDisbursementInternalEmail = (project: Project, milestone: ProjectMilestone): string => {
+    const disbursementAmount = milestone.disbursementAmount || 0;
+    const formattedDisbursementAmount = formatCurrency(disbursementAmount, project.currency);
+    const totalCost = project.totalCost || 0;
+    const formattedCost = formatCurrency(totalCost, project.currency);
+    
+    return `Subject: Second Disbursement Sent – ${project.projectName}
+
+Dear [OFFICER NAME],
+
+This is to confirm that the second disbursement for the ${project.projectName} has been sent to ${project.partnerName || '[PARTNER NAME]'}, in accordance with the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}).
+
+Transaction Details:
+
+Amount Transferred: ${formattedDisbursementAmount}
+
+Date of Transfer: ${new Date(milestone.completedDate || milestone.dueDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}
+
+Project Overview:
+
+Project Cost: ${formattedCost}
+
+Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}
+
+End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }) : '[PROJECT END DATE]'}
+
+For your reference, please find attached:
+
+The official wire sheet.
+
+The bank wire confirmation.
+
+Kindly proceed with any necessary donor communications to keep them informed of this milestone. Please let me know if you require additional details for your update.
+
+Thank you for ensuring our donor remains engaged and updated on the project's progress.
+
+Kind regards,
+Joan Tulloch
+Director of Programs
+Food For The Poor Canada`;
+  };
+
   const generateFollowUpEmail = (
     project: Project,
     milestone: ProjectMilestone,
@@ -363,6 +417,35 @@ joannt@foodforthepoor.ca`;
               
               newFollowUps.push({
                 id: `${project.id}-${milestone.id}-internal-${Date.now()}`,
+                projectId: project.id,
+                projectName: project.projectName,
+                milestoneTitle: `Internal: ${milestone.title}`,
+                milestoneDueDate: milestone.dueDate,
+                draftEmail,
+                generated: new Date().toISOString(),
+                priority: milestone.priority,
+                trigger: "milestone"
+              });
+            }
+          }
+
+          // Generate internal email when Second Disbursement milestone is completed
+          if (milestone.milestoneType === "Second Disbursement Sent" && 
+              milestone.status === "Completed") {
+            
+            const existingSecondDisbursementFollowUp = followUpEmails.find(
+              email => email.projectId === project.id && 
+                      email.milestoneTitle === milestone.title &&
+                      email.trigger === "milestone" &&
+                      email.draftEmail.includes("Second Disbursement Sent – ")
+            );
+            
+            if (!existingSecondDisbursementFollowUp) {
+              console.log(`Generating internal follow-up for completed second disbursement: ${milestone.title}`);
+              const draftEmail = generateSecondDisbursementInternalEmail(project, milestone);
+              
+              newFollowUps.push({
+                id: `${project.id}-${milestone.id}-second-disbursement-${Date.now()}`,
                 projectId: project.id,
                 projectName: project.projectName,
                 milestoneTitle: `Internal: ${milestone.title}`,

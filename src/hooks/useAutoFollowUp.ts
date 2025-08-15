@@ -70,6 +70,11 @@ Kind regards,
     const totalCost = project.totalCost || 0;
     const formattedCost = formatCurrency(totalCost, project.currency);
     
+    // Calculate interim report date (typically 30 days from disbursement)
+    const interimReportDate = milestone.completedDate 
+      ? new Date(new Date(milestone.completedDate).getTime() + 30 * 24 * 60 * 60 * 1000)
+      : new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000);
+    
     return `Subject: First Disbursement Sent – ${project.projectName}
 
 Dear ${project.partnerName || '[PARTNER NAME]'},
@@ -108,14 +113,18 @@ The official wire sheet.
 
 The bank wire confirmation.
 
-Kindly confirm receipt of this disbursement at your earliest convenience. We also look forward to receiving your Interim Report & Receipts by [INTERIM REPORT DATE], as scheduled in the referenced ${project.governanceType || '[GOVERNANCE TYPE]'}.
+Kindly confirm receipt of this disbursement at your earliest convenience. We also look forward to receiving your Interim Report & Receipts by ${interimReportDate.toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}, as scheduled in the referenced ${project.governanceType || '[GOVERNANCE TYPE]'}.
 
 Should you have any questions or require additional documentation, please feel free to reach out.
 
 Kind regards,
-[SENDER NAME]
-[SENDER POSITION]
-[SENDER ORGANIZATION]`;
+Joan Tulloch
+Food For The Poor Canada
+joannt@foodforthepoor.ca`;
   };
 
   const generateFollowUpEmail = (

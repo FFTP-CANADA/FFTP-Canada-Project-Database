@@ -33,8 +33,6 @@ import { useProjectFunding } from "@/hooks/useProjectFunding";
 import UndesignatedFundsManager from "@/components/UndesignatedFundsManager";
 
 const Index = () => {
-  console.log("Dashboard is rendering!");
-  
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
   const [editProject, setEditProject] = useState<{ open: boolean; project: any }>({
     open: false,
@@ -104,14 +102,6 @@ const Index = () => {
     updateMilestone,
     deleteMilestone
   } = useProjectData();
-
-  console.log("Dashboard data loaded:", { 
-    projectsCount: projects.length, 
-    milestonesCount: milestones.length,
-    notesCount: notes.length,
-    attachmentsCount: attachments.length,
-    photosCount: photos.length
-  });
 
   // Auto-correct project status based on milestones - run for all projects
   useEffect(() => {
@@ -405,6 +395,7 @@ const Index = () => {
           </div>
         )}
 
+
         {/* Main Content Tabs */}
         <Tabs defaultValue="projects" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 lg:w-[800px] bg-blue-50 border border-blue-200">
@@ -430,83 +421,106 @@ const Index = () => {
               value="backup" 
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
-              Backup & Recovery
+              Data Backup
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="projects" className="space-y-6">
-            <Card className="border-blue-200">
-              <CardHeader className="bg-blue-50">
-                <CardTitle className="text-blue-900">Projects Management</CardTitle>
-                <CardDescription className="text-blue-700">
-                  Manage your charity projects, track progress, and coordinate disbursements
+            <Card className="border-blue-200 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-blue-900">Projects by Country & Governance</CardTitle>
+                <CardDescription className="text-blue-600">
+                  Projects organized by country and governance number sequence
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-0">
-                <ProjectsTable
-                  projects={projects}
-                  availablePrograms={allPrograms}
-                  onOpenAttachments={handleOpenAttachments}
-                  onOpenGallery={handleOpenGallery}
-                  onOpenNotes={handleOpenNotes}
-                  onOpenMilestones={handleOpenMilestones}
-                  onOpenGantt={handleOpenGantt}
-                  onOpenFunding={handleOpenFunding}
-                  onOpenDisbursement={handleOpenDisbursement}
-                  onEditProject={handleEditProject}
-                  onDeleteProject={deleteProject}
-                  onOpenReallocation={handleOpenReallocation}
-                />
+              <CardContent>
+                {(() => {
+                  // Group projects by country
+                  const projectsByCountry = projects.reduce((acc, project) => {
+                    const country = project.country || "Unassigned";
+                    if (!acc[country]) {
+                      acc[country] = [];
+                    }
+                    acc[country].push(project);
+                    return acc;
+                  }, {} as Record<string, Project[]>);
+
+                  // Sort countries and then sort projects within each country by governance number
+                  const sortedCountries = Object.keys(projectsByCountry).sort();
+                  
+                  return sortedCountries.map(country => {
+                    // Sort projects within country by governance number
+                    const sortedProjects = projectsByCountry[country].sort((a, b) => {
+                      // If both have governance numbers, sort them properly
+                      if (a.governanceNumber && b.governanceNumber) {
+                        // Extract numeric part from governance number (handle formats like "001", "123", etc.)
+                        const aNum = parseInt(a.governanceNumber.replace(/\D/g, '')) || 0;
+                        const bNum = parseInt(b.governanceNumber.replace(/\D/g, '')) || 0;
+                        
+                        // If numbers are the same, sort by the full governance number string
+                        if (aNum === bNum) {
+                          return a.governanceNumber.localeCompare(b.governanceNumber, undefined, { numeric: true });
+                        }
+                        return aNum - bNum;
+                      }
+                      // If only one has governance number, prioritize it
+                      if (a.governanceNumber && !b.governanceNumber) return -1;
+                      if (!a.governanceNumber && b.governanceNumber) return 1;
+                      // If neither has governance number, sort by project name
+                      return a.projectName.localeCompare(b.projectName);
+                    });
+
+                    return (
+                      <div key={country} className="mb-8">
+                        <div className="flex items-center gap-3 mb-4">
+                          <h3 className="text-lg font-semibold text-blue-900 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+                            {country}
+                          </h3>
+                          <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                            {sortedProjects.length} project{sortedProjects.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <ProjectsTable 
+                          projects={sortedProjects}
+                          availablePrograms={allPrograms}
+                          donorPledges={donorPledges}
+                          donorReceipts={donorReceipts}
+                          onOpenAttachments={handleOpenAttachments}
+                          onOpenGallery={handleOpenGallery}
+                          onOpenNotes={handleOpenNotes}
+                          onOpenMilestones={handleOpenMilestones}
+                          onOpenGantt={handleOpenGantt}
+                          onOpenFunding={handleOpenFunding}
+                          onOpenDisbursement={handleOpenDisbursement}
+                          onOpenReallocation={handleOpenReallocation}
+                          onEditProject={handleEditProject}
+                          onDeleteProject={deleteProject}
+                          onManagePrograms={() => setProgramManagementOpen(true)}
+                        />
+                      </div>
+                    );
+                  });
+                })()}
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
-            <Card className="border-blue-200">
-              <CardHeader className="bg-blue-50">
-                <CardTitle className="text-blue-900">Analytics Dashboard</CardTitle>
-                <CardDescription className="text-blue-700">
-                  Comprehensive analytics and insights for your projects
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AnalyticsDashboard projects={projects} />
-              </CardContent>
-            </Card>
+            <AnalyticsDashboard projects={projects} />
           </TabsContent>
 
           <TabsContent value="funding" className="space-y-6">
-            <Card className="border-blue-200">
-              <CardHeader className="bg-blue-50">
-                <CardTitle className="text-blue-900">Fund Management</CardTitle>
-                <CardDescription className="text-blue-700">
-                  Manage fund allocations, pledges, and disbursement schedules
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <UndesignatedFundsManager projects={projects} />
-                <DisbursementSchedule projects={projects} milestones={milestones} />
-              </CardContent>
-            </Card>
+            <UndesignatedFundsManager projects={projects} />
           </TabsContent>
 
           <TabsContent value="backup" className="space-y-6">
-            <Card className="border-blue-200">
-              <CardHeader className="bg-blue-50">
-                <CardTitle className="text-blue-900">Backup & Recovery</CardTitle>
-                <CardDescription className="text-blue-700">
-                  Manage your data backups and recovery options
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <BackupManagerComponent />
-              </CardContent>
-            </Card>
+            <div className="flex justify-center">
+              <BackupManagerComponent />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
 
-      {/* Dialogs */}
       <AddProjectDialog
         open={isAddProjectOpen}
         onOpenChange={setIsAddProjectOpen}
@@ -516,11 +530,12 @@ const Index = () => {
       />
 
       <ProjectEditDialog
-        open={editProject.open}
-        onOpenChange={(open) => setEditProject({open, project: null})}
         project={editProject.project}
+        open={editProject.open}
+        onOpenChange={(open) => setEditProject(prev => ({ ...prev, open }))}
         onUpdateProject={updateProject}
         availablePrograms={allPrograms}
+        validateGovernanceNumber={validateGovernanceNumber}
       />
 
       <ProgramManagementDialog
@@ -532,55 +547,56 @@ const Index = () => {
       />
 
       <ProjectAttachments
-        open={attachmentsDialog.open}
-        onOpenChange={(open) => setAttachmentsDialog({open, projectId: "", projectName: ""})}
         projectId={attachmentsDialog.projectId}
         projectName={attachmentsDialog.projectName}
-        attachments={getAttachmentsForProject(attachmentsDialog.projectId)}
+        open={attachmentsDialog.open}
+        onOpenChange={(open) => setAttachmentsDialog(prev => ({ ...prev, open }))}
+        attachments={attachments.filter(a => a.projectId === attachmentsDialog.projectId)}
         onAddAttachment={addAttachment}
         onDeleteAttachment={deleteAttachment}
       />
 
       <ProjectGallery
-        open={galleryDialog.open}
-        onOpenChange={(open) => setGalleryDialog({open, projectId: "", projectName: ""})}
         projectId={galleryDialog.projectId}
         projectName={galleryDialog.projectName}
+        open={galleryDialog.open}
+        onOpenChange={(open) => setGalleryDialog(prev => ({ ...prev, open }))}
         photos={getPhotosForProject(galleryDialog.projectId)}
         onAddPhoto={addPhoto}
       />
 
       <ProjectNotesDialog
-        open={notesDialog.open}
-        onOpenChange={(open) => setNotesDialog({open, projectId: "", projectName: ""})}
         projectId={notesDialog.projectId}
         projectName={notesDialog.projectName}
+        open={notesDialog.open}
+        onOpenChange={(open) => setNotesDialog(prev => ({ ...prev, open }))}
         notes={getNotesForProject(notesDialog.projectId)}
         onAddNote={addNote}
       />
 
       <ProjectMilestonesDialog
-        open={milestonesDialog.open}
-        onOpenChange={(open) => setMilestonesDialog({open, projectId: "", projectName: ""})}
         projectId={milestonesDialog.projectId}
         projectName={milestonesDialog.projectName}
+        open={milestonesDialog.open}
+        onOpenChange={(open) => setMilestonesDialog(prev => ({ ...prev, open }))}
       />
 
       <ProjectGanttDialog
-        open={ganttDialog.open}
-        onOpenChange={(open) => setGanttDialog({open, project: null})}
         project={ganttDialog.project}
+        open={ganttDialog.open}
+        onOpenChange={(open) => setGanttDialog(prev => ({ ...prev, open }))}
       />
 
       <ProjectFundingStatusDialog
+        project={fundingDialog.project}
         open={fundingDialog.open}
         onOpenChange={(open) => setFundingDialog({open, project: null})}
-        project={fundingDialog.project}
+        onUpdateProject={updateProject}
       />
 
       <ProjectDisbursementDialog
-        open={disbursementDialog.open}
         project={disbursementDialog.project}
+        open={disbursementDialog.open}
         onOpenChange={(open) => setDisbursementDialog({open, project: null})}
       />
 

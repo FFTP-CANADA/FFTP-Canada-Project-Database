@@ -127,6 +127,46 @@ Food For The Poor Canada
 joannt@foodforthepoor.ca`;
   };
 
+  const generateInterimReportReminderEmail = (project: Project, milestone: ProjectMilestone): string => {
+    const totalCost = project.totalCost || 0;
+    const formattedCost = formatCurrency(totalCost, project.currency);
+    
+    return `Subject: Reminder – Interim Report & Receipts Due for ${project.projectName}
+
+Dear ${project.partnerName || '[PARTNER NAME]'},
+
+This is a friendly reminder that the Interim Report & Receipts for the ${project.projectName} are due by ${new Date(milestone.dueDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}, as outlined in the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}).
+
+The submission of this report, along with supporting receipts, is essential for us to review progress and proceed with the next scheduled disbursement in accordance with the agreement.
+
+Project Overview:
+
+Project Cost: ${formattedCost}
+
+Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}
+
+End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }) : '[PROJECT END DATE]'}
+
+Thank you for your cooperation and continued partnership in ensuring the successful delivery of this project.
+
+Kind regards,
+Joan Tulloch
+Food For The Poor Canada
+joannt@foodforthepoor.ca`;
+  };
+
   const generateFollowUpEmail = (
     project: Project,
     milestone: ProjectMilestone,
@@ -142,6 +182,11 @@ joannt@foodforthepoor.ca`;
     // Use special template for First Disbursement Sent milestones
     if (milestone.milestoneType === "First Disbursement Sent") {
       return generateFirstDisbursementEmail(project, milestone);
+    }
+
+    // Use special template for Interim Report & Receipts Submitted milestones
+    if (milestone.milestoneType === "Interim Report & Receipts Submitted (following Installment #1)") {
+      return generateInterimReportReminderEmail(project, milestone);
     }
 
     const totalCostCAD = project.currency === 'USD' 

@@ -513,7 +513,14 @@ joannt@foodforthepoor.ca`;
   const checkAndGenerateFollowUps = () => {
     console.log("=== FOLLOW-UP GENERATION DEBUG ===");
     console.log("Total projects:", projects.length);
+    console.log("Project names:", projects.map(p => p.projectName));
     console.log("Total milestones:", milestones.length);
+    console.log("Milestones by project:", milestones.reduce((acc, m) => {
+      const projectName = projects.find(p => p.id === m.projectId)?.projectName || "Unknown";
+      if (!acc[projectName]) acc[projectName] = [];
+      acc[projectName].push(`${m.title} (${m.dueDate}, ${m.status})`);
+      return acc;
+    }, {} as Record<string, string[]>));
     console.log("All projects will be checked for milestones within 10 business days");
     
     const today = new Date();

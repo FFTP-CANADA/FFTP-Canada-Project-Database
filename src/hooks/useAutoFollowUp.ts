@@ -167,6 +167,39 @@ Food For The Poor Canada
 joannt@foodforthepoor.ca`;
   };
 
+  const generateInterimReportInternalEmail = (project: Project, milestone: ProjectMilestone, milestones: ProjectMilestone[]): string => {
+    // Find the second disbursement milestone to get the date
+    const secondDisbursementMilestone = milestones.find(m => 
+      m.projectId === project.id && 
+      m.milestoneType === "Second Disbursement Sent"
+    );
+    
+    const secondDisbursementDate = secondDisbursementMilestone 
+      ? new Date(secondDisbursementMilestone.dueDate).toLocaleDateString('en-CA', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        })
+      : '[SECOND DISBURSEMENT DATE]';
+    
+    return `Subject: Interim Report Received – ${project.projectName} (For Review & Donor Update)
+
+Dear [OFFICER NAME],
+
+The Interim Report & Receipts for the ${project.projectName} have been received from ${project.partnerName || '[PARTNER NAME]'}, as per the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}). The report and supporting documentation are attached for your detailed review.
+
+Please prepare the relevant donor update to keep our donor informed of the project's progress. This update should be finalized promptly, as the second disbursement under this project is scheduled for ${secondDisbursementDate}, pending confirmation that there are no concerns with the submitted report.
+
+Kindly review the attached documentation and confirm within the next three (3) business days whether you have any questions or concerns. If no concerns are raised, we will proceed with the disbursement to the partner as scheduled.
+
+Thank you for your attention to this matter and for ensuring our donor remains up to date.
+
+Kind regards,
+Joan Tulloch
+Director of Programs
+Food For The Poor Canada`;
+  };
+
   const generateFollowUpEmail = (
     project: Project,
     milestone: ProjectMilestone,
@@ -312,6 +345,35 @@ joannt@foodforthepoor.ca`;
           console.log(`Milestone date: ${milestoneDate.toISOString()}`);
           console.log(`Is milestone in range? ${milestoneDate >= today && milestoneDate <= tenDaysFromNow}`);
           console.log(`Is milestone not completed? ${milestone.status !== "Completed"}`);
+          
+          // Generate internal email when Interim Report milestone is completed
+          if (milestone.milestoneType === "Interim Report & Receipts Submitted (following Installment #1)" && 
+              milestone.status === "Completed") {
+            
+            const existingInternalFollowUp = followUpEmails.find(
+              email => email.projectId === project.id && 
+                      email.milestoneTitle === milestone.title &&
+                      email.trigger === "milestone" &&
+                      email.draftEmail.includes("(For Review & Donor Update)")
+            );
+            
+            if (!existingInternalFollowUp) {
+              console.log(`Generating internal follow-up for completed interim report: ${milestone.title}`);
+              const draftEmail = generateInterimReportInternalEmail(project, milestone, milestones);
+              
+              newFollowUps.push({
+                id: `${project.id}-${milestone.id}-internal-${Date.now()}`,
+                projectId: project.id,
+                projectName: project.projectName,
+                milestoneTitle: `Internal: ${milestone.title}`,
+                milestoneDueDate: milestone.dueDate,
+                draftEmail,
+                generated: new Date().toISOString(),
+                priority: milestone.priority,
+                trigger: "milestone"
+              });
+            }
+          }
           
           // Check if milestone is within 10 days and hasn't been completed
           if (milestoneDate >= today && 

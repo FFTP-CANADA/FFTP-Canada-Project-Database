@@ -65,7 +65,7 @@ const FFTPMilestoneManager = ({
     startDate: undefined as Date | undefined,
     dueDate: undefined as Date | undefined,
     status: "Not Started" as ProjectMilestone["status"],
-    priority: "Medium" as ProjectMilestone["priority"],
+    priority: "High" as ProjectMilestone["priority"],
     disbursementAmount: undefined as number | undefined
   });
   const [editMilestone, setEditMilestone] = useState({
@@ -73,7 +73,7 @@ const FFTPMilestoneManager = ({
     startDate: "" as string, // Changed to string to prevent timezone issues
     dueDate: "" as string, // Changed to string to prevent timezone issues
     status: "Not Started" as ProjectMilestone["status"],
-    priority: "Medium" as ProjectMilestone["priority"],
+    priority: "High" as ProjectMilestone["priority"],
     disbursementAmount: undefined as number | undefined
   });
 
@@ -96,7 +96,7 @@ const FFTPMilestoneManager = ({
       startDate: undefined,
       dueDate: undefined,
       status: "Not Started",
-      priority: "Medium",
+      priority: "High",
       disbursementAmount: undefined
     });
     setIsAddingMilestone(false);
@@ -171,7 +171,7 @@ const FFTPMilestoneManager = ({
       startDate: "",
       dueDate: "",
       status: "Not Started",
-      priority: "Medium",
+      priority: "High",
       disbursementAmount: undefined
     });
     console.log("=== handleUpdateMilestone END ===");
@@ -279,41 +279,22 @@ const FFTPMilestoneManager = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Status</Label>
-                <Select
-                  value={newMilestone.status}
-                  onValueChange={(value) => setNewMilestone(prev => ({ ...prev, status: value as ProjectMilestone["status"] }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Not Started">Not Started</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
-                    <SelectItem value="Overdue">Overdue</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Priority</Label>
-                <Select
-                  value={newMilestone.priority}
-                  onValueChange={(value) => setNewMilestone(prev => ({ ...prev, priority: value as ProjectMilestone["priority"] }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Low">Low</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="High">High</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label>Status</Label>
+              <Select
+                value={newMilestone.status}
+                onValueChange={(value) => setNewMilestone(prev => ({ ...prev, status: value as ProjectMilestone["status"] }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Not Started">Not Started</SelectItem>
+                  <SelectItem value="In Progress">In Progress</SelectItem>
+                  <SelectItem value="Completed">Completed</SelectItem>
+                  <SelectItem value="Overdue">Overdue</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Disbursement Amount Field */}
@@ -428,41 +409,22 @@ const FFTPMilestoneManager = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Status</Label>
-                <Select
-                  value={editMilestone.status}
-                  onValueChange={(value) => setEditMilestone(prev => ({ ...prev, status: value as ProjectMilestone["status"] }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Not Started">Not Started</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
-                    <SelectItem value="Overdue">Overdue</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Priority</Label>
-                <Select
-                  value={editMilestone.priority}
-                  onValueChange={(value) => setEditMilestone(prev => ({ ...prev, priority: value as ProjectMilestone["priority"] }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Low">Low</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="High">High</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label>Status</Label>
+              <Select
+                value={editMilestone.status}
+                onValueChange={(value) => setEditMilestone(prev => ({ ...prev, status: value as ProjectMilestone["status"] }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Not Started">Not Started</SelectItem>
+                  <SelectItem value="In Progress">In Progress</SelectItem>
+                  <SelectItem value="Completed">Completed</SelectItem>
+                  <SelectItem value="Overdue">Overdue</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Disbursement Amount Field */}

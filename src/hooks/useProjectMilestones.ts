@@ -44,30 +44,27 @@ const saveMilestones = async (milestones: ProjectMilestone[]) => {
 
 export const useProjectMilestones = () => {
   const [milestones, setMilestones] = useState<ProjectMilestone[]>(() => {
-    if (globalMilestones.length > 0) return globalMilestones;
+    // IMMEDIATE EMERGENCY RECOVERY - RUN NOW
+    console.log('🚨 STARTING IMMEDIATE MILESTONE RECOVERY');
+    EmergencyMilestoneRecovery.logAllStorageKeys();
     
-    // Try normal load first
+    // Run recovery synchronously if possible
+    EmergencyMilestoneRecovery.recoverAllMilestones().then(recovered => {
+      if (recovered.length > 0) {
+        console.log(`🎉 EMERGENCY RECOVERY SUCCESS: ${recovered.length} MILESTONES RESTORED`);
+        globalMilestones = recovered;
+        // Update all listeners immediately
+        notifyMilestoneListeners(recovered);
+      } else {
+        console.log('❌ NO MILESTONES RECOVERED FROM ANY SOURCE');
+      }
+    });
+    
+    // Also try to load from current storage
     const saved = LocalStorageManager.getItem('project-milestones', []);
+    globalMilestones = saved.length > 0 ? saved : [];
     
-    // If no milestones found, trigger emergency recovery
-    if (saved.length === 0) {
-      console.log('🚨 NO MILESTONES FOUND - TRIGGERING EMERGENCY RECOVERY');
-      EmergencyMilestoneRecovery.logAllStorageKeys();
-      
-      // Trigger recovery (async, will update via event)
-      EmergencyMilestoneRecovery.recoverAllMilestones().then(recovered => {
-        if (recovered.length > 0) {
-          console.log(`🎉 RECOVERED ${recovered.length} MILESTONES!`);
-          // Force reload to pick up recovered data
-          setTimeout(() => window.location.reload(), 1000);
-        }
-      }).catch(error => {
-        console.error('❌ Emergency recovery failed:', error);
-      });
-    }
-    
-    globalMilestones = saved;
-    return saved;
+    return globalMilestones;
   });
 
   useEffect(() => {
@@ -76,8 +73,19 @@ export const useProjectMilestones = () => {
     };
     milestoneListeners.push(listener);
     
+    // Listen for recovery events
+    const handleRecovery = (event: CustomEvent) => {
+      const { milestones: recoveredMilestones } = event.detail;
+      console.log('🎉 RECOVERY EVENT RECEIVED:', recoveredMilestones.length);
+      setMilestones(recoveredMilestones);
+      globalMilestones = recoveredMilestones;
+    };
+    
+    window.addEventListener('milestones-restored', handleRecovery as EventListener);
+    
     return () => {
       milestoneListeners = milestoneListeners.filter(l => l !== listener);
+      window.removeEventListener('milestones-restored', handleRecovery as EventListener);
     };
   }, []);
 

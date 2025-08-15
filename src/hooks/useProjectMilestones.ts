@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ProjectMilestone } from "@/types/project";
 import { LocalStorageManager } from "@/utils/localStorageManager";
+import { EmergencyDataRecovery } from "@/utils/emergencyDataRecovery";
 import { calculateProjectDisbursedAmount } from "@/utils/disbursementCalculator";
 
 let globalMilestones: ProjectMilestone[] = [];
@@ -43,40 +44,34 @@ const saveMilestones = async (milestones: ProjectMilestone[]) => {
 
 export const useProjectMilestones = () => {
   const [milestones, setMilestones] = useState<ProjectMilestone[]>(() => {
-    // RESTORE ALL MILESTONES - DO NOT DELETE ANYTHING
-    const rawMilestones = localStorage.getItem('project-milestones');
-    const ffttpMilestones = localStorage.getItem('fftp_project-milestones');
+    console.log("🚨 EMERGENCY MILESTONE RECOVERY INITIATED");
     
-    console.log("📊 RAW milestones:", rawMilestones ? JSON.parse(rawMilestones).length : 0);
-    console.log("📊 FFTP milestones:", ffttpMilestones ? JSON.parse(ffttpMilestones).length : 0);
+    // IMMEDIATE RECOVERY ATTEMPT
+    const recoveredMilestones = EmergencyDataRecovery.recoverMilestones();
     
-    // ALWAYS preserve all milestone data - migrate without filtering
-    if (rawMilestones) {
-      try {
-        const parsedRaw = JSON.parse(rawMilestones);
-        console.log("🔄 RESTORING all milestones from raw storage");
-        
-        // Save ALL milestones to prefixed storage - DO NOT FILTER
-        localStorage.setItem('fftp_project-milestones', rawMilestones);
-        globalMilestones = parsedRaw;
-        console.log("✅ ALL milestones restored:", parsedRaw.length);
-        return parsedRaw;
-      } catch (e) {
-        console.error("❌ Failed to restore milestones:", e);
+    // If we found milestones, restore them immediately
+    recoveredMilestones.then(recovered => {
+      if (recovered.length > 0) {
+        console.log("🔄 EMERGENCY RESTORE: Found milestones, restoring...");
+        localStorage.setItem('project-milestones', JSON.stringify(recovered));
+        localStorage.setItem('fftp_project-milestones', JSON.stringify(recovered));
+        globalMilestones = recovered;
+        setMilestones(recovered);
+      } else {
+        console.log("🔍 No milestones found, attempting backup restore...");
+        EmergencyDataRecovery.restoreMilestonesFromMostRecentBackup().then(restored => {
+          if (restored) {
+            window.location.reload(); // Force reload to pick up restored data
+          }
+        });
       }
-    }
+    });
     
-    if (globalMilestones.length > 0) {
-      console.log("🎯 Using cached milestones:", globalMilestones.length);
-      return globalMilestones;
-    }
-    
-    const saved = LocalStorageManager.getItem('project-milestones', []);
-    console.log("📊 Loading milestones from storage:", saved.length);
-    console.log("🎯 All milestone project IDs:", saved.map(m => m.projectId));
-    
-    globalMilestones = saved;
-    return saved;
+    // Return current state while recovery runs
+    const currentData = LocalStorageManager.getItem('project-milestones', []);
+    console.log("📊 Current milestone count:", currentData.length);
+    globalMilestones = currentData;
+    return currentData;
   });
 
   useEffect(() => {

@@ -278,6 +278,62 @@ Director of Programs
 Food For The Poor Canada`;
   };
 
+  const generateFinalDisbursementInternalEmail = (project: Project, milestone: ProjectMilestone): string => {
+    const disbursementAmount = milestone.disbursementAmount || 0;
+    const formattedDisbursementAmount = formatCurrency(disbursementAmount, project.currency);
+    const totalCost = project.totalCost || 0;
+    const formattedCost = formatCurrency(totalCost, project.currency);
+    const totalDisbursed = project.amountDisbursed || 0;
+    const formattedTotalDisbursed = formatCurrency(totalDisbursed, project.currency);
+    
+    return `Subject: Final Disbursement Sent – ${project.projectName}
+
+Dear [OFFICER NAME],
+
+This is to confirm that the final disbursement for the ${project.projectName} has been sent to ${project.partnerName || '[PARTNER NAME]'}, in accordance with the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}).
+
+Transaction Details:
+
+Amount Transferred: ${formattedDisbursementAmount}
+
+Date of Transfer: ${new Date(milestone.completedDate || milestone.dueDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}
+
+Total Amount Disbursed to Date: ${formattedTotalDisbursed}
+
+Project Overview:
+
+Project Cost: ${formattedCost}
+
+Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}
+
+End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }) : '[PROJECT END DATE]'}
+
+For your reference, please find attached:
+
+The official wire sheet.
+
+The bank wire confirmation.
+
+Thank you for your support in stewarding this project. If there are any post-narrative reports or updates that would be suitable to share with the donor, please feel free to do so. We also hope to encourage our donors to partner with us on future initiatives, so kindly share any new project ideas that may be of interest to them.
+
+Kind regards,
+Joan Tulloch
+Director of Programs
+Food For The Poor Canada`;
+  };
+
   const generateSecondDisbursementInternalEmail = (project: Project, milestone: ProjectMilestone): string => {
     const disbursementAmount = milestone.disbursementAmount || 0;
     const formattedDisbursementAmount = formatCurrency(disbursementAmount, project.currency);
@@ -558,6 +614,35 @@ joannt@foodforthepoor.ca`;
               
               newFollowUps.push({
                 id: `${project.id}-${milestone.id}-final-report-${Date.now()}`,
+                projectId: project.id,
+                projectName: project.projectName,
+                milestoneTitle: `Internal: ${milestone.title}`,
+                milestoneDueDate: milestone.dueDate,
+                draftEmail,
+                generated: new Date().toISOString(),
+                priority: milestone.priority,
+                trigger: "milestone"
+              });
+            }
+          }
+
+          // Generate internal email when Final Disbursement milestone is completed
+          if (milestone.milestoneType === "Final Disbursement Sent" && 
+              milestone.status === "Completed") {
+            
+            const existingFinalDisbursementFollowUp = followUpEmails.find(
+              email => email.projectId === project.id && 
+                      email.milestoneTitle === milestone.title &&
+                      email.trigger === "milestone" &&
+                      email.draftEmail.includes("Final Disbursement Sent – ")
+            );
+            
+            if (!existingFinalDisbursementFollowUp) {
+              console.log(`Generating internal follow-up for completed final disbursement: ${milestone.title}`);
+              const draftEmail = generateFinalDisbursementInternalEmail(project, milestone);
+              
+              newFollowUps.push({
+                id: `${project.id}-${milestone.id}-final-disbursement-${Date.now()}`,
                 projectId: project.id,
                 projectName: project.projectName,
                 milestoneTitle: `Internal: ${milestone.title}`,

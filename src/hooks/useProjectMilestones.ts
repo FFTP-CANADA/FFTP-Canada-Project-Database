@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { ProjectMilestone } from "@/types/project";
 import { LocalStorageManager } from "@/utils/localStorageManager";
@@ -44,29 +43,7 @@ const saveMilestones = async (milestones: ProjectMilestone[]) => {
 export const useProjectMilestones = () => {
   const [milestones, setMilestones] = useState<ProjectMilestone[]>(() => {
     if (globalMilestones.length > 0) return globalMilestones;
-    
-    // Check multiple storage locations for milestones
-    let saved = LocalStorageManager.getItem('project-milestones', []);
-    
-    // If empty, try backup locations
-    if (saved.length === 0) {
-      try {
-        const backup1 = localStorage.getItem('fftp_project-milestones');
-        if (backup1) {
-          saved = JSON.parse(backup1);
-        }
-      } catch {}
-      
-      if (saved.length === 0) {
-        try {
-          const backup2 = localStorage.getItem('fftp_project-milestones_backup');
-          if (backup2) {
-            saved = JSON.parse(backup2);
-          }
-        } catch {}
-      }
-    }
-    
+    const saved = LocalStorageManager.getItem('project-milestones', []);
     globalMilestones = saved;
     return saved;
   });

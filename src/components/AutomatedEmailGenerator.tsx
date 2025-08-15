@@ -108,15 +108,13 @@ Project Overview:
 Project Cost: ${projectCost}
 Start Date: ${formatDateForDisplay(project.startDate)}
 End Date: ${project.endDate ? formatDateForDisplay(project.endDate) : "To be determined"}
-Country: ${project.country || "Multiple locations"}
-Impact Area: ${project.impactArea}
 
 For your records, please find attached:
 
-• The official wire sheet.
-• The bank wire confirmation.
+The official wire sheet.
+The bank wire confirmation.
 
-Kindly confirm receipt of this disbursement at your earliest convenience. We also look forward to receiving your Interim Report & Receipts by ${formatDateForDisplay(interimReportDate.toISOString().split('T')[0])}, as scheduled in the ${governanceType} (Reference: ${governanceNumber}).
+Kindly confirm receipt of this disbursement at your earliest convenience. We also look forward to receiving your Interim Report & Receipts by ${formatDateForDisplay(interimReportDate.toISOString().split('T')[0])}, as scheduled in the referenced ${governanceType}.
 
 Should you have any questions or require additional documentation, please feel free to reach out.
 

@@ -103,6 +103,18 @@ const Index = () => {
     deleteMilestone
   } = useProjectData();
 
+  // Debug logging to see what's happening with data loading
+  useEffect(() => {
+    console.log("🔍 Dashboard render check:", {
+      projectsCount: projects.length,
+      projectNames: projects.map(p => p.projectName),
+      milestonesCount: milestones.length,
+      attachmentsCount: attachments.length,
+      photosCount: photos.length,
+      notesCount: notes.length
+    });
+  }, [projects, milestones, attachments, photos, notes]);
+
   // Auto-correct project status based on milestones - run for all projects
   useEffect(() => {
     let hasUpdates = false;
@@ -230,6 +242,8 @@ const Index = () => {
   const handleOpenReallocation = (project: Project) => {
     setReallocationDialog({ open: true, project });
   };
+
+  console.log("🎨 Dashboard rendering with projects:", projects.length);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">

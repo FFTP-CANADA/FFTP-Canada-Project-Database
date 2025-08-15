@@ -65,25 +65,42 @@ Kind regards,
   };
 
   const generateFirstDisbursementEmail = (project: Project, milestone: ProjectMilestone): string => {
-    return `Subject: First Disbursement Sent – [PROJECT NAME]
+    const disbursementAmount = milestone.disbursementAmount || 0;
+    const formattedDisbursementAmount = formatCurrency(disbursementAmount, project.currency);
+    const totalCost = project.totalCost || 0;
+    const formattedCost = formatCurrency(totalCost, project.currency);
+    
+    return `Subject: First Disbursement Sent – ${project.projectName}
 
-Dear [PARTNER NAME],
+Dear ${project.partnerName || '[PARTNER NAME]'},
 
-This is to confirm that the first disbursement for the [PROJECT NAME] has been sent in accordance with the [GOVERNANCE TYPE] (Reference: [GOVERNANCE NUMBER]).
+This is to confirm that the first disbursement for the ${project.projectName} has been sent in accordance with the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}).
 
 Transaction Details:
 
-Amount Transferred: [DISBURSEMENT AMOUNT]
+Amount Transferred: ${formattedDisbursementAmount}
 
-Date of Transfer: [DISBURSEMENT DATE]
+Date of Transfer: ${milestone.completedDate ? new Date(milestone.completedDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }) : '[DISBURSEMENT DATE]'}
 
 Project Overview:
 
-Project Cost: [PROJECT COST]
+Project Cost: ${formattedCost}
 
-Start Date: [PROJECT START DATE]
+Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}
 
-End Date: [PROJECT END DATE]
+End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }) : '[PROJECT END DATE]'}
 
 For your records, please find attached:
 
@@ -91,7 +108,7 @@ The official wire sheet.
 
 The bank wire confirmation.
 
-Kindly confirm receipt of this disbursement at your earliest convenience. We also look forward to receiving your Interim Report & Receipts by [INTERIM REPORT DATE], as scheduled in the referenced [GOVERNANCE TYPE].
+Kindly confirm receipt of this disbursement at your earliest convenience. We also look forward to receiving your Interim Report & Receipts by [INTERIM REPORT DATE], as scheduled in the referenced ${project.governanceType || '[GOVERNANCE TYPE]'}.
 
 Should you have any questions or require additional documentation, please feel free to reach out.
 

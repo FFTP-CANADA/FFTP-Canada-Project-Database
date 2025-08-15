@@ -38,7 +38,7 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
     addFundReallocation,
     getAvailableBalance
   } = useUndesignatedFunds();
-  const { addPledge } = useProjectFunding();
+  const { addPledge, addReceipt } = useProjectFunding();
   const { toast } = useToast();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -181,7 +181,7 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
 
     try {
       // Add fund reallocation
-      await addFundReallocation({
+      const reallocationId = await addFundReallocation({
         fromUndesignatedFundId: selectedFund.id,
         toProjectId: reallocationData.projectId,
         amount: amount,
@@ -192,16 +192,32 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
         status: "Completed"
       });
 
-      // Add as pledge to the project
+      // Add as pledge to the project with reallocation tracking
       const selectedProject = projects.find(p => p.id === reallocationData.projectId);
       if (selectedProject) {
-        addPledge({
+        await addPledge({
           projectId: reallocationData.projectId,
           donorName: `Undesignated Funds - ${selectedFund.impactArea}`,
           pledgedAmount: amount,
           datePledged: getCurrentESTTimestamp(),
           status: "Fulfilled",
-          notes: `Reallocated from undesignated ${selectedFund.impactArea} funds. ${reallocationData.reason}`
+          notes: `Reallocated from undesignated ${selectedFund.impactArea} funds. ${reallocationData.reason}`,
+          reallocationId,
+          reallocationSource: "undesignated",
+          sourceUndesignatedFundId: selectedFund.id
+        });
+
+        // Also add a corresponding receipt
+        addReceipt({
+          projectId: reallocationData.projectId,
+          donorName: `Undesignated Funds - ${selectedFund.impactArea}`,
+          amount: amount,
+          dateReceived: getCurrentESTTimestamp(),
+          paymentMethod: "Fund Allocation",
+          notes: `Reallocated from undesignated ${selectedFund.impactArea} funds. ${reallocationData.reason}`,
+          reallocationId,
+          reallocationSource: "undesignated",
+          sourceUndesignatedFundId: selectedFund.id
         });
       }
 

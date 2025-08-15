@@ -58,39 +58,76 @@ export const useUndesignatedFunds = () => {
       id: Date.now().toString(),
     };
     
+    // If the reallocation is completed, reduce the fund balance
+    if (newReallocation.status === "Completed") {
+      setUndesignatedFunds(prev => prev.map(f => 
+        f.id === newReallocation.fromUndesignatedFundId 
+          ? { ...f, balance: f.balance - newReallocation.amount, lastUpdated: new Date().toISOString() }
+          : f
+      ));
+    }
+    
     setFundReallocations(prev => [...prev, newReallocation]);
     return newReallocation.id;
   }, []);
 
   const updateFundReallocation = useCallback(async (id: string, updates: Partial<FundReallocationToPledge>) => {
-    setFundReallocations(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
+    setFundReallocations(prev => prev.map(r => {
+      if (r.id === id) {
+        const oldReallocation = r;
+        const updatedReallocation = { ...r, ...updates };
+        
+        // If status changed to completed, reduce the fund balance
+        if (oldReallocation.status !== "Completed" && updatedReallocation.status === "Completed") {
+          setUndesignatedFunds(fundsPrev => fundsPrev.map(f => 
+            f.id === updatedReallocation.fromUndesignatedFundId 
+              ? { ...f, balance: f.balance - updatedReallocation.amount, lastUpdated: new Date().toISOString() }
+              : f
+          ));
+        }
+        // If status changed from completed to something else, restore the fund balance
+        else if (oldReallocation.status === "Completed" && updatedReallocation.status !== "Completed") {
+          setUndesignatedFunds(fundsPrev => fundsPrev.map(f => 
+            f.id === updatedReallocation.fromUndesignatedFundId 
+              ? { ...f, balance: f.balance + oldReallocation.amount, lastUpdated: new Date().toISOString() }
+              : f
+          ));
+        }
+        
+        return updatedReallocation;
+      }
+      return r;
+    }));
   }, []);
 
   const getAvailableBalance = useCallback((fundId: string) => {
     const fund = undesignatedFunds.find(f => f.id === fundId);
     if (!fund) {
-      console.log(`Fund not found for ID: ${fundId}`);
       return 0;
     }
 
-    console.log(`All reallocations:`, fundReallocations);
-    
-    const completedReallocations = fundReallocations
-      .filter(r => r.fromUndesignatedFundId === fundId && r.status === 'Completed');
-    
-    console.log(`Completed reallocations for fund ${fundId}:`, completedReallocations);
-    
-    const allocatedAmount = completedReallocations.reduce((sum, r) => sum + r.amount, 0);
-
-    console.log(`Fund ${fundId}: balance=${fund.balance}, allocated=${allocatedAmount}, available=${fund.balance - allocatedAmount}`);
-    console.log(`Fund details:`, fund);
-    
-    return fund.balance - allocatedAmount;
-  }, [undesignatedFunds, fundReallocations]);
+    // Since we now reduce the fund balance when reallocations are completed,
+    // the available balance is simply the current fund balance
+    return fund.balance;
+  }, [undesignatedFunds]);
 
   const getFundsByImpactArea = useCallback((impactArea: string) => {
     return undesignatedFunds.filter(f => f.impactArea === impactArea);
   }, [undesignatedFunds]);
+
+  const deleteFundReallocation = useCallback(async (id: string) => {
+    const reallocation = fundReallocations.find(r => r.id === id);
+    if (reallocation && reallocation.status === "Completed") {
+      // Restore the fund balance when deleting a completed reallocation
+      setUndesignatedFunds(prev => prev.map(f => 
+        f.id === reallocation.fromUndesignatedFundId 
+          ? { ...f, balance: f.balance + reallocation.amount, lastUpdated: new Date().toISOString() }
+          : f
+      ));
+    }
+    
+    setFundReallocations(prev => prev.filter(r => r.id !== id));
+  }, [fundReallocations]);
 
   return {
     undesignatedFunds,
@@ -100,6 +137,7 @@ export const useUndesignatedFunds = () => {
     deleteUndesignatedFund,
     addFundReallocation,
     updateFundReallocation,
+    deleteFundReallocation,
     getAvailableBalance,
     getFundsByImpactArea,
   };

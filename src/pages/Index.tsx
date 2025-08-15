@@ -142,14 +142,14 @@ const Index = () => {
 
   const { donorPledges, donorReceipts } = useProjectFunding();
 
-  // Project alerts system - 10 business days warning
+  // Project alerts system - using the EXACT same data as dashboard
   const { 
     alerts, 
     unreadCount, 
     markAlertAsRead, 
     markAllAlertsAsRead,
     demoMode
-  } = useProjectAlerts(projects);
+  } = useProjectAlerts(projects, milestones); // Pass milestones directly from same source
 
   const stats = {
     totalProjects: projects.length,

@@ -513,15 +513,8 @@ joannt@foodforthepoor.ca`;
   const checkAndGenerateFollowUps = () => {
     console.log("=== FOLLOW-UP GENERATION DEBUG ===");
     console.log("Total projects:", projects.length);
-    console.log("Project names:", projects.map(p => p.projectName));
     console.log("Total milestones:", milestones.length);
-    console.log("Milestones by project:", milestones.reduce((acc, m) => {
-      const projectName = projects.find(p => p.id === m.projectId)?.projectName || "Unknown";
-      if (!acc[projectName]) acc[projectName] = [];
-      acc[projectName].push(`${m.title} (${m.dueDate}, ${m.status})`);
-      return acc;
-    }, {} as Record<string, string[]>));
-    console.log("All projects will be checked for milestones within 10 business days");
+    console.log("Projects with followUpNeeded:", projects.filter(p => p.followUpNeeded).length);
     
     const today = new Date();
     console.log("Today:", today.toISOString());
@@ -529,8 +522,9 @@ joannt@foodforthepoor.ca`;
     
     const newFollowUps: FollowUpEmail[] = [];
 
-    // Check ALL projects, not just those with followUpNeeded flag
-    projects.forEach(project => {
+    projects
+      .filter(project => project.followUpNeeded)
+      .forEach(project => {
         console.log(`\n--- Processing project: ${project.projectName} ---`);
         const projectMilestones = milestones.filter(m => m.projectId === project.id);
         const projectNotes = notes.filter(n => n.projectId === project.id);
@@ -542,12 +536,10 @@ joannt@foodforthepoor.ca`;
           const milestoneDate = new Date(milestone.dueDate);
           const isWithin10BusinessDays = BusinessDayCalculator.isWithinNBusinessDays(milestoneDate, 10);
           
-          console.log(`\n>>> Milestone: ${milestone.title} (${project.projectName})`);
-          console.log(`    Due: ${milestone.dueDate}`);
-          console.log(`    Status: ${milestone.status}`);
-          console.log(`    Within 10 business days: ${isWithin10BusinessDays}`);
-          console.log(`    Is completed: ${milestone.status === "Completed"}`);
-          console.log(`    Should generate alert: ${isWithin10BusinessDays && milestone.status !== "Completed"}`);
+          console.log(`Checking milestone: ${milestone.title}, due: ${milestone.dueDate}, status: ${milestone.status}`);
+          console.log(`Milestone date: ${milestoneDate.toISOString()}`);
+          console.log(`Is milestone within 10 business days? ${isWithin10BusinessDays}`);
+          console.log(`Is milestone not completed? ${milestone.status !== "Completed"}`);
           
           // Generate internal email when Interim Report milestone is completed
           if (milestone.milestoneType === "Interim Report & Receipts Submitted (following Installment #1)" && 
@@ -696,53 +688,51 @@ joannt@foodforthepoor.ca`;
           }
         });
 
-        // Check for note-based follow-ups (new notes added today) - only for projects with followUpNeeded flag
-        if (project.followUpNeeded) {
-          const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-          const recentNotes = projectNotes.filter(note => {
-            const noteDate = new Date(note.dateOfNote);
-            return noteDate >= todayStart;
-          });
+        // Check for note-based follow-ups (new notes added today)
+        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const recentNotes = projectNotes.filter(note => {
+          const noteDate = new Date(note.dateOfNote);
+          return noteDate >= todayStart;
+        });
 
-          console.log(`Recent notes (today) for flagged project: ${recentNotes.length}`);
+        console.log(`Recent notes (today): ${recentNotes.length}`);
 
-          recentNotes.forEach(note => {
-            // Find the next upcoming milestone for this project
-            const upcomingMilestone = projectMilestones
-              .filter(m => new Date(m.dueDate) >= today && m.status !== "Completed")
-              .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
+        recentNotes.forEach(note => {
+          // Find the next upcoming milestone for this project
+          const upcomingMilestone = projectMilestones
+            .filter(m => new Date(m.dueDate) >= today && m.status !== "Completed")
+            .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
 
-            if (upcomingMilestone) {
-              console.log(`Found upcoming milestone for note: ${upcomingMilestone.title}`);
-              // Check if we haven't already generated a note-based follow-up for this note
-              const existingNoteFollowUp = followUpEmails.find(
-                email => email.projectId === project.id && 
-                        email.trigger === "note" &&
-                        email.noteContent === note.content
-              );
+          if (upcomingMilestone) {
+            console.log(`Found upcoming milestone for note: ${upcomingMilestone.title}`);
+            // Check if we haven't already generated a note-based follow-up for this note
+            const existingNoteFollowUp = followUpEmails.find(
+              email => email.projectId === project.id && 
+                      email.trigger === "note" &&
+                      email.noteContent === note.content
+            );
 
-              if (!existingNoteFollowUp) {
-                console.log(`Generating note follow-up for note: ${note.content.substring(0, 50)}...`);
-                const draftEmail = generateFollowUpEmail(project, upcomingMilestone, projectNotes, "note", note);
-                
-                newFollowUps.push({
-                  id: `${project.id}-note-${note.id}-${Date.now()}`,
-                  projectId: project.id,
-                  projectName: project.projectName,
-                  milestoneTitle: upcomingMilestone.title,
-                  milestoneDueDate: upcomingMilestone.dueDate,
-                  draftEmail,
-                  generated: new Date().toISOString(),
-                  priority: "High", // All project alerts are High priority
-                  trigger: "note",
-                  noteContent: note.content
-                });
-              }
-            } else {
-              console.log(`No upcoming milestone found for note follow-up`);
+            if (!existingNoteFollowUp) {
+              console.log(`Generating note follow-up for note: ${note.content.substring(0, 50)}...`);
+              const draftEmail = generateFollowUpEmail(project, upcomingMilestone, projectNotes, "note", note);
+              
+              newFollowUps.push({
+                id: `${project.id}-note-${note.id}-${Date.now()}`,
+                projectId: project.id,
+                projectName: project.projectName,
+                milestoneTitle: upcomingMilestone.title,
+                milestoneDueDate: upcomingMilestone.dueDate,
+                draftEmail,
+                generated: new Date().toISOString(),
+                priority: "High", // All project alerts are High priority
+                trigger: "note",
+                noteContent: note.content
+              });
             }
-          });
-        }
+          } else {
+            console.log(`No upcoming milestone found for note follow-up`);
+          }
+        });
       });
 
     console.log(`Total new follow-ups generated: ${newFollowUps.length}`);

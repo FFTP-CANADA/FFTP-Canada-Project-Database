@@ -52,6 +52,10 @@ export const AutomatedEmailGenerator = ({
       } else {
         return "interimReport";
       }
+    } else if (milestoneType === "Final Report and Receipts Submitted" ||
+               milestone.title.toLowerCase().includes("final report") ||
+               milestone.title.toLowerCase().includes("final receipts")) {
+      return "finalReport";
     }
     return "generic";
   };
@@ -227,6 +231,34 @@ ${senderPosition}
 ${senderOrganization}`;
 
       return { subject, emailBody };
+    
+    } else if (emailTemplate === "finalReport") {
+      const totalDisbursed = project.amountDisbursed 
+        ? `${project.currency} $${project.amountDisbursed.toLocaleString()}`
+        : `${project.currency} $0`;
+      
+      const subject = `Reminder – Final Report & Receipts Due for ${project.projectName}`;
+
+      const emailBody = `Dear ${partnerName},
+
+This is a reminder that the Final Report & Receipts for the ${project.projectName} are due by ${formatDateForDisplay(milestone.dueDate)}, as outlined in the ${governanceType} (Reference: ${governanceNumber}).
+
+To date, a total of ${totalDisbursed} has been disbursed under this project. This final submission is essential for confirming the completion of the project, ensuring full accountability in line with our agreement, and issuing the final disbursement where the need exists.
+
+Project Overview:
+
+Project Cost: ${projectCost}
+Start Date: ${formatDateForDisplay(project.startDate)}
+End Date: ${project.endDate ? formatDateForDisplay(project.endDate) : "To be determined"}
+
+Thank you for your cooperation and dedication in bringing this project to completion. We look forward to receiving your final documentation so we can close our records.
+
+Kind regards,
+${senderName}
+${senderPosition}
+${senderOrganization}`;
+
+      return { subject, emailBody };
     }
 
     // Generic template fallback
@@ -263,6 +295,7 @@ ${senderOrganization}`;
       case "secondDisbursement": return "Internal Second Disbursement Confirmation Email";
       case "interimReport": return "Interim Report & Receipts Reminder Email";
       case "interimReportInternal": return "Internal Donor Engagement Advisory Email";
+      case "finalReport": return "Final Report & Receipts Reminder Email";
       default: return "Project Milestone Email";
     }
   };

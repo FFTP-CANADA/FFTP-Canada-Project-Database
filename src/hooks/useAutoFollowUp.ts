@@ -28,11 +28,11 @@ export const useAutoFollowUp = (
     const totalCost = project.totalCost || 0;
     const formattedCost = formatCurrency(totalCost, project.currency);
     
-    return `Subject: Reminder: ${project.governanceType || 'Governance Document'} (${project.governanceNumber || 'TBD'}) for ${project.projectName}
+    return `Subject: Reminder: ${project.governanceType || '[GOVERNANCE TYPE]'} (${project.governanceNumber || '[GOVERNANCE NUMBER]'}) for ${project.projectName}
 
-Dear ${project.partnerName || 'Partner'},
+Dear ${project.partnerName || '[PARTNER NAME]'},
 
-This is a courtesy reminder that the ${project.governanceType || 'Governance Document'} (Reference: ${project.governanceNumber || 'TBD'}) for the ${project.projectName} was sent for your review and signature. The anticipated signing date is ${new Date(milestone.dueDate).toLocaleDateString('en-CA', { 
+This is a courtesy reminder that the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}) for the ${project.projectName} was sent for your review and signature. The anticipated signing date is ${new Date(milestone.dueDate).toLocaleDateString('en-CA', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
@@ -54,14 +54,14 @@ End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-C
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
-    }) : 'TBD'}
+    }) : '[PROJECT END DATE]'}
 
 We appreciate your attention to this matter and look forward to receiving the signed document at your earliest convenience.
 
 Kind regards,
-Joan Tulloch
-Project Manager
-Food For The Poor Canada`;
+[SENDER NAME]
+[SENDER POSITION]
+[SENDER ORGANIZATION]`;
   };
 
   const generateFollowUpEmail = (

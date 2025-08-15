@@ -43,6 +43,27 @@ const saveMilestones = async (milestones: ProjectMilestone[]) => {
 
 export const useProjectMilestones = () => {
   const [milestones, setMilestones] = useState<ProjectMilestone[]>(() => {
+    // CRITICAL FIX: Check for milestone data migration
+    const rawMilestones = localStorage.getItem('project-milestones');
+    const ffttpMilestones = localStorage.getItem('fftp_project-milestones');
+    
+    console.log("📊 RAW milestones:", rawMilestones ? JSON.parse(rawMilestones).length : 0);
+    console.log("📊 FFTP milestones:", ffttpMilestones ? JSON.parse(ffttpMilestones).length : 0);
+    
+    // Migrate milestones if needed
+    if (rawMilestones && !ffttpMilestones) {
+      try {
+        const parsedRaw = JSON.parse(rawMilestones);
+        console.log("🔄 MIGRATING milestones from raw to prefixed storage");
+        localStorage.setItem('fftp_project-milestones', rawMilestones);
+        globalMilestones = parsedRaw;
+        console.log("✅ Milestone migration complete:", parsedRaw.length);
+        return parsedRaw;
+      } catch (e) {
+        console.error("❌ Failed to migrate milestones:", e);
+      }
+    }
+    
     if (globalMilestones.length > 0) {
       console.log("🎯 Using cached milestones:", globalMilestones.length);
       return globalMilestones;

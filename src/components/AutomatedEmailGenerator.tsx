@@ -55,7 +55,12 @@ export const AutomatedEmailGenerator = ({
     } else if (milestoneType === "Final Report and Receipts Submitted" ||
                milestone.title.toLowerCase().includes("final report") ||
                milestone.title.toLowerCase().includes("final receipts")) {
-      return "finalReport";
+      // Check if milestone is completed to determine which template to use
+      if (milestone.status === "Completed") {
+        return "finalReportInternal";
+      } else {
+        return "finalReport";
+      }
     }
     return "generic";
   };
@@ -259,6 +264,34 @@ ${senderPosition}
 ${senderOrganization}`;
 
       return { subject, emailBody };
+    
+    } else if (emailTemplate === "finalReportInternal") {
+      const totalDisbursed = project.amountDisbursed 
+        ? `${project.currency} $${project.amountDisbursed.toLocaleString()}`
+        : `${project.currency} $0`;
+      
+      // Calculate final disbursement date (typically 30 days after final report received)
+      const finalDisbursementDate = new Date(milestone.completedDate || milestone.dueDate);
+      finalDisbursementDate.setDate(finalDisbursementDate.getDate() + 30);
+      
+      const subject = `Final Report Received – ${project.projectName} (For Review & Donor Update)`;
+
+      const emailBody = `Dear ${officerName},
+
+The Final Report & Receipts for the ${project.projectName} have been received from ${partnerName}, as per the ${governanceType} (Reference: ${governanceNumber}). The report and supporting documentation are attached for your detailed review.
+
+To date, ${totalDisbursed} has been disbursed under this project. Please prepare the final donor update to provide them with a comprehensive project completion summary. Where the need exists, the final disbursement will be issued to the partner following this review, in line with the project agreement.
+
+Kindly confirm within the next three (3) business days whether you have any questions or concerns regarding the report. If no concerns are raised, we will proceed with the final disbursement as scheduled for ${formatDateForDisplay(finalDisbursementDate.toISOString().split('T')[0])}.
+
+Thank you for your attention to this matter and for ensuring our donor receives a timely update on the successful completion of this project.
+
+Kind regards,
+${senderName}
+${senderPosition}
+${senderOrganization}`;
+
+      return { subject, emailBody };
     }
 
     // Generic template fallback
@@ -296,6 +329,7 @@ ${senderOrganization}`;
       case "interimReport": return "Interim Report & Receipts Reminder Email";
       case "interimReportInternal": return "Internal Donor Engagement Advisory Email";
       case "finalReport": return "Final Report & Receipts Reminder Email";
+      case "finalReportInternal": return "Internal Final Report Advisory Email";
       default: return "Project Milestone Email";
     }
   };
@@ -351,7 +385,7 @@ ${senderOrganization}`;
                     placeholder="Enter partner organization name"
                   />
                 </div>
-                {(emailTemplate === "interimReportInternal" || emailTemplate === "secondDisbursement") && (
+                {(emailTemplate === "interimReportInternal" || emailTemplate === "secondDisbursement" || emailTemplate === "finalReportInternal") && (
                   <div>
                     <Label htmlFor="officerName">Donor Engagement Officer Name</Label>
                     <Input

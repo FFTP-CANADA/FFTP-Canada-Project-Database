@@ -105,6 +105,14 @@ const Index = () => {
     deleteMilestone
   } = useProjectData();
 
+  console.log("Dashboard data loaded:", { 
+    projectsCount: projects.length, 
+    milestonesCount: milestones.length,
+    notesCount: notes.length,
+    attachmentsCount: attachments.length,
+    photosCount: photos.length
+  });
+
   // Auto-correct project status based on milestones - run for all projects
   useEffect(() => {
     let hasUpdates = false;

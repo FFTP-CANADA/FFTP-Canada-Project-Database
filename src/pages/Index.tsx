@@ -103,15 +103,6 @@ const Index = () => {
     deleteMilestone
   } = useProjectData();
 
-  // CRITICAL DEBUG: Check what projects we actually have in the dashboard
-  console.log("🏠 DASHBOARD: Total projects loaded:", projects.length);
-  console.log("🏠 DASHBOARD: Project names:", projects.map(p => p.projectName));
-  console.log("🏠 DASHBOARD: Projects data:", projects);
-
-  // CRITICAL DEBUG: Check milestones
-  console.log("🏠 DASHBOARD: Total milestones loaded:", milestones.length);
-  console.log("🏠 DASHBOARD: Milestone data:", milestones);
-
   // Auto-correct project status based on milestones - run for all projects
   useEffect(() => {
     let hasUpdates = false;

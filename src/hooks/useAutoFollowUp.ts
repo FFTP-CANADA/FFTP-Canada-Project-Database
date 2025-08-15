@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Project, ProjectMilestone, ProjectNote } from "@/types/project";
 import { formatCurrency, convertUsdToCad } from "@/utils/currencyUtils";
+import { BusinessDayCalculator } from "@/utils/businessDays";
 
 export interface FollowUpEmail {
   id: string;
@@ -516,9 +517,8 @@ joannt@foodforthepoor.ca`;
     console.log("Projects with followUpNeeded:", projects.filter(p => p.followUpNeeded).length);
     
     const today = new Date();
-    const tenDaysFromNow = new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000);
     console.log("Today:", today.toISOString());
-    console.log("Ten days from now:", tenDaysFromNow.toISOString());
+    console.log("Checking milestones within 10 business days");
     
     const newFollowUps: FollowUpEmail[] = [];
 
@@ -534,9 +534,11 @@ joannt@foodforthepoor.ca`;
         // Check for milestone-based follow-ups
         projectMilestones.forEach(milestone => {
           const milestoneDate = new Date(milestone.dueDate);
+          const isWithin10BusinessDays = BusinessDayCalculator.isWithinNBusinessDays(milestoneDate, 10);
+          
           console.log(`Checking milestone: ${milestone.title}, due: ${milestone.dueDate}, status: ${milestone.status}`);
           console.log(`Milestone date: ${milestoneDate.toISOString()}`);
-          console.log(`Is milestone in range? ${milestoneDate >= today && milestoneDate <= tenDaysFromNow}`);
+          console.log(`Is milestone within 10 business days? ${isWithin10BusinessDays}`);
           console.log(`Is milestone not completed? ${milestone.status !== "Completed"}`);
           
           // Generate internal email when Interim Report milestone is completed
@@ -655,10 +657,8 @@ joannt@foodforthepoor.ca`;
             }
           }
           
-          // Check if milestone is within 10 days and hasn't been completed
-          if (milestoneDate >= today && 
-              milestoneDate <= tenDaysFromNow && 
-              milestone.status !== "Completed") {
+          // Check if milestone is within 10 business days and hasn't been completed
+          if (isWithin10BusinessDays && milestone.status !== "Completed") {
             
             // Check if we haven't already generated a follow-up for this milestone
             const existingFollowUp = followUpEmails.find(

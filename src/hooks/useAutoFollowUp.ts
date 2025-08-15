@@ -32,17 +32,17 @@ export const useAutoFollowUp = (
 
 Dear ${project.partnerName || '[PARTNER NAME]'},
 
-This is a courtesy reminder that the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}) for the ${project.projectName} was sent for your review and signature. The anticipated signing date is **${new Date(milestone.dueDate).toLocaleDateString('en-CA', { 
+This is a courtesy reminder that the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}) for the ${project.projectName} was sent for your review and signature. The anticipated signing date is ${new Date(milestone.dueDate).toLocaleDateString('en-CA', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
-    })}**.
+    })}.
 
 As outlined, the timely signing of this document will allow us to proceed with the first disbursement in line with the agreed terms.
 
-**__Project Overview:__**
+Project Overview:
 
-**Project Cost:** ${formattedCost}
+Project Cost: ${formattedCost}
 
 Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
       year: 'numeric', 

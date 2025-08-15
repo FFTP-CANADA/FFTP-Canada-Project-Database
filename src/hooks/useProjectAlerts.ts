@@ -182,12 +182,19 @@ export const useProjectAlerts = (projects: Project[]) => {
   }, [projects, alertSettings, milestones, donorPledges]);
 
   /**
-   * Update alerts when projects change
+   * Update alerts when projects or milestones change - with immediate sync
    */
   useEffect(() => {
+    console.log("🔄 ALERT SYNC: Projects or milestones changed, regenerating alerts");
+    console.log("Current projects count:", projects.length);
+    console.log("Current milestones count:", milestones.length);
+    
     const newAlerts = generateAlerts();
     setAlerts(newAlerts);
-  }, [generateAlerts]);
+    
+    console.log("📊 FINAL ALERT COUNT:", newAlerts.length);
+    console.log("Alert projects:", newAlerts.map(a => a.projectName));
+  }, [projects, milestones, generateAlerts]); // React to ANY change in projects or milestones
 
   /**
    * Mark an alert as read

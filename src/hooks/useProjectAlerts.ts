@@ -34,17 +34,9 @@ export const useProjectAlerts = (projects: Project[]) => {
   const generateAlerts = useCallback(() => {
     if (!alertSettings.enableAlerts) return [];
 
-    console.log("🚨 ALERT GENERATION STARTING 🚨");
-    console.log("Projects received:", projects.length);
-    console.log("Milestones received:", milestones.length);
-    console.log("All project names:", projects.map(p => p.projectName));
-
     const newAlerts: ProjectAlert[] = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Start of today for accurate comparison
-    
-    console.log("Today's date:", today.toISOString());
-    console.log("Warning days setting:", alertSettings.warningDays);
 
     // 1. CHECK PROJECT DEADLINES (upcoming and overdue)
     projects.forEach(project => {
@@ -89,32 +81,17 @@ export const useProjectAlerts = (projects: Project[]) => {
     });
 
     // 2. CHECK ALL MILESTONE DEADLINES (upcoming and overdue)
-    console.log("🔍 ALERTS DEBUG: Checking milestones for alerts");
-    console.log("Total milestones:", milestones.length);
-    console.log("Total projects:", projects.length);
-    
     milestones.forEach(milestone => {
-      const project = projects.find(p => p.id === milestone.projectId);
-      const projectName = project?.projectName || 'Unknown Project';
-      
-      console.log(`\n>>> Alert Check: ${milestone.title} (${projectName})`);
-      console.log(`    Due: ${milestone.dueDate}`);
-      console.log(`    Status: ${milestone.status}`);
-      console.log(`    Project ID: ${milestone.projectId}`);
-      
       if (milestone.status !== 'Completed' && milestone.dueDate) {
         const dueDate = new Date(milestone.dueDate);
         dueDate.setHours(0, 0, 0, 0);
         const businessDaysUntil = BusinessDayCalculator.getBusinessDaysBetween(today, dueDate);
-        
-        console.log(`    Business days until due: ${businessDaysUntil}`);
-        console.log(`    Is within ${alertSettings.warningDays} days: ${businessDaysUntil > 0 && businessDaysUntil <= alertSettings.warningDays}`);
-        console.log(`    Is overdue: ${dueDate < today}`);
+        const project = projects.find(p => p.id === milestone.projectId);
+        const projectName = project?.projectName || 'Unknown Project';
         
         // Overdue milestones
         if (dueDate < today) {
           const overdueDays = BusinessDayCalculator.getBusinessDaysBetween(dueDate, today);
-          console.log(`    → GENERATING OVERDUE ALERT (${overdueDays} days)`);
           newAlerts.push({
             id: `overdue-milestone-${milestone.id}`,
             projectId: milestone.projectId,
@@ -131,7 +108,6 @@ export const useProjectAlerts = (projects: Project[]) => {
         }
         // Upcoming milestones
         else if (businessDaysUntil > 0 && businessDaysUntil <= alertSettings.warningDays) {
-          console.log(`    → GENERATING UPCOMING ALERT (${businessDaysUntil} days)`);
           newAlerts.push({
             id: `milestone-${milestone.id}`,
             projectId: milestone.projectId,
@@ -140,20 +116,13 @@ export const useProjectAlerts = (projects: Project[]) => {
             message: `[${projectName}] Milestone "${milestone.title}" is due in ${businessDaysUntil} business day${businessDaysUntil === 1 ? '' : 's'}`,
             dueDate: dueDate,
             businessDaysUntilDue: businessDaysUntil,
-            priority: 'high', // ALL alerts are high priority as requested
+            priority: businessDaysUntil <= 3 ? 'high' : businessDaysUntil <= 7 ? 'medium' : 'low',
             isRead: false,
             createdAt: new Date()
           });
-        } else {
-          console.log(`    → NO ALERT: Not within warning period`);
         }
-      } else {
-        console.log(`    → NO ALERT: ${milestone.status === 'Completed' ? 'Already completed' : 'No due date'}`);
       }
     });
-    
-    console.log(`🔍 ALERTS DEBUG: Generated ${newAlerts.length} alerts total`);
-    console.log("Alert summary:", newAlerts.map(a => `${a.projectName}: ${a.message}`));
 
     // 3. CHECK FUNDING/DISBURSEMENT DEADLINES
     // Note: Will be implemented when proper disbursement date structure is available
@@ -182,19 +151,12 @@ export const useProjectAlerts = (projects: Project[]) => {
   }, [projects, alertSettings, milestones, donorPledges]);
 
   /**
-   * Update alerts when projects or milestones change - with immediate sync
+   * Update alerts when projects change
    */
   useEffect(() => {
-    console.log("🔄 ALERT SYNC: Projects or milestones changed, regenerating alerts");
-    console.log("Current projects count:", projects.length);
-    console.log("Current milestones count:", milestones.length);
-    
     const newAlerts = generateAlerts();
     setAlerts(newAlerts);
-    
-    console.log("📊 FINAL ALERT COUNT:", newAlerts.length);
-    console.log("Alert projects:", newAlerts.map(a => a.projectName));
-  }, [projects, milestones, generateAlerts]); // React to ANY change in projects or milestones
+  }, [generateAlerts]);
 
   /**
    * Mark an alert as read

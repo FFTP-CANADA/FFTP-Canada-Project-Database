@@ -25,7 +25,7 @@ export const ProjectAlertsPanel = ({
   demoMode = false,
   className 
 }: ProjectAlertsPanelProps) => {
-  const [isExpanded, setIsExpanded] = useState(true); // Start expanded to show all alerts
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const getPriorityColor = (priority: 'high' | 'medium' | 'low') => {
     switch (priority) {

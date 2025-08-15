@@ -39,6 +39,10 @@ export const AutomatedEmailGenerator = ({
     } else if (milestoneType === "First Disbursement Sent" ||
                milestone.title.toLowerCase().includes("first disbursement")) {
       return "firstDisbursement";
+    } else if (milestoneType === "Interim Report & Receipts Submitted (following Installment #1)" ||
+               milestone.title.toLowerCase().includes("interim report") ||
+               milestone.title.toLowerCase().includes("receipts submitted")) {
+      return "interimReport";
     }
     return "generic";
   };
@@ -124,6 +128,30 @@ ${senderPosition}
 ${senderOrganization}`;
 
       return { subject, emailBody };
+    
+    } else if (emailTemplate === "interimReport") {
+      const subject = `Reminder – Interim Report & Receipts Due for ${project.projectName}`;
+
+      const emailBody = `Dear ${partnerName},
+
+This is a friendly reminder that the Interim Report & Receipts for the ${project.projectName} are due by ${formatDateForDisplay(milestone.dueDate)}, as outlined in the ${governanceType} (Reference: ${governanceNumber}).
+
+The submission of this report, along with supporting receipts, is essential for us to review progress and proceed with the next scheduled disbursement in accordance with the agreement.
+
+Project Overview:
+
+Project Cost: ${projectCost}
+Start Date: ${formatDateForDisplay(project.startDate)}
+End Date: ${project.endDate ? formatDateForDisplay(project.endDate) : "To be determined"}
+
+Thank you for your cooperation and continued partnership in ensuring the successful delivery of this project.
+
+Kind regards,
+${senderName}
+${senderPosition}
+${senderOrganization}`;
+
+      return { subject, emailBody };
     }
 
     // Generic template fallback
@@ -157,6 +185,7 @@ ${senderOrganization}`;
     switch (emailTemplate) {
       case "governance": return "Governance Document Reminder Email";
       case "firstDisbursement": return "First Disbursement Confirmation Email";
+      case "interimReport": return "Interim Report & Receipts Reminder Email";
       default: return "Project Milestone Email";
     }
   };

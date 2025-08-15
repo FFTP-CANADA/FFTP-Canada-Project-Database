@@ -86,8 +86,17 @@ export const ProjectAlertsPanel = ({
            milestone?.title.toLowerCase().includes("first disbursement");
   };
 
+  const isInterimReportMilestone = (alert: ProjectAlert) => {
+    const milestone = milestones.find(m => m.id === alert.id.replace('milestone-', ''));
+    return milestone?.milestoneType === "Interim Report & Receipts Submitted (following Installment #1)" ||
+           milestone?.title.toLowerCase().includes("interim report") ||
+           milestone?.title.toLowerCase().includes("receipts submitted");
+  };
+
   const hasEmailTemplate = (alert: ProjectAlert) => {
-    return isGovernanceDocumentMilestone(alert) || isFirstDisbursementMilestone(alert);
+    return isGovernanceDocumentMilestone(alert) || 
+           isFirstDisbursementMilestone(alert) || 
+           isInterimReportMilestone(alert);
   };
 
   if (alerts.length === 0) {

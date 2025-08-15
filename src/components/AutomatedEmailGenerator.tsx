@@ -43,6 +43,9 @@ export const AutomatedEmailGenerator = ({
     } else if (milestoneType === "Second Disbursement Sent" ||
                milestone.title.toLowerCase().includes("second disbursement")) {
       return "secondDisbursement";
+    } else if (milestoneType === "Final Disbursement Sent" ||
+               milestone.title.toLowerCase().includes("final disbursement")) {
+      return "finalDisbursement";
     } else if (milestoneType === "Interim Report & Receipts Submitted (following Installment #1)" ||
                milestone.title.toLowerCase().includes("interim report") ||
                milestone.title.toLowerCase().includes("receipts submitted")) {
@@ -292,6 +295,51 @@ ${senderPosition}
 ${senderOrganization}`;
 
       return { subject, emailBody };
+    
+    } else if (emailTemplate === "finalDisbursement") {
+      const disbursementAmount = milestone.disbursementAmount 
+        ? `${project.currency} $${milestone.disbursementAmount.toLocaleString()}`
+        : `${project.currency} $${Math.round((project.totalCost || 0) * 0.33).toLocaleString()} (estimated final amount)`;
+      
+      const disbursementDate = milestone.completedDate 
+        ? formatDateForDisplay(milestone.completedDate)
+        : formatDateForDisplay(milestone.dueDate);
+      
+      const totalDisbursed = project.amountDisbursed 
+        ? `${project.currency} $${project.amountDisbursed.toLocaleString()}`
+        : `${project.currency} $0`;
+      
+      const subject = `Final Disbursement Sent – ${project.projectName}`;
+
+      const emailBody = `Dear ${officerName},
+
+This is to confirm that the final disbursement for the ${project.projectName} has been sent to ${partnerName}, in accordance with the ${governanceType} (Reference: ${governanceNumber}).
+
+Transaction Details:
+
+Amount Transferred: ${disbursementAmount}
+Date of Transfer: ${disbursementDate}
+Total Amount Disbursed to Date: ${totalDisbursed}
+
+Project Overview:
+
+Project Cost: ${projectCost}
+Start Date: ${formatDateForDisplay(project.startDate)}
+End Date: ${project.endDate ? formatDateForDisplay(project.endDate) : "To be determined"}
+
+For your reference, please find attached:
+
+The official wire sheet.
+The bank wire confirmation.
+
+Thank you for your support in stewarding this project. If there are any post-narrative reports or updates that would be suitable to share with the donor, please feel free to do so. We also hope to encourage our donors to partner with us on future initiatives, so kindly share any new project ideas that may be of interest to them.
+
+Kind regards,
+${senderName}
+${senderPosition}
+${senderOrganization}`;
+
+      return { subject, emailBody };
     }
 
     // Generic template fallback
@@ -326,6 +374,7 @@ ${senderOrganization}`;
       case "governance": return "Governance Document Reminder Email";
       case "firstDisbursement": return "First Disbursement Confirmation Email";
       case "secondDisbursement": return "Internal Second Disbursement Confirmation Email";
+      case "finalDisbursement": return "Internal Final Disbursement Confirmation Email";
       case "interimReport": return "Interim Report & Receipts Reminder Email";
       case "interimReportInternal": return "Internal Donor Engagement Advisory Email";
       case "finalReport": return "Final Report & Receipts Reminder Email";
@@ -385,7 +434,7 @@ ${senderOrganization}`;
                     placeholder="Enter partner organization name"
                   />
                 </div>
-                {(emailTemplate === "interimReportInternal" || emailTemplate === "secondDisbursement" || emailTemplate === "finalReportInternal") && (
+                {(emailTemplate === "interimReportInternal" || emailTemplate === "secondDisbursement" || emailTemplate === "finalReportInternal" || emailTemplate === "finalDisbursement") && (
                   <div>
                     <Label htmlFor="officerName">Donor Engagement Officer Name</Label>
                     <Input

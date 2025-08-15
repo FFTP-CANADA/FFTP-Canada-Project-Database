@@ -18,27 +18,6 @@
   </head>
 
   <body>
-    <script>
-      // IMMEDIATE MILESTONE RESTORATION - RUNS BEFORE ANYTHING ELSE
-      console.log("🚨 EMERGENCY MILESTONE RESTORATION");
-      
-      const backupKeys = Object.keys(localStorage).filter(key => key.startsWith('fftp_fftp_backup_')).slice(0, 50);
-      console.log("Checking", backupKeys.length, "backup files...");
-      
-      for (const key of backupKeys) {
-        try {
-          const backup = JSON.parse(localStorage.getItem(key));
-          if (backup.data && backup.data.milestones && backup.data.milestones.length > 0) {
-            console.log("✅ FOUND & RESTORING milestones from", key);
-            console.log("Milestone count:", backup.data.milestones.length);
-            localStorage.setItem('project-milestones', JSON.stringify(backup.data.milestones));
-            localStorage.setItem('fftp_project-milestones', JSON.stringify(backup.data.milestones));
-            console.log("✅ RESTORATION COMPLETE");
-            break;
-          }
-        } catch (e) {}
-      }
-    </script>
     <div id="root"></div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>

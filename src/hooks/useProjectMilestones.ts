@@ -43,15 +43,8 @@ const saveMilestones = async (milestones: ProjectMilestone[]) => {
 
 export const useProjectMilestones = () => {
   const [milestones, setMilestones] = useState<ProjectMilestone[]>(() => {
-    if (globalMilestones.length > 0) {
-      console.log("🎯 Using cached milestones:", globalMilestones.length);
-      return globalMilestones;
-    }
-    
+    if (globalMilestones.length > 0) return globalMilestones;
     const saved = LocalStorageManager.getItem('project-milestones', []);
-    console.log("📊 Loading milestones from storage:", saved.length);
-    console.log("🎯 Milestone project IDs:", saved.map(m => m.projectId));
-    
     globalMilestones = saved;
     return saved;
   });

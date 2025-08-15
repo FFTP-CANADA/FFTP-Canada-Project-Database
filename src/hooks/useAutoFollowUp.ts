@@ -24,6 +24,46 @@ export const useAutoFollowUp = (
   const [followUpEmails, setFollowUpEmails] = useState<FollowUpEmail[]>([]);
   const [lastNoteCount, setLastNoteCount] = useState(0);
 
+  const generateGovernanceDocumentEmail = (project: Project, milestone: ProjectMilestone): string => {
+    const totalCost = project.totalCost || 0;
+    const formattedCost = formatCurrency(totalCost, project.currency);
+    
+    return `Subject: Reminder: ${project.governanceType || 'Governance Document'} (${project.governanceNumber || 'TBD'}) for ${project.projectName}
+
+Dear ${project.partnerName || 'Partner'},
+
+This is a courtesy reminder that the ${project.governanceType || 'Governance Document'} (Reference: ${project.governanceNumber || 'TBD'}) for the ${project.projectName} was sent for your review and signature. The anticipated signing date is ${new Date(milestone.dueDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}.
+
+As outlined, the timely signing of this document will allow us to proceed with the first disbursement in line with the agreed terms.
+
+Project Overview:
+
+Project Cost: ${formattedCost}
+
+Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}
+
+End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }) : 'TBD'}
+
+We appreciate your attention to this matter and look forward to receiving the signed document at your earliest convenience.
+
+Kind regards,
+Joan Tulloch
+Project Manager
+Food For The Poor Canada`;
+  };
+
   const generateFollowUpEmail = (
     project: Project,
     milestone: ProjectMilestone,
@@ -31,6 +71,11 @@ export const useAutoFollowUp = (
     trigger: "milestone" | "note" = "milestone",
     triggerNote?: ProjectNote
   ): string => {
+    // Use special template for Governance Document Signed milestones
+    if (milestone.milestoneType === "Governance Document Signed") {
+      return generateGovernanceDocumentEmail(project, milestone);
+    }
+
     const totalCostCAD = project.currency === 'USD' 
       ? convertUsdToCad(project.totalCost || 0)
       : (project.totalCost || 0);

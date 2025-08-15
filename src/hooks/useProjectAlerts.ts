@@ -34,9 +34,17 @@ export const useProjectAlerts = (projects: Project[]) => {
   const generateAlerts = useCallback(() => {
     if (!alertSettings.enableAlerts) return [];
 
+    console.log("🚨 ALERT GENERATION STARTING 🚨");
+    console.log("Projects received:", projects.length);
+    console.log("Milestones received:", milestones.length);
+    console.log("All project names:", projects.map(p => p.projectName));
+
     const newAlerts: ProjectAlert[] = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Start of today for accurate comparison
+    
+    console.log("Today's date:", today.toISOString());
+    console.log("Warning days setting:", alertSettings.warningDays);
 
     // 1. CHECK PROJECT DEADLINES (upcoming and overdue)
     projects.forEach(project => {

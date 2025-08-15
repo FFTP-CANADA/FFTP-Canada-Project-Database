@@ -18,40 +18,10 @@ const saveProjects = async (projects: Project[]) => {
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>(() => {
-    console.log("🚀 INITIALIZING PROJECTS HOOK");
-    
-    // Check what's in localStorage with both keys
-    const rawProjects = localStorage.getItem('projects');
-    const ffttpProjects = localStorage.getItem('fftp_projects');
-    
-    console.log("📊 RAW projects in localStorage:", rawProjects ? JSON.parse(rawProjects).length : 0);
-    console.log("📊 FFTP projects in localStorage:", ffttpProjects ? JSON.parse(ffttpProjects).length : 0);
-    
-    // FIRST: Try raw localStorage if it has data
-    if (rawProjects) {
-      try {
-        const parsedRaw = JSON.parse(rawProjects);
-        console.log("🔄 Using raw localStorage (primary):", parsedRaw.length);
-        globalProjects = parsedRaw;
-        // Migrate to LocalStorageManager format
-        LocalStorageManager.setItem('projects', parsedRaw);
-        return parsedRaw;
-      } catch (e) {
-        console.error("❌ Failed to parse raw projects:", e);
-      }
-    }
-    
-    // Fallback: load from LocalStorageManager
+    if (globalProjects.length > 0) return globalProjects;
     const saved = LocalStorageManager.getItem('projects', []);
-    console.log("✅ Loading projects via LocalStorageManager:", saved.length);
-    
-    if (saved.length > 0) {
-      console.log("📋 Project names:", saved.map(p => p.projectName));
-      globalProjects = saved;
-      return saved;
-    }
-    
-    return [];
+    globalProjects = saved;
+    return saved;
   });
 
   useEffect(() => {

@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import { ProjectMilestone } from "@/types/project";
 import { LocalStorageManager } from "@/utils/localStorageManager";
 import { calculateProjectDisbursedAmount } from "@/utils/disbursementCalculator";
-import { EmergencyMilestoneRecovery } from "@/utils/emergencyMilestoneRecovery";
 
 let globalMilestones: ProjectMilestone[] = [];
 let milestoneListeners: Array<(milestones: ProjectMilestone[]) => void> = [];
@@ -44,27 +43,32 @@ const saveMilestones = async (milestones: ProjectMilestone[]) => {
 
 export const useProjectMilestones = () => {
   const [milestones, setMilestones] = useState<ProjectMilestone[]>(() => {
-    // IMMEDIATE EMERGENCY RECOVERY - RUN NOW
-    console.log('🚨 STARTING IMMEDIATE MILESTONE RECOVERY');
-    EmergencyMilestoneRecovery.logAllStorageKeys();
+    if (globalMilestones.length > 0) return globalMilestones;
     
-    // Run recovery synchronously if possible
-    EmergencyMilestoneRecovery.recoverAllMilestones().then(recovered => {
-      if (recovered.length > 0) {
-        console.log(`🎉 EMERGENCY RECOVERY SUCCESS: ${recovered.length} MILESTONES RESTORED`);
-        globalMilestones = recovered;
-        // Update all listeners immediately
-        notifyMilestoneListeners(recovered);
-      } else {
-        console.log('❌ NO MILESTONES RECOVERED FROM ANY SOURCE');
+    // Check multiple storage locations for milestones
+    let saved = LocalStorageManager.getItem('project-milestones', []);
+    
+    // If empty, try backup locations
+    if (saved.length === 0) {
+      try {
+        const backup1 = localStorage.getItem('fftp_project-milestones');
+        if (backup1) {
+          saved = JSON.parse(backup1);
+        }
+      } catch {}
+      
+      if (saved.length === 0) {
+        try {
+          const backup2 = localStorage.getItem('fftp_project-milestones_backup');
+          if (backup2) {
+            saved = JSON.parse(backup2);
+          }
+        } catch {}
       }
-    });
+    }
     
-    // Also try to load from current storage
-    const saved = LocalStorageManager.getItem('project-milestones', []);
-    globalMilestones = saved.length > 0 ? saved : [];
-    
-    return globalMilestones;
+    globalMilestones = saved;
+    return saved;
   });
 
   useEffect(() => {
@@ -73,19 +77,8 @@ export const useProjectMilestones = () => {
     };
     milestoneListeners.push(listener);
     
-    // Listen for recovery events
-    const handleRecovery = (event: CustomEvent) => {
-      const { milestones: recoveredMilestones } = event.detail;
-      console.log('🎉 RECOVERY EVENT RECEIVED:', recoveredMilestones.length);
-      setMilestones(recoveredMilestones);
-      globalMilestones = recoveredMilestones;
-    };
-    
-    window.addEventListener('milestones-restored', handleRecovery as EventListener);
-    
     return () => {
       milestoneListeners = milestoneListeners.filter(l => l !== listener);
-      window.removeEventListener('milestones-restored', handleRecovery as EventListener);
     };
   }, []);
 

@@ -276,6 +276,8 @@ const Index = () => {
             onMarkAsRead={markAlertAsRead}
             onMarkAllAsRead={markAllAlertsAsRead}
             demoMode={demoMode}
+            projects={projects}
+            milestones={milestones}
           />
         </div>
 

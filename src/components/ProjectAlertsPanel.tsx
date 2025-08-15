@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Bell, BellOff, Calendar, AlertTriangle, CheckCircle, X } from "lucide-react";
+import { Bell, BellOff, Calendar, AlertTriangle, CheckCircle, X, Mail } from "lucide-react";
 import { ProjectAlert } from "@/hooks/useProjectAlerts";
 import { cn } from "@/lib/utils";
 import { formatDateForDisplay, toDateString } from "@/utils/dateUtils";
+import { AutomatedEmailGenerator } from "@/components/AutomatedEmailGenerator";
+import { Project, ProjectMilestone } from "@/types/project";
 
 interface ProjectAlertsPanelProps {
   alerts: ProjectAlert[];
@@ -16,6 +18,8 @@ interface ProjectAlertsPanelProps {
   onMarkAllAsRead: () => void;
   demoMode?: boolean;
   className?: string;
+  projects: Project[];
+  milestones: ProjectMilestone[];
 }
 
 export const ProjectAlertsPanel = ({ 
@@ -24,9 +28,16 @@ export const ProjectAlertsPanel = ({
   onMarkAsRead, 
   onMarkAllAsRead,
   demoMode = false,
-  className 
+  className,
+  projects,
+  milestones
 }: ProjectAlertsPanelProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [emailDialog, setEmailDialog] = useState<{
+    open: boolean;
+    project: Project | null;
+    milestone: ProjectMilestone | null;
+  }>({ open: false, project: null, milestone: null });
 
   const getPriorityColor = (priority: 'high' | 'medium' | 'low') => {
     switch (priority) {
@@ -50,6 +61,23 @@ export const ProjectAlertsPanel = ({
     // Convert to EST date string and format for display
     const dateString = toDateString(date);
     return formatDateForDisplay(dateString);
+  };
+
+  const handleGenerateEmail = (alert: ProjectAlert) => {
+    const project = projects.find(p => p.id === alert.projectId);
+    const milestone = milestones.find(m => m.id === alert.id.replace('milestone-', ''));
+    
+    if (project && milestone) {
+      setEmailDialog({ open: true, project, milestone });
+    }
+  };
+
+  const isGovernanceDocumentMilestone = (alert: ProjectAlert) => {
+    const milestone = milestones.find(m => m.id === alert.id.replace('milestone-', ''));
+    return milestone?.milestoneType === "Governance Document Signed" || 
+           milestone?.title.toLowerCase().includes("governance") ||
+           milestone?.title.toLowerCase().includes("agreement") ||
+           milestone?.title.toLowerCase().includes("lod");
   };
 
   if (alerts.length === 0) {
@@ -171,16 +199,33 @@ export const ProjectAlertsPanel = ({
                         </p>
                       </div>
                     </div>
-                    {!alert.isRead && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onMarkAsRead(alert.id)}
-                        className="h-6 w-6 p-0 hover:bg-gray-200"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Badge variant={alert.priority === 'high' ? "destructive" : alert.priority === 'medium' ? "secondary" : "outline"}>
+                        {alert.priority.toUpperCase()}
+                      </Badge>
+                      {alert.alertType === 'milestone' && isGovernanceDocumentMilestone(alert) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleGenerateEmail(alert)}
+                          className="text-xs text-blue-600 hover:bg-blue-50"
+                          title="Generate governance document reminder email"
+                        >
+                          <Mail className="w-3 h-3 mr-1" />
+                          Email
+                        </Button>
+                      )}
+                      {!alert.isRead && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onMarkAsRead(alert.id)}
+                          className="h-6 w-6 p-0 hover:bg-gray-200"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -199,6 +244,16 @@ export const ProjectAlertsPanel = ({
             </>
           )}
         </ScrollArea>
+
+        {/* Email Generator Dialog */}
+        {emailDialog.project && emailDialog.milestone && (
+          <AutomatedEmailGenerator
+            project={emailDialog.project}
+            milestone={emailDialog.milestone}
+            isOpen={emailDialog.open}
+            onClose={() => setEmailDialog({ open: false, project: null, milestone: null })}
+          />
+        )}
       </CardContent>
       </Card>
   );

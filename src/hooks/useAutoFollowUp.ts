@@ -542,10 +542,12 @@ joannt@foodforthepoor.ca`;
           const milestoneDate = new Date(milestone.dueDate);
           const isWithin10BusinessDays = BusinessDayCalculator.isWithinNBusinessDays(milestoneDate, 10);
           
-          console.log(`Checking milestone: ${milestone.title}, due: ${milestone.dueDate}, status: ${milestone.status}`);
-          console.log(`Milestone date: ${milestoneDate.toISOString()}`);
-          console.log(`Is milestone within 10 business days? ${isWithin10BusinessDays}`);
-          console.log(`Is milestone not completed? ${milestone.status !== "Completed"}`);
+          console.log(`\n>>> Milestone: ${milestone.title} (${project.projectName})`);
+          console.log(`    Due: ${milestone.dueDate}`);
+          console.log(`    Status: ${milestone.status}`);
+          console.log(`    Within 10 business days: ${isWithin10BusinessDays}`);
+          console.log(`    Is completed: ${milestone.status === "Completed"}`);
+          console.log(`    Should generate alert: ${isWithin10BusinessDays && milestone.status !== "Completed"}`);
           
           // Generate internal email when Interim Report milestone is completed
           if (milestone.milestoneType === "Interim Report & Receipts Submitted (following Installment #1)" && 

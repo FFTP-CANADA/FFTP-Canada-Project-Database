@@ -5,8 +5,9 @@ export class EmergencyMilestoneRecovery {
   private static readonly CUTOFF_DATE = new Date('2025-08-14T19:00:00');
 
   static async recoverAllMilestones(): Promise<ProjectMilestone[]> {
-    console.log('🚨 EMERGENCY MILESTONE RECOVERY STARTED');
+    console.log('🚨🚨🚨 EMERGENCY MILESTONE RECOVERY STARTED 🚨🚨🚨');
     console.log('📅 Recovery cutoff: August 14th, 2025 7:00 PM');
+    console.log('⏰ Current time:', new Date().toISOString());
     
     const recoveredMilestones: ProjectMilestone[] = [];
     const sources: string[] = [];
@@ -236,13 +237,33 @@ export class EmergencyMilestoneRecovery {
   }
 
   static logAllStorageKeys(): void {
-    console.log('🔍 ALL LOCALSTORAGE KEYS:');
+    console.log('🔍🔍🔍 ALL LOCALSTORAGE KEYS 🔍🔍🔍');
+    console.log('Total localStorage items:', localStorage.length);
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key) {
         const size = localStorage.getItem(key)?.length || 0;
-        console.log(`  ${key}: ${size} chars`);
+        const sizeKB = Math.round(size / 1024);
+        console.log(`  📄 ${key}: ${size} chars (${sizeKB}KB)`);
+        
+        // Log content preview for milestone-related keys
+        if (key.toLowerCase().includes('milestone') || key.includes('backup')) {
+          try {
+            const content = localStorage.getItem(key);
+            if (content) {
+              const parsed = JSON.parse(content);
+              if (Array.isArray(parsed)) {
+                console.log(`    📋 Contains array with ${parsed.length} items`);
+              } else if (parsed.data?.milestones) {
+                console.log(`    📋 Contains backup with ${parsed.data.milestones.length} milestones`);
+              }
+            }
+          } catch (e) {
+            console.log(`    ⚠️ Could not parse content`);
+          }
+        }
       }
     }
+    console.log('🔍🔍🔍 END STORAGE SCAN 🔍🔍🔍');
   }
 }

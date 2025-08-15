@@ -85,11 +85,11 @@ Transaction Details:
 
 Amount Transferred: ${formattedDisbursementAmount}
 
-Date of Transfer: ${milestone.completedDate ? new Date(milestone.completedDate).toLocaleDateString('en-CA', { 
+Date of Transfer: ${new Date(milestone.completedDate || milestone.dueDate).toLocaleDateString('en-CA', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
-    }) : '[DISBURSEMENT DATE]'}
+    })}
 
 Project Overview:
 

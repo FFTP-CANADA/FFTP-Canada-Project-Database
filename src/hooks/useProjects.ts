@@ -20,28 +20,14 @@ export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>(() => {
     console.log("🚀 INITIALIZING PROJECTS HOOK");
     
-    // CRITICAL FIX: Check if data needs migration from raw localStorage to prefixed
+    // Check what's in localStorage with both keys
     const rawProjects = localStorage.getItem('projects');
     const ffttpProjects = localStorage.getItem('fftp_projects');
     
     console.log("📊 RAW projects in localStorage:", rawProjects ? JSON.parse(rawProjects).length : 0);
     console.log("📊 FFTP projects in localStorage:", ffttpProjects ? JSON.parse(ffttpProjects).length : 0);
     
-    // If we have data in raw localStorage but not in prefixed, migrate it
-    if (rawProjects && !ffttpProjects) {
-      try {
-        const parsedRaw = JSON.parse(rawProjects);
-        console.log("🔄 MIGRATING projects from raw to prefixed storage");
-        localStorage.setItem('fftp_projects', rawProjects);
-        globalProjects = parsedRaw;
-        console.log("✅ Migration complete, loaded projects:", parsedRaw.length);
-        return parsedRaw;
-      } catch (e) {
-        console.error("❌ Failed to migrate projects:", e);
-      }
-    }
-    
-    // Normal loading via LocalStorageManager
+    // Always load from LocalStorageManager which uses the prefixed key
     const saved = LocalStorageManager.getItem('projects', []);
     console.log("✅ Loading projects via LocalStorageManager:", saved.length);
     
@@ -49,6 +35,18 @@ export const useProjects = () => {
       console.log("📋 Project names:", saved.map(p => p.projectName));
       globalProjects = saved;
       return saved;
+    }
+    
+    // Fallback: try raw localStorage if LocalStorageManager returns empty
+    if (rawProjects) {
+      try {
+        const parsedRaw = JSON.parse(rawProjects);
+        console.log("🔄 Using raw localStorage fallback:", parsedRaw.length);
+        globalProjects = parsedRaw;
+        return parsedRaw;
+      } catch (e) {
+        console.error("❌ Failed to parse raw projects:", e);
+      }
     }
     
     return [];

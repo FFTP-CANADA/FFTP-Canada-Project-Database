@@ -15,6 +15,7 @@ import { useUndesignatedFunds } from "@/hooks/useUndesignatedFunds";
 import { useProjectFunding } from "@/hooks/useProjectFunding";
 import { formatWithExchange } from "@/utils/currencyUtils";
 import { useToast } from "@/hooks/use-toast";
+import { getTodayString } from "@/utils/dateUtils";
 
 interface FundReallocationDialogProps {
   open: boolean;
@@ -103,7 +104,7 @@ export const FundReallocationDialog = ({
     }
 
     try {
-      const reallocationDate = new Date().toISOString().split('T')[0];
+      const reallocationDate = getTodayString();
       
       const reallocationId = await addReallocation({
         fromProjectId,
@@ -195,7 +196,7 @@ export const FundReallocationDialog = ({
     }
 
     try {
-      const reallocationDate = new Date().toISOString().split('T')[0];
+      const reallocationDate = getTodayString();
       
       // Create fund reallocation record
       const reallocationId = await addFundReallocation({

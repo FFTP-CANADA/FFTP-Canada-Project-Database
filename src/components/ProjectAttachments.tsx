@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Upload, Download, Trash2, File, X } from "lucide-react";
 import { ProjectAttachment } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
-import { formatDateForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay, getCurrentESTTimestamp } from "@/utils/dateUtils";
 
 interface ProjectAttachmentsProps {
   projectId: string;
@@ -91,7 +91,7 @@ const ProjectAttachments = ({
           fileName: file.name,
           fileUrl: base64Data,
           fileSize: file.size,
-          uploadDate: new Date().toISOString(),
+          uploadDate: getCurrentESTTimestamp(),
           fileType: file.type || "application/octet-stream"
         };
         

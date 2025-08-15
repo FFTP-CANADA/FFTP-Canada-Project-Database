@@ -11,6 +11,7 @@ import { Plus, Edit, Trash2, ArrowRight } from "lucide-react";
 import { useUndesignatedFunds } from "@/hooks/useUndesignatedFunds";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/utils/currencyUtils";
+import { getCurrentESTTimestamp, formatTimestampForDisplay } from "@/utils/dateUtils";
 import { UndesignatedFund } from "@/types/undesignatedFunds";
 import { Project } from "@/types/project";
 import { useProjectFunding } from "@/hooks/useProjectFunding";
@@ -185,7 +186,7 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
         toProjectId: reallocationData.projectId,
         amount: amount,
         currency: selectedFund.currency,
-        reallocationDate: new Date().toISOString(),
+        reallocationDate: getCurrentESTTimestamp(),
         reason: reallocationData.reason,
         approvedBy: reallocationData.approvedBy,
         status: "Completed"
@@ -198,7 +199,7 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
           projectId: reallocationData.projectId,
           donorName: `Undesignated Funds - ${selectedFund.impactArea}`,
           pledgedAmount: amount,
-          datePledged: new Date().toISOString(),
+          datePledged: getCurrentESTTimestamp(),
           status: "Fulfilled",
           notes: `Reallocated from undesignated ${selectedFund.impactArea} funds. ${reallocationData.reason}`
         });
@@ -318,7 +319,7 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
                   <TableCell>{fund.impactArea}</TableCell>
                   <TableCell>{fund.currency}</TableCell>
                   <TableCell>{formatCurrency(availableBalance, fund.currency)}</TableCell>
-                  <TableCell>{new Date(fund.lastUpdated).toLocaleDateString()}</TableCell>
+                  <TableCell>{formatTimestampForDisplay(fund.lastUpdated)}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button

@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Project } from "@/types/project";
 import { LocalStorageManager } from "@/utils/localStorageManager";
+import { getCurrentESTDate } from "@/utils/dateUtils";
 
 let globalProjects: Project[] = [];
 let listeners: Array<(projects: Project[]) => void> = [];
@@ -65,7 +66,7 @@ export const useProjects = () => {
 
     const newProject: Project = {
       ...project,
-      id: Date.now().toString(),
+      id: getCurrentESTDate().getTime().toString(),
     };
     
     const updatedProjects = [...globalProjects, newProject];

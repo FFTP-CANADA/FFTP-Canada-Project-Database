@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ProjectMilestone } from "@/types/project";
 import { LocalStorageManager } from "@/utils/localStorageManager";
 import { calculateProjectDisbursedAmount } from "@/utils/disbursementCalculator";
+import { getCurrentESTDate } from "@/utils/dateUtils";
 
 let globalMilestones: ProjectMilestone[] = [];
 let milestoneListeners: Array<(milestones: ProjectMilestone[]) => void> = [];
@@ -63,7 +64,7 @@ export const useProjectMilestones = () => {
   const addMilestone = useCallback(async (milestone: Omit<ProjectMilestone, "id">) => {
     const newMilestone: ProjectMilestone = {
       ...milestone,
-      id: Date.now().toString(),
+      id: getCurrentESTDate().getTime().toString(),
     };
     
     const updatedMilestones = [...globalMilestones, newMilestone];

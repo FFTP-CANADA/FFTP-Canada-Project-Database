@@ -8,6 +8,7 @@ import { Project, ProjectMilestone } from "@/types/project";
 import { formatWithExchange } from "@/utils/currencyUtils";
 import DisbursementTimeline from "./DisbursementTimeline";
 import { format, parseISO, isAfter, isBefore } from "date-fns";
+import { getCurrentESTDate, fromDateString } from "@/utils/dateUtils";
 
 interface DisbursementScheduleProps {
   projects: Project[];
@@ -49,8 +50,8 @@ const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProp
   }).filter(item => item.disbursements.length > 0);
 
   const getStatusColor = (status: string, dueDate: string) => {
-    const today = new Date();
-    const due = parseISO(dueDate);
+    const today = getCurrentESTDate();
+    const due = fromDateString(dueDate);
     
     switch (status) {
       case "Completed": 
@@ -69,8 +70,8 @@ const DisbursementSchedule = ({ projects, milestones }: DisbursementScheduleProp
   };
 
   const getDisplayStatus = (status: string, dueDate: string) => {
-    const today = new Date();
-    const due = parseISO(dueDate);
+    const today = getCurrentESTDate();
+    const due = fromDateString(dueDate);
     
     if (status === "Completed") return status;
     if (isBefore(due, today) && status !== "Completed") return "Overdue";

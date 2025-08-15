@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { FundReallocation, ReallocationSummary } from "@/types/reallocation";
 import { Project } from "@/types/project";
 import { LocalStorageManager } from "@/utils/localStorageManager";
+import { getCurrentESTDate } from "@/utils/dateUtils";
 
 export const useReallocation = () => {
   const [reallocations, setReallocations] = useState<FundReallocation[]>(() => {
@@ -15,7 +16,7 @@ export const useReallocation = () => {
   const addReallocation = useCallback(async (reallocation: Omit<FundReallocation, "id">) => {
     const newReallocation: FundReallocation = {
       ...reallocation,
-      id: Date.now().toString(),
+      id: getCurrentESTDate().getTime().toString(),
     };
     
     setReallocations(prev => [...prev, newReallocation]);

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, X, Camera, Trash2, Edit } from "lucide-react";
 import { ProjectPhoto } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
-import { formatDateForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay, getCurrentESTTimestamp } from "@/utils/dateUtils";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface ProjectGalleryProps {
@@ -55,7 +55,7 @@ const ProjectGallery = ({
         projectId,
         photoUrl: URL.createObjectURL(file), // In real app, upload to server first
         caption: caption || undefined,
-        uploadDate: new Date().toISOString()
+        uploadDate: getCurrentESTTimestamp()
       };
       onAddPhoto(photo);
     });

@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Mail, Clock, AlertTriangle, Copy, CheckCircle, X } from "lucide-react";
 import { FollowUpEmail } from "@/hooks/useAutoFollowUp";
 import { useToast } from "@/hooks/use-toast";
-import { formatDateForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay, getCurrentESTDate, fromDateString } from "@/utils/dateUtils";
 
 interface AutoFollowUpManagerProps {
   followUpEmails: FollowUpEmail[];
@@ -62,8 +62,8 @@ const AutoFollowUpManager = ({
   };
 
   const getDaysUntilDue = (dueDate: string) => {
-    const today = new Date();
-    const due = new Date(dueDate);
+    const today = getCurrentESTDate();
+    const due = fromDateString(dueDate);
     const diffTime = due.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;

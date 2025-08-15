@@ -9,6 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Upload, X } from "lucide-react";
 import { format } from "date-fns";
+import { getCurrentESTTimestamp, toDateString, toESTDate } from "@/utils/dateUtils";
 import { cn } from "@/lib/utils";
 import { Project, PROGRAM_OPTIONS } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
@@ -94,8 +95,8 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
       totalCost: formData.totalCost ? parseFloat(formData.totalCost) : undefined,
       amountDisbursed: 0, // Auto-calculated from milestones
       reportedSpend: parseFloat(formData.reportedSpend) || 0,
-      startDate: formData.startDate ? format(formData.startDate, "yyyy-MM-dd") : "",
-      endDate: formData.endDate ? format(formData.endDate, "yyyy-MM-dd") : undefined,
+      startDate: formData.startDate ? toDateString(toESTDate(formData.startDate)) : "",
+      endDate: formData.endDate ? toDateString(toESTDate(formData.endDate)) : undefined,
       status: formData.status as Project["status"],
       followUpNeeded: formData.followUpNeeded,
       program: formData.program || undefined,
@@ -127,7 +128,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
             fileName: file.name,
             fileUrl: base64Data,
             fileSize: file.size,
-            uploadDate: new Date().toISOString(),
+            uploadDate: getCurrentESTTimestamp(),
             fileType: file.type || "application/octet-stream"
           };
           
@@ -153,7 +154,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
             projectId: projectId,
             photoUrl: base64Data,
             caption: file.name,
-            uploadDate: new Date().toISOString()
+            uploadDate: getCurrentESTTimestamp()
           };
           
           console.log('📷 Adding photo:', photo.caption);

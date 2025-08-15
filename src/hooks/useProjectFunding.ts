@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getCurrentESTDate, getCurrentESTTimestamp } from "@/utils/dateUtils";
 
 export interface DonorReceipt {
   id: string;
@@ -65,7 +66,7 @@ export const useProjectFunding = () => {
   const addReceipt = async (receipt: Omit<DonorReceipt, "id">) => {
     const newReceipt: DonorReceipt = {
       ...receipt,
-      id: Date.now().toString(),
+      id: getCurrentESTDate().getTime().toString(),
     };
     setDonorReceipts(prev => [...prev, newReceipt]);
     return newReceipt.id;
@@ -90,7 +91,7 @@ export const useProjectFunding = () => {
   const addPledge = async (pledge: Omit<DonorPledge, "id">) => {
     const newPledge: DonorPledge = {
       ...pledge,
-      id: Date.now().toString(),
+      id: getCurrentESTDate().getTime().toString(),
     };
     setDonorPledges(prev => [...prev, newPledge]);
     return newPledge.id;
@@ -130,7 +131,7 @@ export const useProjectFunding = () => {
       const fundIndex = currentFunds.findIndex((f: any) => f.id === item.sourceUndesignatedFundId);
       if (fundIndex !== -1) {
         currentFunds[fundIndex].balance += amount;
-        currentFunds[fundIndex].lastUpdated = new Date().toISOString();
+        currentFunds[fundIndex].lastUpdated = getCurrentESTTimestamp();
         localStorage.setItem('undesignated-funds', JSON.stringify(currentFunds));
       }
       

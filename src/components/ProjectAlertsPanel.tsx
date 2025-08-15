@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Bell, BellOff, Calendar, AlertTriangle, CheckCircle, X } from "lucide-react";
 import { ProjectAlert } from "@/hooks/useProjectAlerts";
 import { cn } from "@/lib/utils";
+import { formatDateForDisplay, toDateString } from "@/utils/dateUtils";
 
 interface ProjectAlertsPanelProps {
   alerts: ProjectAlert[];
@@ -46,11 +47,9 @@ export const ProjectAlertsPanel = ({
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    }).format(date);
+    // Convert to EST date string and format for display
+    const dateString = toDateString(date);
+    return formatDateForDisplay(dateString);
   };
 
   if (alerts.length === 0) {

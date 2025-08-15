@@ -3,6 +3,7 @@ import { Project, ProjectMilestone } from "@/types/project";
 import { BusinessDayCalculator } from "@/utils/businessDays";
 import { useProjectMilestones } from "@/hooks/useProjectMilestones";
 import { useProjectFunding } from "@/hooks/useProjectFunding";
+import { getCurrentESTDate, fromDateString, toESTDate } from "@/utils/dateUtils";
 
 export interface ProjectAlert {
   id: string;
@@ -35,13 +36,13 @@ export const useProjectAlerts = (projects: Project[]) => {
     if (!alertSettings.enableAlerts) return [];
 
     const newAlerts: ProjectAlert[] = [];
-    const today = new Date();
+    const today = getCurrentESTDate();
     today.setHours(0, 0, 0, 0); // Start of today for accurate comparison
 
     // 1. CHECK PROJECT DEADLINES (upcoming and overdue)
     projects.forEach(project => {
       if (project.endDate) {
-        const endDate = new Date(project.endDate);
+        const endDate = fromDateString(project.endDate);
         endDate.setHours(0, 0, 0, 0);
         const businessDaysUntil = BusinessDayCalculator.getBusinessDaysBetween(today, endDate);
         
@@ -58,7 +59,7 @@ export const useProjectAlerts = (projects: Project[]) => {
             businessDaysUntilDue: -overdueDays,
             priority: 'high',
             isRead: false,
-            createdAt: new Date(),
+            createdAt: getCurrentESTDate(),
             isOverdue: true
           });
         }
@@ -74,7 +75,7 @@ export const useProjectAlerts = (projects: Project[]) => {
             businessDaysUntilDue: businessDaysUntil,
             priority: businessDaysUntil <= 3 ? 'high' : businessDaysUntil <= 7 ? 'medium' : 'low',
             isRead: false,
-            createdAt: new Date()
+            createdAt: getCurrentESTDate()
           });
         }
       }
@@ -83,7 +84,7 @@ export const useProjectAlerts = (projects: Project[]) => {
     // 2. CHECK ALL MILESTONE DEADLINES (upcoming and overdue)
     milestones.forEach(milestone => {
       if (milestone.status !== 'Completed' && milestone.dueDate) {
-        const dueDate = new Date(milestone.dueDate);
+        const dueDate = fromDateString(milestone.dueDate);
         dueDate.setHours(0, 0, 0, 0);
         const businessDaysUntil = BusinessDayCalculator.getBusinessDaysBetween(today, dueDate);
         const project = projects.find(p => p.id === milestone.projectId);
@@ -102,7 +103,7 @@ export const useProjectAlerts = (projects: Project[]) => {
             businessDaysUntilDue: -overdueDays,
             priority: 'high',
             isRead: false,
-            createdAt: new Date(),
+            createdAt: getCurrentESTDate(),
             isOverdue: true
           });
         }
@@ -118,7 +119,7 @@ export const useProjectAlerts = (projects: Project[]) => {
             businessDaysUntilDue: businessDaysUntil,
             priority: businessDaysUntil <= 3 ? 'high' : businessDaysUntil <= 7 ? 'medium' : 'low',
             isRead: false,
-            createdAt: new Date()
+            createdAt: getCurrentESTDate()
           });
         }
       }
@@ -137,11 +138,11 @@ export const useProjectAlerts = (projects: Project[]) => {
           projectName: project.projectName,
           alertType: 'overdue',
           message: `⚠️ [${project.projectName}] Project status is ${project.status.toUpperCase()}`,
-          dueDate: project.endDate ? new Date(project.endDate) : new Date(),
+          dueDate: project.endDate ? fromDateString(project.endDate) : getCurrentESTDate(),
           businessDaysUntilDue: 0,
           priority: project.status === "Delayed" ? 'high' : 'medium',
           isRead: false,
-          createdAt: new Date(),
+          createdAt: getCurrentESTDate(),
           isOverdue: true
         });
       }

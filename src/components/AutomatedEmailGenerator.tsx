@@ -40,6 +40,9 @@ export const AutomatedEmailGenerator = ({
     } else if (milestoneType === "First Disbursement Sent" ||
                milestone.title.toLowerCase().includes("first disbursement")) {
       return "firstDisbursement";
+    } else if (milestoneType === "Second Disbursement Sent" ||
+               milestone.title.toLowerCase().includes("second disbursement")) {
+      return "secondDisbursement";
     } else if (milestoneType === "Interim Report & Receipts Submitted (following Installment #1)" ||
                milestone.title.toLowerCase().includes("interim report") ||
                milestone.title.toLowerCase().includes("receipts submitted")) {
@@ -182,6 +185,48 @@ ${senderPosition}
 ${senderOrganization}`;
 
       return { subject, emailBody };
+    
+    } else if (emailTemplate === "secondDisbursement") {
+      const disbursementAmount = milestone.disbursementAmount 
+        ? `${project.currency} $${milestone.disbursementAmount.toLocaleString()}`
+        : `${project.currency} $${Math.round((project.totalCost || 0) * 0.33).toLocaleString()} (estimated 33%)`;
+      
+      const disbursementDate = milestone.completedDate 
+        ? formatDateForDisplay(milestone.completedDate)
+        : formatDateForDisplay(milestone.dueDate);
+      
+      const subject = `Second Disbursement Sent – ${project.projectName}`;
+
+      const emailBody = `Dear ${officerName},
+
+This is to confirm that the second disbursement for the ${project.projectName} has been sent to ${partnerName}, in accordance with the ${governanceType} (Reference: ${governanceNumber}).
+
+Transaction Details:
+
+Amount Transferred: ${disbursementAmount}
+Date of Transfer: ${disbursementDate}
+
+Project Overview:
+
+Project Cost: ${projectCost}
+Start Date: ${formatDateForDisplay(project.startDate)}
+End Date: ${project.endDate ? formatDateForDisplay(project.endDate) : "To be determined"}
+
+For your reference, please find attached:
+
+The official wire sheet.
+The bank wire confirmation.
+
+Kindly proceed with any necessary donor communications to keep them informed of this milestone. Please let me know if you require additional details for your update.
+
+Thank you for ensuring our donor remains engaged and updated on the project's progress.
+
+Kind regards,
+${senderName}
+${senderPosition}
+${senderOrganization}`;
+
+      return { subject, emailBody };
     }
 
     // Generic template fallback
@@ -215,6 +260,7 @@ ${senderOrganization}`;
     switch (emailTemplate) {
       case "governance": return "Governance Document Reminder Email";
       case "firstDisbursement": return "First Disbursement Confirmation Email";
+      case "secondDisbursement": return "Internal Second Disbursement Confirmation Email";
       case "interimReport": return "Interim Report & Receipts Reminder Email";
       case "interimReportInternal": return "Internal Donor Engagement Advisory Email";
       default: return "Project Milestone Email";
@@ -263,7 +309,7 @@ ${senderOrganization}`;
                 </div>
                 <div>
                   <Label htmlFor="partnerName">
-                    {emailTemplate === "interimReportInternal" ? "Partner Name" : "Partner Name"}
+                    {(emailTemplate === "interimReportInternal" || emailTemplate === "secondDisbursement") ? "Partner Name" : "Partner Name"}
                   </Label>
                   <Input
                     id="partnerName"
@@ -272,7 +318,7 @@ ${senderOrganization}`;
                     placeholder="Enter partner organization name"
                   />
                 </div>
-                {emailTemplate === "interimReportInternal" && (
+                {(emailTemplate === "interimReportInternal" || emailTemplate === "secondDisbursement") && (
                   <div>
                     <Label htmlFor="officerName">Donor Engagement Officer Name</Label>
                     <Input

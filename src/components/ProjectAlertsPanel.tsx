@@ -86,6 +86,12 @@ export const ProjectAlertsPanel = ({
            milestone?.title.toLowerCase().includes("first disbursement");
   };
 
+  const isSecondDisbursementMilestone = (alert: ProjectAlert) => {
+    const milestone = milestones.find(m => m.id === alert.id.replace('milestone-', ''));
+    return milestone?.milestoneType === "Second Disbursement Sent" ||
+           milestone?.title.toLowerCase().includes("second disbursement");
+  };
+
   const isInterimReportMilestone = (alert: ProjectAlert) => {
     const milestone = milestones.find(m => m.id === alert.id.replace('milestone-', ''));
     return milestone?.milestoneType === "Interim Report & Receipts Submitted (following Installment #1)" ||
@@ -97,6 +103,7 @@ export const ProjectAlertsPanel = ({
     const milestone = milestones.find(m => m.id === alert.id.replace('milestone-', ''));
     return isGovernanceDocumentMilestone(alert) || 
            isFirstDisbursementMilestone(alert) || 
+           isSecondDisbursementMilestone(alert) ||
            (isInterimReportMilestone(alert) && (milestone?.status !== "Completed" || milestone?.status === "Completed"));
   };
 

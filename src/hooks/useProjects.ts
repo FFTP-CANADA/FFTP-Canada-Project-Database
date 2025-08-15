@@ -19,35 +19,37 @@ const saveProjects = async (projects: Project[]) => {
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>(() => {
     console.log("🚀 INITIALIZING PROJECTS HOOK");
-    console.log("🔍 DEBUGGING ALL STORAGE:");
     
-    // Check all possible storage locations
-    console.log("localStorage keys:", Object.keys(localStorage));
-    console.log("Raw localStorage projects:", localStorage.getItem('projects'));
+    // Check what's in localStorage with both keys
+    const rawProjects = localStorage.getItem('projects');
+    const ffttpProjects = localStorage.getItem('fftp_projects');
     
-    // Try different possible keys
-    const possibleKeys = ['projects', 'project-data', 'projectData', 'project-list'];
-    possibleKeys.forEach(key => {
-      const data = localStorage.getItem(key);
-      console.log(`Key "${key}":`, data ? JSON.parse(data).length : 'null');
-    });
+    console.log("📊 RAW projects in localStorage:", rawProjects ? JSON.parse(rawProjects).length : 0);
+    console.log("📊 FFTP projects in localStorage:", ffttpProjects ? JSON.parse(ffttpProjects).length : 0);
     
-    if (globalProjects.length > 0) {
-      console.log("Using cached global projects:", globalProjects.length);
-      console.log("Global project names:", globalProjects.map(p => p.projectName));
-      return globalProjects;
+    // Always load from LocalStorageManager which uses the prefixed key
+    const saved = LocalStorageManager.getItem('projects', []);
+    console.log("✅ Loading projects via LocalStorageManager:", saved.length);
+    
+    if (saved.length > 0) {
+      console.log("📋 Project names:", saved.map(p => p.projectName));
+      globalProjects = saved;
+      return saved;
     }
     
-    const saved = LocalStorageManager.getItem('projects', []);
-    console.log("Loading projects from localStorage:", saved.length);
-    console.log("Project names from localStorage:", saved.map(p => p.projectName));
+    // Fallback: try raw localStorage if LocalStorageManager returns empty
+    if (rawProjects) {
+      try {
+        const parsedRaw = JSON.parse(rawProjects);
+        console.log("🔄 Using raw localStorage fallback:", parsedRaw.length);
+        globalProjects = parsedRaw;
+        return parsedRaw;
+      } catch (e) {
+        console.error("❌ Failed to parse raw projects:", e);
+      }
+    }
     
-    // Force check what's actually in the localStorage right now
-    const rawData = localStorage.getItem('projects');
-    console.log("RAW localStorage data:", rawData);
-    
-    globalProjects = saved;
-    return saved;
+    return [];
   });
 
   useEffect(() => {

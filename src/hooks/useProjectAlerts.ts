@@ -18,15 +18,18 @@ export interface ProjectAlert {
   isOverdue?: boolean;
 }
 
-export const useProjectAlerts = (projects: Project[]) => {
+export const useProjectAlerts = (projects: Project[], providedMilestones?: ProjectMilestone[]) => {
   const [alerts, setAlerts] = useState<ProjectAlert[]>([]);
   const [alertSettings] = useState({
     warningDays: 10, // Alert 10 business days before
     enableAlerts: true,
     demoMode: false // Demo removed as requested
   });
-  const { milestones } = useProjectMilestones();
+  const { milestones: hookMilestones } = useProjectMilestones();
   const { donorPledges } = useProjectFunding();
+  
+  // Use provided milestones if available, otherwise use hook milestones
+  const milestones = providedMilestones || hookMilestones;
 
   /**
    * Generate alerts for all projects

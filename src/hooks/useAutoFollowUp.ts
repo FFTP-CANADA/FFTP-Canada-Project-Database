@@ -64,6 +64,58 @@ Kind regards,
 [SENDER ORGANIZATION]`;
   };
 
+  const generateFirstDisbursementEmail = (project: Project, milestone: ProjectMilestone): string => {
+    const disbursementAmount = milestone.disbursementAmount || 0;
+    const formattedDisbursementAmount = formatCurrency(disbursementAmount, project.currency);
+    const totalCost = project.totalCost || 0;
+    const formattedCost = formatCurrency(totalCost, project.currency);
+    
+    return `Subject: First Disbursement Sent – ${project.projectName}
+
+Dear ${project.partnerName || '[PARTNER NAME]'},
+
+This is to confirm that the first disbursement for the ${project.projectName} has been sent in accordance with the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}).
+
+Transaction Details:
+
+Amount Transferred: ${formattedDisbursementAmount}
+
+Date of Transfer: ${milestone.completedDate ? new Date(milestone.completedDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }) : '[DISBURSEMENT DATE]'}
+
+Project Overview:
+
+Project Cost: ${formattedCost}
+
+Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}
+
+End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }) : '[PROJECT END DATE]'}
+
+For your records, please find attached:
+
+The official wire sheet.
+
+The bank wire confirmation.
+
+Should you have any questions or require additional documentation, please feel free to reach out.
+
+Kind regards,
+[SENDER NAME]
+[SENDER POSITION]
+[SENDER ORGANIZATION]`;
+  };
+
   const generateFollowUpEmail = (
     project: Project,
     milestone: ProjectMilestone,
@@ -74,6 +126,11 @@ Kind regards,
     // Use special template for Governance Document Signed milestones
     if (milestone.milestoneType === "Governance Document Signed") {
       return generateGovernanceDocumentEmail(project, milestone);
+    }
+
+    // Use special template for First Disbursement Sent milestones
+    if (milestone.milestoneType === "First Disbursement Sent") {
+      return generateFirstDisbursementEmail(project, milestone);
     }
 
     const totalCostCAD = project.currency === 'USD' 

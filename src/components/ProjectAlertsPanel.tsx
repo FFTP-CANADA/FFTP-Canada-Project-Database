@@ -99,11 +99,26 @@ export const ProjectAlertsPanel = ({
            milestone?.title.toLowerCase().includes("receipts submitted");
   };
 
+  const isFinalDisbursementMilestone = (alert: ProjectAlert) => {
+    const milestone = milestones.find(m => m.id === alert.id.replace('milestone-', ''));
+    return milestone?.milestoneType === "Final Disbursement Sent" ||
+           milestone?.title.toLowerCase().includes("final disbursement");
+  };
+
+  const isFinalReportMilestone = (alert: ProjectAlert) => {
+    const milestone = milestones.find(m => m.id === alert.id.replace('milestone-', ''));
+    return milestone?.milestoneType === "Final Report and Receipts Submitted" ||
+           milestone?.title.toLowerCase().includes("final report") ||
+           milestone?.title.toLowerCase().includes("final receipts");
+  };
+
   const hasEmailTemplate = (alert: ProjectAlert) => {
     const milestone = milestones.find(m => m.id === alert.id.replace('milestone-', ''));
     return isGovernanceDocumentMilestone(alert) || 
            isFirstDisbursementMilestone(alert) || 
            isSecondDisbursementMilestone(alert) ||
+           isFinalDisbursementMilestone(alert) ||
+           isFinalReportMilestone(alert) ||
            (isInterimReportMilestone(alert) && (milestone?.status !== "Completed" || milestone?.status === "Completed"));
   };
 

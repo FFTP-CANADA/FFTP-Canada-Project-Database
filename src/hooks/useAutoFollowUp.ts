@@ -562,7 +562,7 @@ joannt@foodforthepoor.ca`;
                 milestoneDueDate: milestone.dueDate,
                 draftEmail,
                 generated: new Date().toISOString(),
-                priority: milestone.priority,
+                priority: "High", // All project alerts are High priority
                 trigger: "milestone"
               });
             }
@@ -591,7 +591,7 @@ joannt@foodforthepoor.ca`;
                 milestoneDueDate: milestone.dueDate,
                 draftEmail,
                 generated: new Date().toISOString(),
-                priority: milestone.priority,
+                priority: "High", // All project alerts are High priority
                 trigger: "milestone"
               });
             }
@@ -620,7 +620,7 @@ joannt@foodforthepoor.ca`;
                 milestoneDueDate: milestone.dueDate,
                 draftEmail,
                 generated: new Date().toISOString(),
-                priority: milestone.priority,
+                priority: "High", // All project alerts are High priority
                 trigger: "milestone"
               });
             }
@@ -649,7 +649,7 @@ joannt@foodforthepoor.ca`;
                 milestoneDueDate: milestone.dueDate,
                 draftEmail,
                 generated: new Date().toISOString(),
-                priority: milestone.priority,
+                priority: "High", // All project alerts are High priority
                 trigger: "milestone"
               });
             }
@@ -681,7 +681,7 @@ joannt@foodforthepoor.ca`;
                 milestoneDueDate: milestone.dueDate,
                 draftEmail,
                 generated: new Date().toISOString(),
-                priority: milestone.priority,
+                priority: "High", // All project alerts are High priority
                 trigger: "milestone"
               });
             }
@@ -724,7 +724,7 @@ joannt@foodforthepoor.ca`;
                 milestoneDueDate: upcomingMilestone.dueDate,
                 draftEmail,
                 generated: new Date().toISOString(),
-                priority: upcomingMilestone.priority,
+                priority: "High", // All project alerts are High priority
                 trigger: "note",
                 noteContent: note.content
               });

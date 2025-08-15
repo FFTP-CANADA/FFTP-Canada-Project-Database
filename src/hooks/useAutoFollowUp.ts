@@ -514,7 +514,7 @@ joannt@foodforthepoor.ca`;
     console.log("=== FOLLOW-UP GENERATION DEBUG ===");
     console.log("Total projects:", projects.length);
     console.log("Total milestones:", milestones.length);
-    console.log("Projects with followUpNeeded:", projects.filter(p => p.followUpNeeded).length);
+    console.log("All projects will be checked for milestones within 10 business days");
     
     const today = new Date();
     console.log("Today:", today.toISOString());
@@ -522,9 +522,8 @@ joannt@foodforthepoor.ca`;
     
     const newFollowUps: FollowUpEmail[] = [];
 
-    projects
-      .filter(project => project.followUpNeeded)
-      .forEach(project => {
+    // Check ALL projects, not just those with followUpNeeded flag
+    projects.forEach(project => {
         console.log(`\n--- Processing project: ${project.projectName} ---`);
         const projectMilestones = milestones.filter(m => m.projectId === project.id);
         const projectNotes = notes.filter(n => n.projectId === project.id);

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartGantt } from "lucide-react";
 import { Project, ProjectMilestone, FFTPMilestoneType } from "@/types/project";
+import { formatDateForDisplay, fromDateString, getCurrentESTDate } from "@/utils/dateUtils";
 
 interface ProjectGanttChartProps {
   project: Project;
@@ -46,15 +47,15 @@ const getMilestoneColor = (milestoneType: FFTPMilestoneType | undefined, status:
 const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
   console.log(`ProjectGanttChart: Rendering project ${project.projectName} with status: ${project.status}`);
   const chartData = useMemo(() => {
-    const projectStart = new Date(project.startDate);
-    const projectEnd = project.endDate ? new Date(project.endDate) : new Date();
+    const projectStart = fromDateString(project.startDate);
+    const projectEnd = project.endDate ? fromDateString(project.endDate) : getCurrentESTDate();
     
     // Calculate project duration in days
     const totalDays = Math.ceil((projectEnd.getTime() - projectStart.getTime()) / (1000 * 60 * 60 * 24));
     
     // Sort milestones by start date in ascending order
     const sortedMilestones = [...milestones].sort((a, b) => 
-      new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+      fromDateString(a.startDate).getTime() - fromDateString(b.startDate).getTime()
     );
     
     // Create timeline items with proper typing
@@ -81,14 +82,14 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
         sortOrder: 0
       },
       ...sortedMilestones.map((milestone, index) => {
-        const start = new Date(milestone.startDate);
+        const start = fromDateString(milestone.startDate);
         const end = milestone.completedDate 
-          ? new Date(milestone.completedDate)
-          : new Date(milestone.dueDate);
+          ? fromDateString(milestone.completedDate)
+          : fromDateString(milestone.dueDate);
         
         // For completed milestones, make them shorter (1-2 days max)
         if (milestone.status === "Completed" && milestone.completedDate) {
-          const completedDate = new Date(milestone.completedDate);
+          const completedDate = fromDateString(milestone.completedDate);
           const shortEnd = new Date(completedDate);
           shortEnd.setDate(completedDate.getDate() + 1); // 1 day duration for completed
           return {
@@ -157,7 +158,7 @@ const ProjectGanttChart = ({ project, milestones }: ProjectGanttChartProps) => {
   };
 
   // Calculate "today" line position
-  const todayPosition = calculatePosition(new Date());
+  const todayPosition = calculatePosition(getCurrentESTDate());
 
   return (
     <Card>

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Clock, FileText, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Project, ProjectMilestone, ProjectNote } from "@/types/project";
-import { formatDateForDisplay } from "@/utils/dateUtils";
+import { formatDateForDisplay, getCurrentESTDate, fromDateString } from "@/utils/dateUtils";
 
 interface NotificationsAlertProps {
   projects: Project[];
@@ -17,13 +17,13 @@ const NotificationsAlert = ({ projects, milestones, notes }: NotificationsAlertP
   const [isExpanded, setIsExpanded] = useState(true);
   const [dismissedNotifications, setDismissedNotifications] = useState<string[]>([]);
 
-  const today = new Date();
+  const today = getCurrentESTDate();
   const sevenDaysFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
   // Get upcoming milestones (next 7 days)
   const upcomingMilestones = milestones.filter(milestone => {
-    const milestoneDate = new Date(milestone.dueDate);
+    const milestoneDate = fromDateString(milestone.dueDate);
     return milestoneDate >= today && 
            milestoneDate <= sevenDaysFromNow && 
            milestone.status !== "Completed" &&
@@ -32,7 +32,7 @@ const NotificationsAlert = ({ projects, milestones, notes }: NotificationsAlertP
 
   // Get recent notes (today)
   const recentNotes = notes.filter(note => {
-    const noteDate = new Date(note.dateOfNote);
+    const noteDate = fromDateString(note.dateOfNote);
     return noteDate >= todayStart && 
            !dismissedNotifications.includes(`note-${note.id}`);
   });
@@ -49,7 +49,7 @@ const NotificationsAlert = ({ projects, milestones, notes }: NotificationsAlertP
   };
 
   const getDaysUntilDue = (dueDate: string) => {
-    const due = new Date(dueDate);
+    const due = fromDateString(dueDate);
     const diffTime = due.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;

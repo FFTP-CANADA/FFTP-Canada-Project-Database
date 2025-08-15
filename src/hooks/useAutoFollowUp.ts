@@ -1,6 +1,10 @@
 
-import { useState, useEffect } from "react";
-import { Project, ProjectMilestone, ProjectNote } from "@/types/project";
+import { useState, useEffect, useCallback } from "react";
+import { ProjectMilestone, Project, ProjectNote } from "@/types/project";
+import { LocalStorageManager } from "@/utils/localStorageManager";
+import { useProjects } from "./useProjects";
+import { getCurrentESTDate, getCurrentESTTimestamp, fromDateString, formatTimestampForDisplay } from "@/utils/dateUtils";
+import { formatInTimeZone } from 'date-fns-tz';
 import { formatCurrency, convertUsdToCad } from "@/utils/currencyUtils";
 
 export interface FollowUpEmail {
@@ -32,11 +36,7 @@ export const useAutoFollowUp = (
 
 Dear ${project.partnerName || '[PARTNER NAME]'},
 
-This is a courtesy reminder that the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}) for the ${project.projectName} was sent for your review and signature. The anticipated signing date is ${new Date(milestone.dueDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}.
+This is a courtesy reminder that the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}) for the ${project.projectName} was sent for your review and signature. The anticipated signing date is ${formatInTimeZone(fromDateString(milestone.dueDate), 'America/New_York', 'PPPP')}.
 
 As outlined, the timely signing of this document will allow us to proceed with the first disbursement in line with the agreed terms.
 
@@ -44,17 +44,9 @@ Project Overview:
 
 Project Cost: ${formattedCost}
 
-Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}
+Start Date: ${formatInTimeZone(fromDateString(project.startDate), 'America/New_York', 'PPPP')}
 
-End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }) : '[PROJECT END DATE]'}
+End Date: ${project.endDate ? formatInTimeZone(fromDateString(project.endDate), 'America/New_York', 'PPPP') : '[PROJECT END DATE]'}
 
 We appreciate your attention to this matter and look forward to receiving the signed document at your earliest convenience.
 
@@ -72,8 +64,8 @@ Kind regards,
     
     // Calculate interim report date (typically 30 days from disbursement)
     const interimReportDate = milestone.completedDate 
-      ? new Date(new Date(milestone.completedDate).getTime() + 30 * 24 * 60 * 60 * 1000)
-      : new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000);
+      ? new Date(fromDateString(milestone.completedDate).getTime() + 30 * 24 * 60 * 60 * 1000)
+      : new Date(getCurrentESTDate().getTime() + 30 * 24 * 60 * 60 * 1000);
     
     return `Subject: First Disbursement Sent – ${project.projectName}
 
@@ -85,27 +77,15 @@ Transaction Details:
 
 Amount Transferred: ${formattedDisbursementAmount}
 
-Date of Transfer: ${new Date(milestone.completedDate || milestone.dueDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}
+Date of Transfer: ${formatInTimeZone(milestone.completedDate ? fromDateString(milestone.completedDate) : fromDateString(milestone.dueDate), 'America/New_York', 'PPPP')}
 
 Project Overview:
 
 Project Cost: ${formattedCost}
 
-Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}
+Start Date: ${formatInTimeZone(fromDateString(project.startDate), 'America/New_York', 'PPPP')}
 
-End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }) : '[PROJECT END DATE]'}
+End Date: ${project.endDate ? formatInTimeZone(fromDateString(project.endDate), 'America/New_York', 'PPPP') : '[PROJECT END DATE]'}
 
 For your records, please find attached:
 
@@ -113,11 +93,7 @@ The official wire sheet.
 
 The bank wire confirmation.
 
-Kindly confirm receipt of this disbursement at your earliest convenience. We also look forward to receiving your Interim Report & Receipts by ${interimReportDate.toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}, as scheduled in the referenced ${project.governanceType || '[GOVERNANCE TYPE]'}.
+Kindly confirm receipt of this disbursement at your earliest convenience. We also look forward to receiving your Interim Report & Receipts by ${formatInTimeZone(interimReportDate, 'America/New_York', 'PPPP')}, as scheduled in the referenced ${project.governanceType || '[GOVERNANCE TYPE]'}.
 
 Should you have any questions or require additional documentation, please feel free to reach out.
 
@@ -135,11 +111,7 @@ joannt@foodforthepoor.ca`;
 
 Dear ${project.partnerName || '[PARTNER NAME]'},
 
-This is a friendly reminder that the Interim Report & Receipts for the ${project.projectName} are due by ${new Date(milestone.dueDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}, as outlined in the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}).
+This is a friendly reminder that the Interim Report & Receipts for the ${project.projectName} are due by ${formatInTimeZone(fromDateString(milestone.dueDate), 'America/New_York', 'PPPP')}, as outlined in the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}).
 
 The submission of this report, along with supporting receipts, is essential for us to review progress and proceed with the next scheduled disbursement in accordance with the agreement.
 
@@ -147,17 +119,9 @@ Project Overview:
 
 Project Cost: ${formattedCost}
 
-Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}
+Start Date: ${formatInTimeZone(fromDateString(project.startDate), 'America/New_York', 'PPPP')}
 
-End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }) : '[PROJECT END DATE]'}
+End Date: ${project.endDate ? formatInTimeZone(fromDateString(project.endDate), 'America/New_York', 'PPPP') : '[PROJECT END DATE]'}
 
 Thank you for your cooperation and continued partnership in ensuring the successful delivery of this project.
 
@@ -177,11 +141,7 @@ joannt@foodforthepoor.ca`;
 
 Dear ${project.partnerName || '[PARTNER NAME]'},
 
-This is a reminder that the Final Report & Receipts for the ${project.projectName} are due by ${new Date(milestone.dueDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}, as outlined in the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}).
+This is a reminder that the Final Report & Receipts for the ${project.projectName} are due by ${formatInTimeZone(fromDateString(milestone.dueDate), 'America/New_York', 'PPPP')}, as outlined in the ${project.governanceType || '[GOVERNANCE TYPE]'} (Reference: ${project.governanceNumber || '[GOVERNANCE NUMBER]'}).
 
 To date, a total of ${formattedDisbursed} has been disbursed under this project. This final submission is essential for confirming the completion of the project, ensuring full accountability in line with our agreement, and issuing the final disbursement where the need exists.
 
@@ -189,17 +149,9 @@ Project Overview:
 
 Project Cost: ${formattedCost}
 
-Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}
+Start Date: ${formatInTimeZone(fromDateString(project.startDate), 'America/New_York', 'PPPP')}
 
-End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }) : '[PROJECT END DATE]'}
+End Date: ${project.endDate ? formatInTimeZone(fromDateString(project.endDate), 'America/New_York', 'PPPP') : '[PROJECT END DATE]'}
 
 Thank you for your cooperation and dedication in bringing this project to completion. We look forward to receiving your final documentation so we can close our records.
 
@@ -217,11 +169,7 @@ joannt@foodforthepoor.ca`;
     );
     
     const secondDisbursementDate = secondDisbursementMilestone 
-      ? new Date(secondDisbursementMilestone.dueDate).toLocaleDateString('en-CA', { 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
-        })
+      ? formatInTimeZone(fromDateString(secondDisbursementMilestone.dueDate), 'America/New_York', 'PPPP')
       : '[SECOND DISBURSEMENT DATE]';
     
     return `Subject: Interim Report Received – ${project.projectName} (For Review & Donor Update)
@@ -253,11 +201,7 @@ Food For The Poor Canada`;
     );
     
     const finalDisbursementDate = finalDisbursementMilestone 
-      ? new Date(finalDisbursementMilestone.dueDate).toLocaleDateString('en-CA', { 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
-        })
+      ? formatInTimeZone(fromDateString(finalDisbursementMilestone.dueDate), 'America/New_York', 'PPPP')
       : '[FINAL DISBURSEMENT DATE]';
     
     return `Subject: Final Report Received – ${project.projectName} (For Review & Donor Update)
@@ -296,11 +240,7 @@ Transaction Details:
 
 Amount Transferred: ${formattedDisbursementAmount}
 
-Date of Transfer: ${new Date(milestone.completedDate || milestone.dueDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}
+Date of Transfer: ${formatInTimeZone(milestone.completedDate ? fromDateString(milestone.completedDate) : fromDateString(milestone.dueDate), 'America/New_York', 'PPPP')}
 
 Total Amount Disbursed to Date: ${formattedTotalDisbursed}
 
@@ -308,17 +248,9 @@ Project Overview:
 
 Project Cost: ${formattedCost}
 
-Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}
+Start Date: ${formatInTimeZone(fromDateString(project.startDate), 'America/New_York', 'PPPP')}
 
-End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }) : '[PROJECT END DATE]'}
+End Date: ${project.endDate ? formatInTimeZone(fromDateString(project.endDate), 'America/New_York', 'PPPP') : '[PROJECT END DATE]'}
 
 For your reference, please find attached:
 
@@ -350,27 +282,15 @@ Transaction Details:
 
 Amount Transferred: ${formattedDisbursementAmount}
 
-Date of Transfer: ${new Date(milestone.completedDate || milestone.dueDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}
+Date of Transfer: ${formatInTimeZone(milestone.completedDate ? fromDateString(milestone.completedDate) : fromDateString(milestone.dueDate), 'America/New_York', 'PPPP')}
 
 Project Overview:
 
 Project Cost: ${formattedCost}
 
-Start Date: ${new Date(project.startDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })}
+Start Date: ${formatInTimeZone(fromDateString(project.startDate), 'America/New_York', 'PPPP')}
 
-End Date: ${project.endDate ? new Date(project.endDate).toLocaleDateString('en-CA', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }) : '[PROJECT END DATE]'}
+End Date: ${project.endDate ? formatInTimeZone(fromDateString(project.endDate), 'America/New_York', 'PPPP') : '[PROJECT END DATE]'}
 
 For your reference, please find attached:
 
@@ -431,7 +351,7 @@ Food For The Poor Canada`;
 
     // Extract recent notes for context
     const recentNotes = projectNotes
-      .sort((a, b) => new Date(b.dateOfNote).getTime() - new Date(a.dateOfNote).getTime())
+      .sort((a, b) => fromDateString(b.dateOfNote).getTime() - fromDateString(a.dateOfNote).getTime())
       .slice(0, 3);
 
     const notesContext = recentNotes.length > 0 
@@ -443,7 +363,7 @@ Food For The Poor Canada`;
       : '';
 
     const triggerContext = trigger === "note" && triggerNote
-      ? `\n\nThis follow-up was triggered by a new project note added on ${new Date(triggerNote.dateOfNote).toLocaleDateString('en-CA')}:\n"${triggerNote.content}"\n\nPlease review this update and provide any necessary clarification or response.`
+      ? `\n\nThis follow-up was triggered by a new project note added on ${formatInTimeZone(fromDateString(triggerNote.dateOfNote), 'America/New_York', 'PPP')}:\n"${triggerNote.content}"\n\nPlease review this update and provide any necessary clarification or response.`
       : '';
 
     const subjectPrefix = trigger === "note" ? "Action Required - New Update:" : "Follow-up Required:";
@@ -468,11 +388,7 @@ FINANCIAL SUMMARY:
 
 ${trigger === "milestone" ? `UPCOMING MILESTONE:
 • Milestone: ${milestone.title}
-• Due Date: ${new Date(milestone.dueDate).toLocaleDateString('en-CA', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  })}
+• Due Date: ${formatInTimeZone(fromDateString(milestone.dueDate), 'America/New_York', 'PPPP')}
 • Priority: ${milestone.priority}${milestoneTypeContext}` : ''}${triggerContext}
 
 ACTION REQUIRED:
@@ -493,11 +409,7 @@ ${outstandingAmount > 0 ?
   ''
 }${notesContext}
 
-Please respond by ${new Date(new Date(milestone.dueDate).getTime() - 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-CA', { 
-  year: 'numeric', 
-  month: 'long', 
-  day: 'numeric' 
-})} to ensure we can process everything before the milestone deadline.
+Please respond by ${formatInTimeZone(new Date(fromDateString(milestone.dueDate).getTime() - 5 * 24 * 60 * 60 * 1000), 'America/New_York', 'PPPP')} to ensure we can process everything before the milestone deadline.
 
 If you have any questions or need assistance, please don't hesitate to reach out.
 
@@ -515,10 +427,10 @@ joannt@foodforthepoor.ca`;
     console.log("Total milestones:", milestones.length);
     console.log("Projects with followUpNeeded:", projects.filter(p => p.followUpNeeded).length);
     
-    const today = new Date();
+    const today = getCurrentESTDate();
     const tenDaysFromNow = new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000);
-    console.log("Today:", today.toISOString());
-    console.log("Ten days from now:", tenDaysFromNow.toISOString());
+    console.log("Today (EST):", today.toISOString());
+    console.log("Ten days from now (EST):", tenDaysFromNow.toISOString());
     
     const newFollowUps: FollowUpEmail[] = [];
 
@@ -533,7 +445,7 @@ joannt@foodforthepoor.ca`;
         
         // Check for milestone-based follow-ups
         projectMilestones.forEach(milestone => {
-          const milestoneDate = new Date(milestone.dueDate);
+          const milestoneDate = fromDateString(milestone.dueDate);
           console.log(`Checking milestone: ${milestone.title}, due: ${milestone.dueDate}, status: ${milestone.status}`);
           console.log(`Milestone date: ${milestoneDate.toISOString()}`);
           console.log(`Is milestone in range? ${milestoneDate >= today && milestoneDate <= tenDaysFromNow}`);
@@ -555,13 +467,13 @@ joannt@foodforthepoor.ca`;
               const draftEmail = generateInterimReportInternalEmail(project, milestone, milestones);
               
               newFollowUps.push({
-                id: `${project.id}-${milestone.id}-internal-${Date.now()}`,
+                id: `${project.id}-${milestone.id}-internal-${getCurrentESTDate().getTime()}`,
                 projectId: project.id,
                 projectName: project.projectName,
                 milestoneTitle: `Internal: ${milestone.title}`,
                 milestoneDueDate: milestone.dueDate,
                 draftEmail,
-                generated: new Date().toISOString(),
+                generated: getCurrentESTTimestamp(),
                 priority: milestone.priority,
                 trigger: "milestone"
               });
@@ -584,13 +496,13 @@ joannt@foodforthepoor.ca`;
               const draftEmail = generateSecondDisbursementInternalEmail(project, milestone);
               
               newFollowUps.push({
-                id: `${project.id}-${milestone.id}-second-disbursement-${Date.now()}`,
+                id: `${project.id}-${milestone.id}-second-disbursement-${getCurrentESTDate().getTime()}`,
                 projectId: project.id,
                 projectName: project.projectName,
                 milestoneTitle: `Internal: ${milestone.title}`,
                 milestoneDueDate: milestone.dueDate,
                 draftEmail,
-                generated: new Date().toISOString(),
+                generated: getCurrentESTTimestamp(),
                 priority: milestone.priority,
                 trigger: "milestone"
               });
@@ -613,13 +525,13 @@ joannt@foodforthepoor.ca`;
               const draftEmail = generateFinalReportInternalEmail(project, milestone, milestones);
               
               newFollowUps.push({
-                id: `${project.id}-${milestone.id}-final-report-${Date.now()}`,
+                id: `${project.id}-${milestone.id}-final-report-${getCurrentESTDate().getTime()}`,
                 projectId: project.id,
                 projectName: project.projectName,
                 milestoneTitle: `Internal: ${milestone.title}`,
                 milestoneDueDate: milestone.dueDate,
                 draftEmail,
-                generated: new Date().toISOString(),
+                generated: getCurrentESTTimestamp(),
                 priority: milestone.priority,
                 trigger: "milestone"
               });
@@ -642,13 +554,13 @@ joannt@foodforthepoor.ca`;
               const draftEmail = generateFinalDisbursementInternalEmail(project, milestone);
               
               newFollowUps.push({
-                id: `${project.id}-${milestone.id}-final-disbursement-${Date.now()}`,
+                id: `${project.id}-${milestone.id}-final-disbursement-${getCurrentESTDate().getTime()}`,
                 projectId: project.id,
                 projectName: project.projectName,
                 milestoneTitle: `Internal: ${milestone.title}`,
                 milestoneDueDate: milestone.dueDate,
                 draftEmail,
-                generated: new Date().toISOString(),
+                generated: getCurrentESTTimestamp(),
                 priority: milestone.priority,
                 trigger: "milestone"
               });
@@ -674,13 +586,13 @@ joannt@foodforthepoor.ca`;
               const draftEmail = generateFollowUpEmail(project, milestone, projectNotes, "milestone");
               
               newFollowUps.push({
-                id: `${project.id}-${milestone.id}-milestone-${Date.now()}`,
+                id: `${project.id}-${milestone.id}-milestone-${getCurrentESTDate().getTime()}`,
                 projectId: project.id,
                 projectName: project.projectName,
                 milestoneTitle: milestone.title,
                 milestoneDueDate: milestone.dueDate,
                 draftEmail,
-                generated: new Date().toISOString(),
+                generated: getCurrentESTTimestamp(),
                 priority: milestone.priority,
                 trigger: "milestone"
               });
@@ -691,7 +603,7 @@ joannt@foodforthepoor.ca`;
         // Check for note-based follow-ups (new notes added today)
         const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const recentNotes = projectNotes.filter(note => {
-          const noteDate = new Date(note.dateOfNote);
+          const noteDate = fromDateString(note.dateOfNote);
           return noteDate >= todayStart;
         });
 
@@ -700,8 +612,8 @@ joannt@foodforthepoor.ca`;
         recentNotes.forEach(note => {
           // Find the next upcoming milestone for this project
           const upcomingMilestone = projectMilestones
-            .filter(m => new Date(m.dueDate) >= today && m.status !== "Completed")
-            .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
+            .filter(m => fromDateString(m.dueDate) >= today && m.status !== "Completed")
+            .sort((a, b) => fromDateString(a.dueDate).getTime() - fromDateString(b.dueDate).getTime())[0];
 
           if (upcomingMilestone) {
             console.log(`Found upcoming milestone for note: ${upcomingMilestone.title}`);
@@ -717,13 +629,13 @@ joannt@foodforthepoor.ca`;
               const draftEmail = generateFollowUpEmail(project, upcomingMilestone, projectNotes, "note", note);
               
               newFollowUps.push({
-                id: `${project.id}-note-${note.id}-${Date.now()}`,
+                id: `${project.id}-note-${note.id}-${getCurrentESTDate().getTime()}`,
                 projectId: project.id,
                 projectName: project.projectName,
                 milestoneTitle: upcomingMilestone.title,
                 milestoneDueDate: upcomingMilestone.dueDate,
                 draftEmail,
-                generated: new Date().toISOString(),
+                generated: getCurrentESTTimestamp(),
                 priority: upcomingMilestone.priority,
                 trigger: "note",
                 noteContent: note.content

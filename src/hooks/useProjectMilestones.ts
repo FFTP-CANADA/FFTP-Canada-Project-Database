@@ -43,22 +43,40 @@ const saveMilestones = async (milestones: ProjectMilestone[]) => {
 
 export const useProjectMilestones = () => {
   const [milestones, setMilestones] = useState<ProjectMilestone[]>(() => {
-    // CRITICAL FIX: Check for milestone data migration
+    // CRITICAL FIX: Check for milestone data and validate against existing projects
     const rawMilestones = localStorage.getItem('project-milestones');
     const ffttpMilestones = localStorage.getItem('fftp_project-milestones');
     
     console.log("📊 RAW milestones:", rawMilestones ? JSON.parse(rawMilestones).length : 0);
     console.log("📊 FFTP milestones:", ffttpMilestones ? JSON.parse(ffttpMilestones).length : 0);
     
-    // Migrate milestones if needed
+    // Check what projects exist first
+    const rawProjects = localStorage.getItem('projects');
+    const ffttpProjects = localStorage.getItem('fftp_projects');
+    const existingProjects = rawProjects ? JSON.parse(rawProjects) : (ffttpProjects ? JSON.parse(ffttpProjects) : []);
+    const existingProjectIds = existingProjects.map(p => p.id);
+    
+    console.log("🔍 MILESTONE DEBUG: Existing project IDs:", existingProjectIds);
+    
+    // Migrate milestones if needed, but filter out orphaned ones
     if (rawMilestones && !ffttpMilestones) {
       try {
         const parsedRaw = JSON.parse(rawMilestones);
         console.log("🔄 MIGRATING milestones from raw to prefixed storage");
-        localStorage.setItem('fftp_project-milestones', rawMilestones);
-        globalMilestones = parsedRaw;
-        console.log("✅ Milestone migration complete:", parsedRaw.length);
-        return parsedRaw;
+        
+        // Filter out milestones for projects that don't exist
+        const validMilestones = parsedRaw.filter(m => {
+          const isValid = existingProjectIds.includes(m.projectId);
+          if (!isValid) {
+            console.log(`❌ REMOVING orphaned milestone: "${m.title}" for non-existent project ${m.projectId}`);
+          }
+          return isValid;
+        });
+        
+        console.log(`📊 Filtered milestones: ${parsedRaw.length} → ${validMilestones.length}`);
+        localStorage.setItem('fftp_project-milestones', JSON.stringify(validMilestones));
+        globalMilestones = validMilestones;
+        return validMilestones;
       } catch (e) {
         console.error("❌ Failed to migrate milestones:", e);
       }
@@ -71,10 +89,25 @@ export const useProjectMilestones = () => {
     
     const saved = LocalStorageManager.getItem('project-milestones', []);
     console.log("📊 Loading milestones from storage:", saved.length);
-    console.log("🎯 Milestone project IDs:", saved.map(m => m.projectId));
     
-    globalMilestones = saved;
-    return saved;
+    // Validate loaded milestones against existing projects
+    const validSaved = saved.filter(m => {
+      const isValid = existingProjectIds.includes(m.projectId);
+      if (!isValid) {
+        console.log(`❌ REMOVING orphaned milestone: "${m.title}" for non-existent project ${m.projectId}`);
+      }
+      return isValid;
+    });
+    
+    if (validSaved.length !== saved.length) {
+      console.log(`📊 Cleaned milestones: ${saved.length} → ${validSaved.length}`);
+      // Save the cleaned data back
+      LocalStorageManager.setItem('project-milestones', validSaved);
+    }
+    
+    console.log("🎯 Final milestone project IDs:", validSaved.map(m => m.projectId));
+    globalMilestones = validSaved;
+    return validSaved;
   });
 
   useEffect(() => {

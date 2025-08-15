@@ -28,16 +28,34 @@ export const AutomatedEmailGenerator = ({
   const [senderOrganization, setSenderOrganization] = useState("Food For The Poor Canada");
   const [partnerName, setPartnerName] = useState(project.partnerName || "[Partner Name]");
 
+  const getEmailTemplate = () => {
+    const milestoneType = milestone.milestoneType || milestone.title;
+    
+    if (milestoneType === "Governance Document Signed" || 
+        milestone.title.toLowerCase().includes("governance") ||
+        milestone.title.toLowerCase().includes("agreement") ||
+        milestone.title.toLowerCase().includes("lod")) {
+      return "governance";
+    } else if (milestoneType === "First Disbursement Sent" ||
+               milestone.title.toLowerCase().includes("first disbursement")) {
+      return "firstDisbursement";
+    }
+    return "generic";
+  };
+
   const generateEmailContent = () => {
     const governanceType = project.governanceType || "GOVERNANCE DOCUMENT";
     const governanceNumber = project.governanceNumber || "PENDING";
     const projectCost = project.totalCost 
       ? `${project.currency} $${project.totalCost.toLocaleString()}` 
       : "To be confirmed";
+    
+    const emailTemplate = getEmailTemplate();
+    
+    if (emailTemplate === "governance") {
+      const subject = `Reminder: ${governanceType} (${governanceNumber}) for ${project.projectName}`;
 
-    const subject = `Reminder: ${governanceType} (${governanceNumber}) for ${project.projectName}`;
-
-    const emailBody = `Dear ${partnerName},
+      const emailBody = `Dear ${partnerName},
 
 This is a courtesy reminder that the ${governanceType} (Reference: ${governanceNumber}) for the ${project.projectName} was sent for your review and signature. The anticipated signing date is ${formatDateForDisplay(milestone.dueDate)}.
 
@@ -59,10 +77,91 @@ ${senderName}
 ${senderPosition}
 ${senderOrganization}`;
 
+      return { subject, emailBody };
+    
+    } else if (emailTemplate === "firstDisbursement") {
+      const disbursementAmount = milestone.disbursementAmount 
+        ? `${project.currency} $${milestone.disbursementAmount.toLocaleString()}`
+        : `${project.currency} $${Math.round((project.totalCost || 0) * 0.33).toLocaleString()} (estimated 33%)`;
+      
+      const disbursementDate = milestone.completedDate 
+        ? formatDateForDisplay(milestone.completedDate)
+        : formatDateForDisplay(milestone.dueDate);
+      
+      // Calculate interim report date (typically 60 days after disbursement)
+      const interimReportDate = new Date(milestone.completedDate || milestone.dueDate);
+      interimReportDate.setDate(interimReportDate.getDate() + 60);
+      
+      const subject = `First Disbursement Sent – ${project.projectName}`;
+
+      const emailBody = `Dear ${partnerName},
+
+This is to confirm that the first disbursement for the ${project.projectName} has been sent in accordance with the ${governanceType} (Reference: ${governanceNumber}).
+
+Transaction Details:
+
+Amount Transferred: ${disbursementAmount}
+Date of Transfer: ${disbursementDate}
+
+Project Overview:
+
+Project Cost: ${projectCost}
+Start Date: ${formatDateForDisplay(project.startDate)}
+End Date: ${project.endDate ? formatDateForDisplay(project.endDate) : "To be determined"}
+Country: ${project.country || "Multiple locations"}
+Impact Area: ${project.impactArea}
+
+For your records, please find attached:
+
+• The official wire sheet.
+• The bank wire confirmation.
+
+Kindly confirm receipt of this disbursement at your earliest convenience. We also look forward to receiving your Interim Report & Receipts by ${formatDateForDisplay(interimReportDate.toISOString().split('T')[0])}, as scheduled in the ${governanceType} (Reference: ${governanceNumber}).
+
+Should you have any questions or require additional documentation, please feel free to reach out.
+
+Kind regards,
+${senderName}
+${senderPosition}
+${senderOrganization}`;
+
+      return { subject, emailBody };
+    }
+
+    // Generic template fallback
+    const subject = `Project Update: ${project.projectName} - ${milestone.title}`;
+    const emailBody = `Dear ${partnerName},
+
+This is regarding the ${project.projectName} milestone: ${milestone.title}.
+
+Due Date: ${formatDateForDisplay(milestone.dueDate)}
+
+Project Overview:
+
+Project Cost: ${projectCost}
+Start Date: ${formatDateForDisplay(project.startDate)}
+End Date: ${project.endDate ? formatDateForDisplay(project.endDate) : "To be determined"}
+
+Please contact us if you have any questions.
+
+Kind regards,
+${senderName}
+${senderPosition}
+${senderOrganization}`;
+
     return { subject, emailBody };
   };
 
   const { subject, emailBody } = generateEmailContent();
+  const emailTemplate = getEmailTemplate();
+  
+  const getDialogTitle = () => {
+    switch (emailTemplate) {
+      case "governance": return "Governance Document Reminder Email";
+      case "firstDisbursement": return "First Disbursement Confirmation Email";
+      default: return "Project Milestone Email";
+    }
+  };
 
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -83,7 +182,7 @@ ${senderOrganization}`;
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mail className="w-5 h-5 text-blue-600" />
-            Governance Document Reminder Email
+            {getDialogTitle()}
           </DialogTitle>
         </DialogHeader>
 
@@ -147,6 +246,9 @@ ${senderOrganization}`;
                 <div><strong>Country:</strong> {project.country || "Multiple locations"}</div>
                 <div><strong>Milestone:</strong> {milestone.title}</div>
                 <div><strong>Due Date:</strong> {formatDateForDisplay(milestone.dueDate)}</div>
+                {emailTemplate === "firstDisbursement" && milestone.disbursementAmount && (
+                  <div><strong>Disbursement Amount:</strong> {project.currency} ${milestone.disbursementAmount.toLocaleString()}</div>
+                )}
               </div>
             </CardContent>
           </Card>

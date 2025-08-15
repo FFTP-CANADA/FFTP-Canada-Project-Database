@@ -80,6 +80,16 @@ export const ProjectAlertsPanel = ({
            milestone?.title.toLowerCase().includes("lod");
   };
 
+  const isFirstDisbursementMilestone = (alert: ProjectAlert) => {
+    const milestone = milestones.find(m => m.id === alert.id.replace('milestone-', ''));
+    return milestone?.milestoneType === "First Disbursement Sent" ||
+           milestone?.title.toLowerCase().includes("first disbursement");
+  };
+
+  const hasEmailTemplate = (alert: ProjectAlert) => {
+    return isGovernanceDocumentMilestone(alert) || isFirstDisbursementMilestone(alert);
+  };
+
   if (alerts.length === 0) {
     return (
       <Card className={cn("border-green-200 bg-green-50", className)}>
@@ -203,13 +213,13 @@ export const ProjectAlertsPanel = ({
                       <Badge variant={alert.priority === 'high' ? "destructive" : alert.priority === 'medium' ? "secondary" : "outline"}>
                         {alert.priority.toUpperCase()}
                       </Badge>
-                      {alert.alertType === 'milestone' && isGovernanceDocumentMilestone(alert) && (
+                      {alert.alertType === 'milestone' && hasEmailTemplate(alert) && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleGenerateEmail(alert)}
                           className="text-xs text-blue-600 hover:bg-blue-50"
-                          title="Generate governance document reminder email"
+                          title="Generate automated milestone email"
                         >
                           <Mail className="w-3 h-3 mr-1" />
                           Email

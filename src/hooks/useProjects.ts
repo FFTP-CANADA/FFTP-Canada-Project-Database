@@ -19,13 +19,33 @@ const saveProjects = async (projects: Project[]) => {
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>(() => {
     console.log("🚀 INITIALIZING PROJECTS HOOK");
+    console.log("🔍 DEBUGGING ALL STORAGE:");
+    
+    // Check all possible storage locations
+    console.log("localStorage keys:", Object.keys(localStorage));
+    console.log("Raw localStorage projects:", localStorage.getItem('projects'));
+    
+    // Try different possible keys
+    const possibleKeys = ['projects', 'project-data', 'projectData', 'project-list'];
+    possibleKeys.forEach(key => {
+      const data = localStorage.getItem(key);
+      console.log(`Key "${key}":`, data ? JSON.parse(data).length : 'null');
+    });
+    
     if (globalProjects.length > 0) {
       console.log("Using cached global projects:", globalProjects.length);
+      console.log("Global project names:", globalProjects.map(p => p.projectName));
       return globalProjects;
     }
+    
     const saved = LocalStorageManager.getItem('projects', []);
     console.log("Loading projects from localStorage:", saved.length);
     console.log("Project names from localStorage:", saved.map(p => p.projectName));
+    
+    // Force check what's actually in the localStorage right now
+    const rawData = localStorage.getItem('projects');
+    console.log("RAW localStorage data:", rawData);
+    
     globalProjects = saved;
     return saved;
   });

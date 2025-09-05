@@ -288,7 +288,7 @@ const AnalyticsDashboard = ({ projects }: AnalyticsDashboardProps) => {
                 </tr>
               </thead>
               <tbody>
-                {['Food Security', 'Education', 'Housing & Community', 'Health', 'Economic Empowerment', 'Greatest Needs'].map((area) => {
+                {['Food Security', 'Education', 'Housing & Community', 'Health', 'Economic Empowerment', 'Emergency Response', 'Greatest Needs'].map((area) => {
                   const areaProjects = projects.filter(p => p.impactArea === area);
                   const undesignatedProjects = areaProjects.filter(p => p.fundType === 'Undesignated');
                   const areaFunds = undesignatedFunds.filter(f => f.impactArea === area);
@@ -305,6 +305,22 @@ const AnalyticsDashboard = ({ projects }: AnalyticsDashboardProps) => {
                     </tr>
                   );
                 })}
+                {(() => {
+                  const totalProjects = projects.length;
+                  const totalUndesignatedProjects = projects.filter(p => p.fundType === 'Undesignated').length;
+                  const grandTotalBalance = undesignatedFunds.reduce((sum, fund) => sum + getAvailableBalance(fund.id), 0);
+                  
+                  return (
+                    <tr className="border-t-2 border-blue-300 bg-blue-50 font-semibold">
+                      <td className="py-3 px-4 text-blue-900 font-bold">GRAND TOTAL</td>
+                      <td className="py-3 px-4 text-right text-blue-900 font-bold">{totalProjects}</td>
+                      <td className="py-3 px-4 text-right text-blue-900 font-bold">{totalUndesignatedProjects}</td>
+                      <td className="py-3 px-4 text-right text-blue-900 font-bold">
+                        ${grandTotalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  );
+                })()}
               </tbody>
             </table>
           </div>

@@ -366,6 +366,30 @@ const UndesignatedFundsManager = ({ projects }: UndesignatedFundsManagerProps) =
                 </TableRow>
               );
             })}
+            {undesignatedFunds.length > 0 && (
+              <TableRow className="border-t-2 font-bold bg-muted">
+                <TableCell className="font-bold">GRAND TOTAL</TableCell>
+                <TableCell className="font-bold">All Currencies</TableCell>
+                <TableCell className="font-bold">
+                  {(() => {
+                    const cadTotal = undesignatedFunds
+                      .filter(fund => fund.currency === 'CAD')
+                      .reduce((sum, fund) => sum + getAvailableBalance(fund.id), 0);
+                    const usdTotal = undesignatedFunds
+                      .filter(fund => fund.currency === 'USD')
+                      .reduce((sum, fund) => sum + getAvailableBalance(fund.id), 0);
+                    
+                    const parts = [];
+                    if (cadTotal > 0) parts.push(formatCurrency(cadTotal, 'CAD'));
+                    if (usdTotal > 0) parts.push(formatCurrency(usdTotal, 'USD'));
+                    
+                    return parts.join(' + ') || formatCurrency(0, 'CAD');
+                  })()}
+                </TableCell>
+                <TableCell className="font-bold">-</TableCell>
+                <TableCell className="font-bold">-</TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
 

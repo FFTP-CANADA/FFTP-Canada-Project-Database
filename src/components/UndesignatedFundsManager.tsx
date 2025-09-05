@@ -26,6 +26,7 @@ const IMPACT_AREAS = [
   "Housing & Community",
   "Health",
   "Economic Empowerment",
+  "Emergency Response",
   "Greatest Needs"
 ] as const;
 

@@ -34,6 +34,7 @@ import UndesignatedFundsManager from "@/components/UndesignatedFundsManager";
 import { DataRecoveryDialog } from "@/components/DataRecoveryDialog";
 import { CurrentDataViewer } from "@/components/CurrentDataViewer";
 import { QuickDataRestore } from "@/components/QuickDataRestore";
+import { DebugProjectsPanel } from "@/components/DebugProjectsPanel";
 
 const Index = () => {
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
@@ -440,19 +441,29 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {(() => {
-                  // Group projects by country
-                  const projectsByCountry = projects.reduce((acc, project) => {
-                    const country = project.country || "Unassigned";
-                    if (!acc[country]) {
-                      acc[country] = [];
-                    }
-                    acc[country].push(project);
-                    return acc;
-                  }, {} as Record<string, Project[]>);
+                 {(() => {
+                   // Group projects by country
+                   const projectsByCountry = projects.reduce((acc, project) => {
+                     const country = project.country || "Unassigned";
+                     if (!acc[country]) {
+                       acc[country] = [];
+                     }
+                     acc[country].push(project);
+                     return acc;
+                   }, {} as Record<string, Project[]>);
 
-                  // Sort countries and then sort projects within each country by governance number
-                  const sortedCountries = Object.keys(projectsByCountry).sort();
+                   // Debug logging
+                   console.log('🌍 Index Debug - Projects by Country:', {
+                     totalProjects: projects.length,
+                     projectsByCountry: Object.keys(projectsByCountry).map(country => ({
+                       country,
+                       count: projectsByCountry[country].length,
+                       projects: projectsByCountry[country].map(p => ({ name: p.projectName, id: p.id }))
+                     }))
+                   });
+
+                   // Sort countries and then sort projects within each country by governance number
+                   const sortedCountries = Object.keys(projectsByCountry).sort();
                   
                   return sortedCountries.map(country => {
                     // Sort projects within country by governance number
@@ -520,6 +531,7 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="backup" className="space-y-6">
+            <DebugProjectsPanel />
             <QuickDataRestore />
             <CurrentDataViewer />
             <div className="flex justify-center">

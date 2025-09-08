@@ -100,6 +100,18 @@ const ProjectsTable = ({
     return matchesSearch && matchesCountry && matchesStatus && matchesImpactArea && matchesProgram;
   });
 
+  // Debug logging
+  console.log('🔍 ProjectsTable Debug:', {
+    totalProjects: projects.length,
+    filteredProjects: filteredProjects.length,
+    searchTerm,
+    countryFilter,
+    statusFilter,
+    impactAreaFilter,
+    programFilter,
+    projectNames: projects.map(p => p.projectName)
+  });
+
   const handleSendFollowUp = (project: Project) => {
     toast({
       title: "Follow-up Email Sent",

@@ -32,6 +32,7 @@ import { useAutoFollowUp } from "@/hooks/useAutoFollowUp";
 import { useProjectFunding } from "@/hooks/useProjectFunding";
 import UndesignatedFundsManager from "@/components/UndesignatedFundsManager";
 import { DataRecoveryDialog } from "@/components/DataRecoveryDialog";
+import { CurrentDataViewer } from "@/components/CurrentDataViewer";
 
 const Index = () => {
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
@@ -518,6 +519,7 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="backup" className="space-y-6">
+            <CurrentDataViewer />
             <div className="flex justify-center">
               <BackupManagerComponent />
             </div>

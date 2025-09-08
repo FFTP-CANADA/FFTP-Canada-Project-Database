@@ -31,6 +31,7 @@ import { convertUsdToCad, formatWithExchange } from "@/utils/currencyUtils";
 import { useAutoFollowUp } from "@/hooks/useAutoFollowUp";
 import { useProjectFunding } from "@/hooks/useProjectFunding";
 import UndesignatedFundsManager from "@/components/UndesignatedFundsManager";
+import { DataRecoveryDialog } from "@/components/DataRecoveryDialog";
 
 const Index = () => {
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
@@ -246,7 +247,7 @@ const Index = () => {
               <p className="text-blue-600 mt-1">Project Tracker & Analytics Dashboard</p>
             </div>
             <div className="flex gap-3">
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => setShowProgramInfo(true)}
                 className="border-blue-300 text-blue-700 hover:bg-blue-50"
@@ -254,6 +255,7 @@ const Index = () => {
                 <Info className="w-4 h-4 mr-2" />
                 Program Info
               </Button>
+              <DataRecoveryDialog />
               <StatusReportDialog projects={projects} notes={notes} />
               <Button 
                 onClick={() => setIsAddProjectOpen(true)}

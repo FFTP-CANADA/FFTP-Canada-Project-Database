@@ -360,7 +360,16 @@ const ProjectsTable = ({
                       size="sm"
                       variant="outline"
                       className="border-purple-300 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1 h-7"
-                      onClick={() => onOpenAttachments?.(project.id, project.projectName)}
+                      onClick={() => {
+                        console.log('🚨 URGENT: Files button clicked!', { projectId: project.id, projectName: project.projectName });
+                        console.log('🚨 onOpenAttachments function:', onOpenAttachments);
+                        if (onOpenAttachments) {
+                          console.log('🚨 Calling onOpenAttachments...');
+                          onOpenAttachments(project.id, project.projectName);
+                        } else {
+                          console.log('🚨 ERROR: onOpenAttachments is undefined!');
+                        }
+                      }}
                     >
                       <Paperclip className="w-3 h-3 mr-1" />
                       Files

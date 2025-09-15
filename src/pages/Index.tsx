@@ -200,7 +200,11 @@ const Index = () => {
   };
 
   const handleOpenAttachments = (projectId: string, projectName: string) => {
+    console.log('🔥 URGENT DEBUG: handleOpenAttachments called!', { projectId, projectName });
+    console.log('🔥 Current attachmentsDialog state:', attachmentsDialog);
+    console.log('🔥 About to set dialog state...');
     setAttachmentsDialog({ open: true, projectId, projectName });
+    console.log('🔥 Dialog state should now be updated');
   };
 
   const handleOpenGallery = (projectId: string, projectName: string) => {

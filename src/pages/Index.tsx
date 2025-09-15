@@ -10,6 +10,7 @@ import DisbursementSchedule from "@/components/DisbursementSchedule";
 import ProjectDisbursementDialog from "@/components/ProjectDisbursementDialog";
 import AddProjectDialog from "@/components/AddProjectDialog";
 import ProjectAttachments from "@/components/ProjectAttachments";
+import { SafeProjectAttachments } from "@/components/SafeProjectAttachments";
 import ProjectGallery from "@/components/ProjectGallery";
 import ProjectEditDialog from "@/components/ProjectEditDialog";
 import ProgramManagementDialog from "@/components/ProgramManagementDialog";
@@ -566,12 +567,12 @@ const Index = () => {
         onDeleteProgram={deleteProgram}
       />
 
-      <ProjectAttachments
+      <SafeProjectAttachments
         projectId={attachmentsDialog.projectId}
         projectName={attachmentsDialog.projectName}
         open={attachmentsDialog.open}
         onOpenChange={(open) => setAttachmentsDialog(prev => ({ ...prev, open }))}
-        attachments={attachments.filter(a => a.projectId === attachmentsDialog.projectId)}
+        attachments={getAttachmentsForProject(attachmentsDialog.projectId)}
         onAddAttachment={addAttachment}
         onDeleteAttachment={deleteAttachment}
       />

@@ -103,11 +103,21 @@ const ProjectAttachments = ({
           };
           
           reader.onerror = () => {
-            console.error('FileReader error:', reader.error);
-            reject(new Error(`Failed to read ${file.name}`));
+            console.error('FileReader error for file:', file.name, reader.error);
+            reject(new Error(`Failed to read ${file.name}: ${reader.error || 'Unknown error'}`));
           };
           
-          reader.readAsDataURL(file);
+          reader.onabort = () => {
+            console.error('FileReader aborted for file:', file.name);
+            reject(new Error(`File reading was aborted for ${file.name}`));
+          };
+          
+          try {
+            reader.readAsDataURL(file);
+          } catch (error) {
+            console.error('Failed to start reading file:', file.name, error);
+            reject(new Error(`Failed to start reading ${file.name}`));
+          }
         });
 
         const attachment = {

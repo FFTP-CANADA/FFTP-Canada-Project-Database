@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { ProjectAttachment } from "@/types/project";
-import { LocalStorageManager } from "@/utils/localStorageManager";
 import { IndexedDBManager } from "@/utils/indexedDBManager";
 
 let globalAttachments: ProjectAttachment[] = [];
@@ -9,7 +8,13 @@ let attachmentListeners: Array<(attachments: ProjectAttachment[]) => void> = [];
 
 const notifyAttachmentListeners = (attachments: ProjectAttachment[]) => {
   globalAttachments = attachments;
-  attachmentListeners.forEach(listener => listener(attachments));
+  attachmentListeners.forEach(listener => {
+    try {
+      listener(attachments);
+    } catch (error) {
+      console.error('Error in attachment listener:', error);
+    }
+  });
 };
 
 const saveAttachments = async (attachments: ProjectAttachment[]) => {
@@ -18,6 +23,11 @@ const saveAttachments = async (attachments: ProjectAttachment[]) => {
     
     // Save all attachments individually to IndexedDB
     for (const attachment of attachments) {
+      if (!attachment || !attachment.id) {
+        console.warn('Skipping invalid attachment:', attachment);
+        continue;
+      }
+      
       const success = await IndexedDBManager.saveAttachment(attachment);
       if (!success) {
         throw new Error(`Failed to save ${attachment.fileName} to IndexedDB`);
@@ -33,9 +43,15 @@ const saveAttachments = async (attachments: ProjectAttachment[]) => {
   } catch (error) {
     console.error('❌ SAVE ERROR:', error);
     // Try to recover by reverting to previous state
-    const previousAttachments = await IndexedDBManager.getAllAttachments();
-    globalAttachments = previousAttachments;
-    notifyAttachmentListeners(previousAttachments);
+    try {
+      const previousAttachments = await IndexedDBManager.getAllAttachments();
+      globalAttachments = previousAttachments || [];
+      notifyAttachmentListeners(globalAttachments);
+    } catch (recoveryError) {
+      console.error('Failed to recover attachments:', recoveryError);
+      globalAttachments = [];
+      notifyAttachmentListeners([]);
+    }
     return false;
   }
 };
@@ -46,17 +62,30 @@ export const useProjectAttachments = () => {
   // Load attachments from IndexedDB on initialization
   useEffect(() => {
     const loadAttachments = async () => {
-      const saved = await IndexedDBManager.getAllAttachments();
-      console.log('INITIALIZING ATTACHMENTS FROM INDEXEDDB:', saved.length);
-      globalAttachments = saved;
-      setAttachments(saved);
+      try {
+        const saved = await IndexedDBManager.getAllAttachments();
+        console.log('INITIALIZING ATTACHMENTS FROM INDEXEDDB:', saved?.length || 0);
+        const validAttachments = Array.isArray(saved) ? saved.filter(a => a && a.id) : [];
+        globalAttachments = validAttachments;
+        setAttachments(validAttachments);
+      } catch (error) {
+        console.error('Failed to load attachments on init:', error);
+        globalAttachments = [];
+        setAttachments([]);
+      }
     };
     loadAttachments();
   }, []);
 
   useEffect(() => {
     const listener = (newAttachments: ProjectAttachment[]) => {
-      setAttachments(newAttachments);
+      try {
+        const validAttachments = Array.isArray(newAttachments) ? newAttachments : [];
+        setAttachments(validAttachments);
+      } catch (error) {
+        console.error('Error updating attachment state:', error);
+        setAttachments([]);
+      }
     };
     attachmentListeners.push(listener);
     
@@ -67,60 +96,88 @@ export const useProjectAttachments = () => {
 
   const addAttachment = useCallback(async (attachment: Omit<ProjectAttachment, "id">) => {
     console.log('=== HOOK: ADD ATTACHMENT ===');
-    console.log('A1. Received attachment:', {
-      projectId: attachment.projectId,
-      fileName: attachment.fileName,
-      hasFileUrl: !!attachment.fileUrl,
-      currentGlobalCount: globalAttachments.length
-    });
     
-    if (!attachment.projectId) {
-      console.log('A2. ERROR: No projectId');
-      throw new Error('ProjectId is required for attachment');
+    try {
+      if (!attachment || !attachment.projectId) {
+        throw new Error('Invalid attachment data: missing projectId');
+      }
+      
+      console.log('A1. Received attachment:', {
+        projectId: attachment.projectId,
+        fileName: attachment.fileName,
+        hasFileUrl: !!attachment.fileUrl,
+        currentGlobalCount: globalAttachments.length
+      });
+      
+      const newAttachment: ProjectAttachment = {
+        ...attachment,
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      };
+      
+      console.log('A3. Created new attachment with ID:', newAttachment.id);
+      
+      const updatedAttachments = [...globalAttachments, newAttachment];
+      console.log('A4. Updated array length:', updatedAttachments.length);
+      
+      const success = await saveAttachments(updatedAttachments);
+      console.log('A5. Save result:', success);
+      
+      if (!success) {
+        throw new Error('Failed to save attachment to storage');
+      }
+      
+      console.log('A7. Attachment successfully added');
+    } catch (error) {
+      console.error('ADD ATTACHMENT ERROR:', error);
+      throw error; // Re-throw to be caught by caller
     }
-    
-    const newAttachment: ProjectAttachment = {
-      ...attachment,
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    };
-    
-    console.log('A3. Created new attachment with ID:', newAttachment.id);
-    
-    const updatedAttachments = [...globalAttachments, newAttachment];
-    console.log('A4. Updated array length:', updatedAttachments.length);
-    
-    const success = await saveAttachments(updatedAttachments);
-    console.log('A5. Save result:', success);
-    
-    if (!success) {
-      console.log('A6. ERROR: Save failed');
-      throw new Error('Failed to save attachment to storage');
-    }
-    
-    console.log('A7. Attachment successfully added');
   }, []);
 
   const deleteAttachment = useCallback(async (id: string) => {
-    await IndexedDBManager.deleteAttachment(id);
-    const updatedAttachments = globalAttachments.filter(attachment => attachment.id !== id);
-    globalAttachments = updatedAttachments;
-    notifyAttachmentListeners(updatedAttachments);
+    try {
+      if (!id) {
+        throw new Error('Invalid attachment ID');
+      }
+      
+      await IndexedDBManager.deleteAttachment(id);
+      const updatedAttachments = globalAttachments.filter(attachment => attachment.id !== id);
+      globalAttachments = updatedAttachments;
+      notifyAttachmentListeners(updatedAttachments);
+    } catch (error) {
+      console.error('DELETE ATTACHMENT ERROR:', error);
+      throw error;
+    }
   }, []);
 
   const getAttachmentsForProject = useCallback((projectId: string) => {
-    // Use IndexedDB consistently - filter from global state
-    const projectAttachments = globalAttachments.filter(attachment => attachment.projectId === projectId);
-    console.log('GET ATTACHMENTS FOR PROJECT:', {
-      projectId,
-      totalInMemory: globalAttachments.length,
-      forThisProject: projectAttachments.length,
-      attachmentDetails: projectAttachments.map(a => ({ id: a.id, fileName: a.fileName }))
-    });
-    return projectAttachments;
+    try {
+      if (!projectId) {
+        console.warn('getAttachmentsForProject called with empty projectId');
+        return [];
+      }
+      
+      // Use IndexedDB consistently - filter from global state
+      const validAttachments = Array.isArray(globalAttachments) ? globalAttachments : [];
+      const projectAttachments = validAttachments.filter(attachment => 
+        attachment && attachment.projectId === projectId
+      );
+      
+      console.log('GET ATTACHMENTS FOR PROJECT:', {
+        projectId,
+        totalInMemory: validAttachments.length,
+        forThisProject: projectAttachments.length,
+        attachmentDetails: projectAttachments.map(a => ({ id: a?.id, fileName: a?.fileName }))
+      });
+      
+      return projectAttachments;
+    } catch (error) {
+      console.error('GET ATTACHMENTS ERROR:', error);
+      return [];
+    }
   }, []);
 
   return {
-    attachments,
+    attachments: Array.isArray(attachments) ? attachments : [],
     addAttachment,
     deleteAttachment,
     getAttachmentsForProject,

@@ -271,18 +271,29 @@ const ProjectAttachments = ({
             <h3 className="text-lg font-medium text-blue-900">Upload New Files</h3>
             <div className="border-2 border-dashed border-blue-200 rounded-lg p-6">
               <div className="flex items-center justify-center">
-                <label className="cursor-pointer flex flex-col items-center">
+                <div className="flex flex-col items-center">
                   <Upload className="w-12 h-12 text-blue-400 mb-4" />
                   <span className="text-lg text-blue-600 mb-2">Upload Documents</span>
-                  <span className="text-sm text-blue-500">PDF, DOC, XLS, TXT files supported (Max 20MB each)</span>
-                  <input
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e.target.files)}
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
-                  />
-                </label>
+                  <span className="text-sm text-blue-500 mb-4">PDF, DOC, XLS, TXT files supported (Max 20MB each)</span>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      console.log('🔘 Add Files button clicked');
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.multiple = true;
+                      input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv';
+                      input.onchange = (e) => {
+                        console.log('📁 Files selected:', (e.target as HTMLInputElement).files?.length);
+                        handleFileUpload((e.target as HTMLInputElement).files);
+                      };
+                      input.click();
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+                  >
+                    Choose Files
+                  </Button>
+                </div>
               </div>
             </div>
 

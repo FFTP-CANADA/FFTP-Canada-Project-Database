@@ -31,18 +31,29 @@ const ProjectAttachments = ({
   const { toast } = useToast();
 
   // Debug when dialog opens
-  console.log('ATTACHMENT DIALOG OPENED:', {
+  console.log('ATTACHMENT DIALOG RENDERED:', {
     projectId,
     projectName,
     attachmentsCount: attachments.length,
-    open
+    open,
+    uploadFilesCount: uploadFiles.length
   });
 
   const handleFileUpload = (files: FileList | null) => {
-    if (!files) return;
+    console.log('📁 handleFileUpload called with:', files);
+    if (!files) {
+      console.log('❌ No files provided to handleFileUpload');
+      return;
+    }
     
+    console.log('📁 Files count:', files.length);
     const fileArray = Array.from(files);
-    setUploadFiles(prev => [...prev, ...fileArray]);
+    console.log('📁 File array:', fileArray.map(f => ({ name: f.name, size: f.size })));
+    setUploadFiles(prev => {
+      const newFiles = [...prev, ...fileArray];
+      console.log('📁 Updated uploadFiles, new count:', newFiles.length);
+      return newFiles;
+    });
   };
 
   const removeUploadFile = (index: number) => {
@@ -277,17 +288,33 @@ const ProjectAttachments = ({
                   <span className="text-sm text-blue-500 mb-4">PDF, DOC, XLS, TXT files supported (Max 20MB each)</span>
                   <Button
                     type="button"
-                    onClick={() => {
-                      console.log('🔘 Add Files button clicked');
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.multiple = true;
-                      input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv';
-                      input.onchange = (e) => {
-                        console.log('📁 Files selected:', (e.target as HTMLInputElement).files?.length);
-                        handleFileUpload((e.target as HTMLInputElement).files);
-                      };
-                      input.click();
+                    onClick={(e) => {
+                      console.log('🔘 Add Files button clicked - event:', e);
+                      console.log('🔘 Button element:', e.currentTarget);
+                      try {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.multiple = true;
+                        input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv';
+                        console.log('🔘 Created file input:', input);
+                        
+                        input.onchange = (event) => {
+                          console.log('📁 File input change event:', event);
+                          const target = event.target as HTMLInputElement;
+                          console.log('📁 Files selected:', target.files?.length || 0);
+                          if (target.files && target.files.length > 0) {
+                            handleFileUpload(target.files);
+                          } else {
+                            console.log('❌ No files selected');
+                          }
+                        };
+                        
+                        console.log('🔘 About to click input');
+                        input.click();
+                        console.log('🔘 Input click completed');
+                      } catch (error) {
+                        console.error('❌ Error in button click handler:', error);
+                      }
                     }}
                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
                   >

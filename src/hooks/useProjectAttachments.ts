@@ -13,21 +13,29 @@ const notifyAttachmentListeners = (attachments: ProjectAttachment[]) => {
 };
 
 const saveAttachments = async (attachments: ProjectAttachment[]) => {
-  // Save all attachments individually to IndexedDB
   try {
+    console.log('💾 Saving attachments to IndexedDB:', attachments.length);
+    
+    // Save all attachments individually to IndexedDB
     for (const attachment of attachments) {
       const success = await IndexedDBManager.saveAttachment(attachment);
       if (!success) {
-        throw new Error(`Failed to save ${attachment.fileName}`);
+        throw new Error(`Failed to save ${attachment.fileName} to IndexedDB`);
       }
     }
     
     // Update global state and notify listeners
     globalAttachments = attachments;
     notifyAttachmentListeners(attachments);
+    
+    console.log('✅ All attachments saved successfully');
     return true;
   } catch (error) {
-    console.error('SAVE ERROR:', error);
+    console.error('❌ SAVE ERROR:', error);
+    // Try to recover by reverting to previous state
+    const previousAttachments = await IndexedDBManager.getAllAttachments();
+    globalAttachments = previousAttachments;
+    notifyAttachmentListeners(previousAttachments);
     return false;
   }
 };
@@ -100,14 +108,11 @@ export const useProjectAttachments = () => {
   }, []);
 
   const getAttachmentsForProject = useCallback((projectId: string) => {
-    // Always get fresh data from localStorage to ensure we have the latest
-    const freshAttachments = LocalStorageManager.getItem('project-attachments', []);
-    globalAttachments = freshAttachments; // Update global state
-    
-    const projectAttachments = freshAttachments.filter(attachment => attachment.projectId === projectId);
-    console.log('GET ATTACHMENTS (FRESH):', {
+    // Use IndexedDB consistently - filter from global state
+    const projectAttachments = globalAttachments.filter(attachment => attachment.projectId === projectId);
+    console.log('GET ATTACHMENTS FOR PROJECT:', {
       projectId,
-      totalInStorage: freshAttachments.length,
+      totalInMemory: globalAttachments.length,
       forThisProject: projectAttachments.length,
       attachmentDetails: projectAttachments.map(a => ({ id: a.id, fileName: a.fileName }))
     });

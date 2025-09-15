@@ -69,22 +69,46 @@ const ProjectAttachments = ({
     }
 
     try {
+      // Process files one by one to prevent memory overload
       for (const file of uploadFiles) {
         console.log('2. Processing file:', file.name, 'Size:', Math.round(file.size / 1024), 'KB');
         
-        // Much higher file size limit with IndexedDB (50MB)
-        if (file.size > 50 * 1024 * 1024) {
-          throw new Error(`File "${file.name}" is too large. Maximum size is 50MB.`);
+        // Reduced file size limit to prevent crashes (20MB)
+        if (file.size > 20 * 1024 * 1024) {
+          throw new Error(`File "${file.name}" is too large. Maximum size is 20MB to prevent system issues.`);
+        }
+
+        // Add memory check before processing large files
+        if (file.size > 5 * 1024 * 1024) { // 5MB+
+          console.log('⚠️ Processing large file, monitoring memory usage');
+          
+          // Force garbage collection if available (development)
+          if (window.gc) {
+            window.gc();
+          }
         }
         
         const base64Data = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
+          
+          reader.onload = () => {
+            try {
+              const result = reader.result as string;
+              console.log('3. File converted to base64, size:', Math.round(result.length / 1024), 'KB');
+              resolve(result);
+            } catch (error) {
+              console.error('Error processing file result:', error);
+              reject(new Error(`Failed to process ${file.name}`));
+            }
+          };
+          
+          reader.onerror = () => {
+            console.error('FileReader error:', reader.error);
+            reject(new Error(`Failed to read ${file.name}`));
+          };
+          
           reader.readAsDataURL(file);
         });
-
-        console.log('3. File converted to base64, estimated storage size:', Math.round(base64Data.length / 1024), 'KB');
 
         const attachment = {
           projectId,
@@ -101,24 +125,29 @@ const ProjectAttachments = ({
         });
         
         await onAddAttachment(attachment);
-        console.log('5. onAddAttachment completed');
+        console.log('5. onAddAttachment completed for:', file.name);
+        
+        // Small delay between files to prevent overwhelming the system
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       console.log('6. All files processed, clearing upload list');
       setUploadFiles([]);
       
-      console.log('7. Checking what attachments we have now:', attachments.length);
-      
       toast({
         title: "Upload Complete",
-        description: `${uploadFiles.length} file(s) uploaded`,
+        description: `${uploadFiles.length} file(s) uploaded successfully`,
       });
       
     } catch (error) {
       console.error('8. ERROR during upload:', error);
+      
+      // Clear upload files on error to prevent retry loops
+      setUploadFiles([]);
+      
       toast({
         title: "Upload Failed",
-        description: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        description: `Error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try with smaller files or refresh the page.`,
         variant: "destructive"
       });
     }
@@ -235,7 +264,7 @@ const ProjectAttachments = ({
                 <label className="cursor-pointer flex flex-col items-center">
                   <Upload className="w-12 h-12 text-blue-400 mb-4" />
                   <span className="text-lg text-blue-600 mb-2">Upload Documents</span>
-                  <span className="text-sm text-blue-500">PDF, DOC, XLS, TXT files supported (Max 50MB each)</span>
+                  <span className="text-sm text-blue-500">PDF, DOC, XLS, TXT files supported (Max 20MB each)</span>
                   <input
                     type="file"
                     multiple

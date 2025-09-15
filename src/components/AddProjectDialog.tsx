@@ -13,6 +13,7 @@ import { getCurrentESTTimestamp, toDateString, toESTDate } from "@/utils/dateUti
 import { cn } from "@/lib/utils";
 import { Project, PROGRAM_OPTIONS } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
+import { ProjectFilePreview } from "@/components/ProjectFilePreview";
 
 interface AddProjectDialogProps {
   open: boolean;
@@ -534,6 +535,13 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
               </div>
             </div>
           </div>
+
+          <ProjectFilePreview
+            attachments={attachments}
+            photos={photos}
+            onRemoveAttachment={(index) => removeFile(index, 'attachments')}
+            onRemovePhoto={(index) => removeFile(index, 'photos')}
+          />
 
           <div className="flex items-center space-x-2">
             <Checkbox

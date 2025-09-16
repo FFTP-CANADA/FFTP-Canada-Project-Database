@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Plus, BarChart3, Users, DollarSign, AlertCircle, Info, Target, TrendingUp, Calendar, CheckCircle } from "lucide-react";
+import ImpactDemographicsTab from "@/components/ImpactDemographicsTab";
 import ProjectsTable from "@/components/ProjectsTable";
 import { BackupManagerComponent } from "@/components/BackupManager";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
@@ -405,12 +406,18 @@ const Index = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="projects" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-[800px] bg-blue-50 border border-blue-200">
+          <TabsList className="grid w-full grid-cols-5 lg:w-[1000px] bg-blue-50 border border-blue-200">
             <TabsTrigger 
               value="projects" 
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               Projects
+            </TabsTrigger>
+            <TabsTrigger 
+              value="impact-demographics" 
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
+              Impact & Demographics
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
@@ -520,6 +527,10 @@ const Index = () => {
                 })()}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="impact-demographics" className="space-y-6">
+            <ImpactDemographicsTab projects={projects} />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">

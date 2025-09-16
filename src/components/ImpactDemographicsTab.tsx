@@ -1,0 +1,220 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Users, MapPin, Plus, Save, Edit, Trash2 } from "lucide-react";
+import { Project } from "@/types/project";
+import { ImpactDemographics } from "@/types/impactDemographics";
+import { LocalStorageManager } from "@/utils/localStorageManager";
+
+interface ImpactDemographicsTabProps {
+  projects: Project[];
+}
+
+const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
+  const [impactData, setImpactData] = useState<ImpactDemographics[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    region: "" as "Urban" | "Rural" | "",
+    directParticipants: 0,
+    indirectParticipants: 0,
+  });
+
+  // Load impact data from local storage
+  useEffect(() => {
+    const savedData = LocalStorageManager.getItem('impactDemographics', []);
+    setImpactData(savedData);
+  }, []);
+
+  // Save impact data to local storage
+  const saveImpactData = (data: ImpactDemographics[]) => {
+    LocalStorageManager.setItem('impactDemographics', data);
+    setImpactData(data);
+  };
+
+  // Create initial entries for projects that don't have impact data
+  useEffect(() => {
+    const existingProjectIds = impactData.map(item => item.projectId);
+    const newEntries: ImpactDemographics[] = [];
+
+    projects.forEach(project => {
+      if (!existingProjectIds.includes(project.id)) {
+        newEntries.push({
+          id: `impact-${project.id}`,
+          projectId: project.id,
+          projectName: project.projectName,
+          governanceNumber: project.governanceNumber || "N/A",
+          region: "Urban",
+          directParticipants: 0,
+          indirectParticipants: 0,
+        });
+      }
+    });
+
+    if (newEntries.length > 0) {
+      const updatedData = [...impactData, ...newEntries];
+      saveImpactData(updatedData);
+    }
+  }, [projects, impactData]);
+
+  const handleEdit = (item: ImpactDemographics) => {
+    setEditingId(item.id);
+    setFormData({
+      region: item.region,
+      directParticipants: item.directParticipants,
+      indirectParticipants: item.indirectParticipants,
+    });
+  };
+
+  const handleSave = (itemId: string) => {
+    const updatedData = impactData.map(item => 
+      item.id === itemId 
+        ? { 
+            ...item, 
+            region: formData.region as "Urban" | "Rural",
+            directParticipants: formData.directParticipants,
+            indirectParticipants: formData.indirectParticipants 
+          }
+        : item
+    );
+    saveImpactData(updatedData);
+    setEditingId(null);
+    setFormData({ region: "", directParticipants: 0, indirectParticipants: 0 });
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setFormData({ region: "", directParticipants: 0, indirectParticipants: 0 });
+  };
+
+  // Filter impact data to only show items for existing projects
+  const existingProjectIds = projects.map(p => p.id);
+  const validImpactData = impactData.filter(item => existingProjectIds.includes(item.projectId));
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 mb-6">
+        <Users className="w-6 h-6 text-blue-600" />
+        <h2 className="text-2xl font-bold text-blue-900">Impact & Demographics</h2>
+      </div>
+
+      <div className="grid gap-4">
+        {validImpactData.map((item) => (
+          <Card key={item.id} className="border-blue-200">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg text-blue-900 flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                {item.projectName}
+              </CardTitle>
+              <p className="text-sm text-blue-600">
+                Governance Number: {item.governanceNumber}
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {editingId === item.id ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor={`region-${item.id}`}>Region</Label>
+                      <Select
+                        value={formData.region}
+                        onValueChange={(value) => setFormData({ ...formData, region: value as "Urban" | "Rural" })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select region" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Urban">Urban</SelectItem>
+                          <SelectItem value="Rural">Rural</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor={`direct-${item.id}`}>Direct Participants</Label>
+                      <Input
+                        id={`direct-${item.id}`}
+                        type="number"
+                        min="0"
+                        value={formData.directParticipants}
+                        onChange={(e) => setFormData({ ...formData, directParticipants: parseInt(e.target.value) || 0 })}
+                        placeholder="Enter count"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor={`indirect-${item.id}`}>Indirect Participants</Label>
+                      <Input
+                        id={`indirect-${item.id}`}
+                        type="number"
+                        min="0"
+                        value={formData.indirectParticipants}
+                        onChange={(e) => setFormData({ ...formData, indirectParticipants: parseInt(e.target.value) || 0 })}
+                        placeholder="Enter count"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => handleSave(item.id)}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      Save
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={handleCancel}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-blue-700">Region:</span>
+                      <span className="text-blue-900">{item.region}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-medium text-blue-700">Direct Participants:</span>
+                      <span className="text-blue-900">{item.directParticipants.toLocaleString()}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-medium text-blue-700">Indirect Participants:</span>
+                      <span className="text-blue-900">{item.indirectParticipants.toLocaleString()}</span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    variant="outline"
+                    onClick={() => handleEdit(item)}
+                    className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Impact Data
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+        
+        {validImpactData.length === 0 && (
+          <Card className="border-blue-200">
+            <CardContent className="text-center py-8">
+              <Users className="w-12 h-12 text-blue-300 mx-auto mb-4" />
+              <p className="text-blue-600">No projects available for impact tracking.</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ImpactDemographicsTab;

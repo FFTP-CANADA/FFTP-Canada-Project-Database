@@ -5,6 +5,7 @@ export interface Project {
   id: string;
   projectName: string;
   country?: "Jamaica" | "Guyana" | "Haiti" | "Honduras" | "Canada";
+  cityParish?: string;
   partnerName?: string;
   impactArea: "Food Security" | "Education" | "Housing & Community" | "Health" | "Economic Empowerment" | "Greatest Needs";
   fundType: "Designated" | "Undesignated";
@@ -16,6 +17,7 @@ export interface Project {
   startDate: string;
   endDate?: string;
   status: "On-Track" | "Delayed" | "Pending Start" | "Completed" | "Cancelled" | "Needs Attention";
+  activeStatus: "Active" | "Closed";
   followUpNeeded: boolean;
   program?: string;
   governanceType?: GovernanceType;

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Upload, X } from "lucide-react";
+import { CalendarIcon, Upload, X, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { getCurrentESTTimestamp, toDateString, toESTDate } from "@/utils/dateUtils";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
   const [formData, setFormData] = useState({
     projectName: "",
     country: "",
+    cityParish: "",
     partnerName: "",
     impactArea: "",
     fundType: "",
@@ -37,14 +38,33 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
     startDate: undefined as Date | undefined,
     endDate: undefined as Date | undefined,
     status: "",
+    activeStatus: "Active",
     followUpNeeded: false,
     program: "",
     governanceType: "",
     governanceNumber: "",
   });
 
+  const [showNewPartnerDialog, setShowNewPartnerDialog] = useState(false);
+  const [newPartnerName, setNewPartnerName] = useState("");
+  const [savedPartners, setSavedPartners] = useState<string[]>(() => {
+    const saved = localStorage.getItem('partnerNames');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [attachments, setAttachments] = useState<File[]>([]);
   const [photos, setPhotos] = useState<File[]>([]);
+
+  const addNewPartner = () => {
+    if (newPartnerName.trim()) {
+      const updatedPartners = [...savedPartners, newPartnerName.trim()];
+      setSavedPartners(updatedPartners);
+      localStorage.setItem('partnerNames', JSON.stringify(updatedPartners));
+      setFormData(prev => ({ ...prev, partnerName: newPartnerName.trim() }));
+      setNewPartnerName("");
+      setShowNewPartnerDialog(false);
+    }
+  };
 
   const { toast } = useToast();
 
@@ -88,6 +108,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
     const project: Omit<Project, "id"> = {
       projectName: formData.projectName,
       country: formData.country ? formData.country as Project["country"] : undefined,
+      cityParish: formData.cityParish || undefined,
       partnerName: formData.partnerName || undefined,
       impactArea: formData.impactArea as Project["impactArea"],
       fundType: formData.fundType as Project["fundType"],
@@ -99,6 +120,7 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
       startDate: formData.startDate ? toDateString(toESTDate(formData.startDate)) : "",
       endDate: formData.endDate ? toDateString(toESTDate(formData.endDate)) : undefined,
       status: formData.status as Project["status"],
+      activeStatus: formData.activeStatus as Project["activeStatus"],
       followUpNeeded: formData.followUpNeeded,
       program: formData.program || undefined,
       governanceType: formData.governanceType as Project["governanceType"],
@@ -169,17 +191,18 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
       setFormData({
         projectName: "",
         country: "",
+        cityParish: "",
         partnerName: "",
         impactArea: "",
         fundType: "",
         isDesignated: false,
         currency: "",
         totalCost: "",
-        
         reportedSpend: "",
         startDate: undefined,
         endDate: undefined,
         status: "",
+        activeStatus: "Active",
         followUpNeeded: false,
         program: "",
         governanceType: "",
@@ -293,14 +316,51 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="partnerName" className="text-blue-900">Partner Name</Label>
+              <Label htmlFor="cityParish" className="text-blue-900">City/Parish</Label>
               <Input
-                id="partnerName"
-                value={formData.partnerName}
-                onChange={(e) => setFormData(prev => ({ ...prev, partnerName: e.target.value }))}
+                id="cityParish"
+                value={formData.cityParish}
+                onChange={(e) => setFormData(prev => ({ ...prev, cityParish: e.target.value }))}
                 className="border-blue-200 focus:border-blue-400"
-                placeholder="Enter partner name (optional)"
+                placeholder="Enter city or parish (optional)"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="partnerName" className="text-blue-900">Partner Name</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="partnerName"
+                  value={formData.partnerName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, partnerName: e.target.value }))}
+                  className="border-blue-200 focus:border-blue-400 flex-1"
+                  placeholder="Enter partner name (optional)"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowNewPartnerDialog(true)}
+                  className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              {savedPartners.length > 0 && (
+                <Select 
+                  value={formData.partnerName}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, partnerName: value }))}
+                >
+                  <SelectTrigger className="border-blue-200 focus:border-blue-400">
+                    <SelectValue placeholder="Or select from saved partners" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {savedPartners.map(partner => (
+                      <SelectItem key={partner} value={partner}>{partner}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -454,6 +514,22 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="activeStatus" className="text-blue-900">Active Status *</Label>
+              <Select 
+                value={formData.activeStatus} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, activeStatus: value }))}
+              >
+                <SelectTrigger className="border-blue-200 focus:border-blue-400">
+                  <SelectValue placeholder="Select active status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* File Upload Sections */}
@@ -570,6 +646,49 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
             </Button>
           </DialogFooter>
         </form>
+
+        {/* New Partner Dialog */}
+        <Dialog open={showNewPartnerDialog} onOpenChange={setShowNewPartnerDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Partner</DialogTitle>
+              <DialogDescription>
+                Enter the name of a new partner to add to your saved list.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPartnerName">Partner Name</Label>
+                <Input
+                  id="newPartnerName"
+                  value={newPartnerName}
+                  onChange={(e) => setNewPartnerName(e.target.value)}
+                  placeholder="Enter partner name"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      addNewPartner();
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowNewPartnerDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={addNewPartner}
+                disabled={!newPartnerName.trim()}
+              >
+                Add Partner
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );

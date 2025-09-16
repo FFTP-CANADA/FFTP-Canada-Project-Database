@@ -510,7 +510,6 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
                   <SelectItem value="Pending Start">Pending Start</SelectItem>
                   <SelectItem value="Completed">Completed</SelectItem>
                   <SelectItem value="Cancelled">Cancelled</SelectItem>
-                  <SelectItem value="Needs Attention">Needs Attention</SelectItem>
                 </SelectContent>
               </Select>
             </div>

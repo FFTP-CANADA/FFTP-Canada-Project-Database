@@ -10,7 +10,6 @@ import DisbursementSchedule from "@/components/DisbursementSchedule";
 import ProjectDisbursementDialog from "@/components/ProjectDisbursementDialog";
 import AddProjectDialog from "@/components/AddProjectDialog";
 import ProjectAttachments from "@/components/ProjectAttachments";
-import { SafeProjectAttachments } from "@/components/SafeProjectAttachments";
 import ProjectGallery from "@/components/ProjectGallery";
 import ProjectEditDialog from "@/components/ProjectEditDialog";
 import ProgramManagementDialog from "@/components/ProgramManagementDialog";

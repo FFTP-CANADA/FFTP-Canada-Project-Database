@@ -43,8 +43,8 @@ const ProjectAttachments = ({
   const handleSaveAttachments = async () => {
     if (!projectId || uploadFiles.length === 0) {
       toast({
-        title: "Error",
-        description: "No project selected or no files to upload",
+        title: "Error", 
+        description: "No files selected",
         variant: "destructive"
       });
       return;
@@ -52,22 +52,14 @@ const ProjectAttachments = ({
 
     try {
       for (const file of uploadFiles) {
-        // File size limit (20MB)
-        if (file.size > 20 * 1024 * 1024) {
-          throw new Error(`File "${file.name}" is too large. Maximum size is 20MB.`);
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          throw new Error(`File "${file.name}" is too large. Maximum size is 10MB.`);
         }
         
         const base64Data = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
-          
-          reader.onload = () => {
-            resolve(reader.result as string);
-          };
-          
-          reader.onerror = () => {
-            reject(new Error(`Failed to read ${file.name}`));
-          };
-          
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error(`Failed to read ${file.name}`));
           reader.readAsDataURL(file);
         });
 
@@ -84,18 +76,16 @@ const ProjectAttachments = ({
       }
 
       setUploadFiles([]);
-      
       toast({
-        title: "Upload Complete",
+        title: "Success",
         description: `${uploadFiles.length} file(s) uploaded successfully`,
       });
       
     } catch (error) {
       setUploadFiles([]);
-      
       toast({
         title: "Upload Failed",
-        description: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        description: error instanceof Error ? error.message : 'Unknown error',
         variant: "destructive"
       });
     }
@@ -119,44 +109,32 @@ const ProjectAttachments = ({
 
   const handleDownload = (attachment: ProjectAttachment) => {
     try {
-      if (!attachment.fileUrl || !attachment.fileUrl.startsWith('data:')) {
+      if (!attachment.fileUrl?.startsWith('data:')) {
         throw new Error('Invalid file format');
       }
 
-      const parts = attachment.fileUrl.split(',');
-      if (parts.length !== 2) {
-        throw new Error('Invalid data URL structure');
-      }
-
-      const base64Data = parts[1];
+      const [, base64Data] = attachment.fileUrl.split(',');
       const byteCharacters = atob(base64Data);
-      const byteNumbers = new Array(byteCharacters.length);
+      const byteArray = new Uint8Array(byteCharacters.length);
       
       for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
+        byteArray[i] = byteCharacters.charCodeAt(i);
       }
       
-      const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], { type: attachment.fileType });
-      
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = attachment.fileName;
-      link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      toast({
-        title: "Download Started",
-        description: `Downloading ${attachment.fileName}`,
-      });
     } catch (error) {
       toast({
         title: "Download Failed", 
-        description: `Unable to download ${attachment.fileName}`,
+        description: "Unable to download file",
         variant: "destructive"
       });
     }
@@ -166,22 +144,22 @@ const ProjectAttachments = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-blue-900">Project Files</DialogTitle>
-          <DialogDescription className="text-blue-600">
-            Manage documents and files for: {projectName}
+          <DialogTitle>Project Files</DialogTitle>
+          <DialogDescription>
+            Manage files for: {projectName}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Upload Section - EXACT same pattern as Photos */}
+          {/* Upload Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-blue-900">Upload New Files</h3>
-            <div className="border-2 border-dashed border-blue-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium">Upload New Files</h3>
+            <div className="border-2 border-dashed border-gray-200 rounded-lg p-6">
               <div className="flex items-center justify-center">
                 <label className="cursor-pointer flex flex-col items-center">
-                  <Upload className="w-12 h-12 text-blue-400 mb-4" />
-                  <span className="text-lg text-blue-600 mb-2">Upload Files</span>
-                  <span className="text-sm text-blue-500">PDF, DOC, XLS, TXT files supported (Max 20MB each)</span>
+                  <Upload className="w-12 h-12 text-gray-400 mb-4" />
+                  <span className="text-lg mb-2">Upload Files</span>
+                  <span className="text-sm text-gray-500">PDF, DOC, XLS, TXT files (Max 10MB)</span>
                   <input
                     type="file"
                     multiple
@@ -195,30 +173,28 @@ const ProjectAttachments = ({
 
             {uploadFiles.length > 0 && (
               <div className="space-y-4">
-                <h4 className="font-medium text-blue-900">Files to Upload</h4>
-                <div className="grid gap-3">
-                  {uploadFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between bg-blue-50 p-3 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{getFileIcon(file.type)}</span>
-                        <div>
-                          <p className="font-medium text-blue-900">{file.name}</p>
-                          <p className="text-sm text-blue-600">{formatFileSize(file.size)}</p>
-                        </div>
+                <h4 className="font-medium">Files to Upload</h4>
+                {uploadFiles.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{getFileIcon(file.type)}</span>
+                      <div>
+                        <p className="font-medium">{file.name}</p>
+                        <p className="text-sm text-gray-600">{formatFileSize(file.size)}</p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeUploadFile(index)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
                     </div>
-                  ))}
-                </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeUploadFile(index)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
                 <Button 
                   onClick={handleSaveAttachments}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  className="w-full"
                 >
                   Save {uploadFiles.length} File(s)
                 </Button>
@@ -228,22 +204,21 @@ const ProjectAttachments = ({
 
           {/* Existing Files */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-blue-900">Existing Files ({attachments.length})</h3>
+            <h3 className="text-lg font-medium">Existing Files ({attachments.length})</h3>
             {attachments.length === 0 ? (
-              <div className="text-center py-12 text-blue-500">
-                <File className="w-16 h-16 mx-auto mb-4 text-blue-300" />
+              <div className="text-center py-12 text-gray-500">
+                <File className="w-16 h-16 mx-auto mb-4 text-gray-300" />
                 <p>No files uploaded yet</p>
-                <p className="text-sm">Upload some files to manage your project documents</p>
               </div>
             ) : (
               <div className="grid gap-3">
                 {attachments.map((attachment) => (
-                  <div key={attachment.id} className="flex items-center justify-between bg-white border border-blue-200 p-4 rounded-lg">
+                  <div key={attachment.id} className="flex items-center justify-between bg-white border p-4 rounded-lg">
                     <div className="flex items-center gap-4">
                       <span className="text-3xl">{getFileIcon(attachment.fileType)}</span>
                       <div>
-                        <p className="font-medium text-blue-900">{attachment.fileName}</p>
-                        <div className="flex gap-4 text-sm text-blue-600">
+                        <p className="font-medium">{attachment.fileName}</p>
+                        <div className="flex gap-4 text-sm text-gray-600">
                           <span>{formatFileSize(attachment.fileSize)}</span>
                           <span>Uploaded: {formatDateForDisplay(attachment.uploadDate)}</span>
                         </div>
@@ -253,7 +228,6 @@ const ProjectAttachments = ({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-blue-300 text-blue-600 hover:bg-blue-50"
                         onClick={() => handleDownload(attachment)}
                       >
                         <Download className="w-4 h-4 mr-1" />
@@ -261,11 +235,7 @@ const ProjectAttachments = ({
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-red-300 text-red-600 hover:bg-red-50"
-                          >
+                          <Button variant="outline" size="sm">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
@@ -273,14 +243,12 @@ const ProjectAttachments = ({
                           <AlertDialogHeader>
                             <AlertDialogTitle>Delete File</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to delete "{attachment.fileName}"? 
-                              This action cannot be undone.
+                              Are you sure you want to delete "{attachment.fileName}"?
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
-                              className="bg-red-600 hover:bg-red-700"
                               onClick={() => {
                                 onDeleteAttachment(attachment.id);
                                 toast({
@@ -289,7 +257,7 @@ const ProjectAttachments = ({
                                 });
                               }}
                             >
-                              Delete File
+                              Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

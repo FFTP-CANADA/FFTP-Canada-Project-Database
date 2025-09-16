@@ -200,11 +200,15 @@ const Index = () => {
   };
 
   const handleOpenAttachments = (projectId: string, projectName: string) => {
-    console.log('🔥 URGENT DEBUG: handleOpenAttachments called!', { projectId, projectName });
+    console.log('🔥 handleOpenAttachments called with:', { projectId, projectName });
     console.log('🔥 Current attachmentsDialog state:', attachmentsDialog);
-    console.log('🔥 About to set dialog state...');
+    console.log('🔥 Setting dialog to open...');
     setAttachmentsDialog({ open: true, projectId, projectName });
-    console.log('🔥 Dialog state should now be updated');
+    console.log('🔥 Dialog state updated');
+    // Force a re-render check
+    setTimeout(() => {
+      console.log('🔥 Dialog state after timeout:', attachmentsDialog);
+    }, 100);
   };
 
   const handleOpenGallery = (projectId: string, projectName: string) => {

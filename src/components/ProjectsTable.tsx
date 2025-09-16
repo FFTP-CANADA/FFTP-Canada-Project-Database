@@ -359,23 +359,21 @@ const ProjectsTable = ({
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-purple-300 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1 h-7 relative z-50"
+                      className="border-purple-300 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1 h-7"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        alert('FILES BUTTON CLICKED!');
-                        console.log('🚨 FILES BUTTON CLICKED - IMMEDIATE DEBUG');
+                        console.log('🚨 FILES BUTTON CLICKED!');
                         console.log('onOpenAttachments function:', onOpenAttachments);
-                        console.log('project.id:', project.id);
-                        console.log('project.projectName:', project.projectName);
-                        try {
-                          onOpenAttachments?.(project.id, project.projectName);
-                          console.log('✅ onOpenAttachments called successfully');
-                        } catch (error) {
-                          console.error('❌ Error calling onOpenAttachments:', error);
+                        console.log('project details:', { id: project.id, name: project.projectName });
+                        if (onOpenAttachments) {
+                          console.log('🔥 Calling onOpenAttachments...');
+                          onOpenAttachments(project.id, project.projectName);
+                          console.log('✅ onOpenAttachments called');
+                        } else {
+                          console.log('❌ onOpenAttachments is undefined!');
                         }
                       }}
-                      style={{ pointerEvents: 'all' }}
                     >
                       <Paperclip className="w-3 h-3 mr-1" />
                       Files

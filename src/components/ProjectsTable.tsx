@@ -359,8 +359,11 @@ const ProjectsTable = ({
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-purple-300 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1 h-7"
-                      onClick={() => {
+                      className="border-purple-300 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1 h-7 relative z-50"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        alert('FILES BUTTON CLICKED!');
                         console.log('🚨 FILES BUTTON CLICKED - IMMEDIATE DEBUG');
                         console.log('onOpenAttachments function:', onOpenAttachments);
                         console.log('project.id:', project.id);
@@ -372,6 +375,7 @@ const ProjectsTable = ({
                           console.error('❌ Error calling onOpenAttachments:', error);
                         }
                       }}
+                      style={{ pointerEvents: 'all' }}
                     >
                       <Paperclip className="w-3 h-3 mr-1" />
                       Files

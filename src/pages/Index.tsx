@@ -22,7 +22,6 @@ import ProgramInfoDialog from "@/components/ProgramInfoDialog";
 import { FundReallocationDialog } from "@/components/FundReallocationDialog";
 import AutoFollowUpManager from "@/components/AutoFollowUpManager";
 import NotificationsAlert from "@/components/NotificationsAlert";
-import ImpactDemographicsTab from "@/components/ImpactDemographicsTab";
 import { useProjectData } from "@/hooks/useProjectData";
 import { useProjectAlerts } from "@/hooks/useProjectAlerts";
 import { ProjectAlertsPanel } from "@/components/ProjectAlertsPanel";
@@ -406,18 +405,12 @@ const Index = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="projects" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-[1000px] bg-blue-50 border border-blue-200">
+          <TabsList className="grid w-full grid-cols-4 lg:w-[800px] bg-blue-50 border border-blue-200">
             <TabsTrigger 
               value="projects" 
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
               Projects
-            </TabsTrigger>
-            <TabsTrigger 
-              value="impact" 
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-            >
-              Impact & Demographics
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
@@ -527,10 +520,6 @@ const Index = () => {
                 })()}
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="impact" className="space-y-6">
-            <ImpactDemographicsTab projects={projects} />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">

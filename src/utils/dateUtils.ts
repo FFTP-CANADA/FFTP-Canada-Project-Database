@@ -32,17 +32,62 @@ export const toDateString = (date: Date): string => {
  * Converts a YYYY-MM-DD string to Date object in EST timezone
  */
 export const fromDateString = (dateString: string): Date => {
-  const [year, month, day] = dateString.split('-').map(Number);
+  if (!dateString || typeof dateString !== 'string') {
+    console.warn('Invalid dateString provided to fromDateString:', dateString);
+    return new Date(); // Return current date as fallback
+  }
+
+  const parts = dateString.split('-');
+  if (parts.length !== 3) {
+    console.warn('Invalid date format in fromDateString:', dateString);
+    return new Date(); // Return current date as fallback
+  }
+
+  const [year, month, day] = parts.map(Number);
+  
+  // Validate the numbers
+  if (isNaN(year) || isNaN(month) || isNaN(day)) {
+    console.warn('Invalid date components in fromDateString:', { year, month, day, original: dateString });
+    return new Date(); // Return current date as fallback
+  }
+
+  // Validate ranges
+  if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
+    console.warn('Invalid date values in fromDateString:', { year, month, day, original: dateString });
+    return new Date(); // Return current date as fallback
+  }
+
   const localDate = new Date(year, month - 1, day);
-  return fromZonedTime(localDate, EST_TIMEZONE);
+  
+  // Check if the created date is valid
+  if (isNaN(localDate.getTime())) {
+    console.warn('Created invalid Date in fromDateString:', { year, month, day, original: dateString });
+    return new Date(); // Return current date as fallback
+  }
+
+  try {
+    return fromZonedTime(localDate, EST_TIMEZONE);
+  } catch (error) {
+    console.warn('Error in fromZonedTime:', error, 'for date:', dateString);
+    return new Date(); // Return current date as fallback
+  }
 };
 
 /**
  * Formats a date string (YYYY-MM-DD) for display in EST timezone
  */
 export const formatDateForDisplay = (dateString: string): string => {
-  const date = fromDateString(dateString);
-  return formatInTimeZone(date, EST_TIMEZONE, 'PPP');
+  if (!dateString || typeof dateString !== 'string') {
+    return 'Invalid Date';
+  }
+
+  try {
+    const date = fromDateString(dateString);
+    return formatInTimeZone(date, EST_TIMEZONE, 'PPP');
+  } catch (error) {
+    console.warn('Error formatting date for display:', error, 'for dateString:', dateString);
+    return 'Invalid Date';
+  }
 };
 
 /**
@@ -63,14 +108,41 @@ export const getCurrentESTTimestamp = (): string => {
  * Converts ISO timestamp to EST timezone
  */
 export const toESTTimestamp = (timestamp: string): string => {
-  const date = new Date(timestamp);
-  return formatInTimeZone(date, EST_TIMEZONE, "yyyy-MM-dd'T'HH:mm:ssXXX");
+  if (!timestamp || typeof timestamp !== 'string') {
+    console.warn('Invalid timestamp provided to toESTTimestamp:', timestamp);
+    return getCurrentESTTimestamp(); // Return current timestamp as fallback
+  }
+
+  try {
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid timestamp created Date in toESTTimestamp:', timestamp);
+      return getCurrentESTTimestamp(); // Return current timestamp as fallback
+    }
+    return formatInTimeZone(date, EST_TIMEZONE, "yyyy-MM-dd'T'HH:mm:ssXXX");
+  } catch (error) {
+    console.warn('Error in toESTTimestamp:', error, 'for timestamp:', timestamp);
+    return getCurrentESTTimestamp(); // Return current timestamp as fallback
+  }
 };
 
 /**
  * Formats timestamp for display in EST timezone
  */
 export const formatTimestampForDisplay = (timestamp: string): string => {
-  const date = new Date(timestamp);
-  return formatInTimeZone(date, EST_TIMEZONE, 'PPpp');
+  if (!timestamp || typeof timestamp !== 'string') {
+    return 'Invalid Date';
+  }
+
+  try {
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid timestamp for display:', timestamp);
+      return 'Invalid Date';
+    }
+    return formatInTimeZone(date, EST_TIMEZONE, 'PPpp');
+  } catch (error) {
+    console.warn('Error formatting timestamp for display:', error, 'for timestamp:', timestamp);
+    return 'Invalid Date';
+  }
 };

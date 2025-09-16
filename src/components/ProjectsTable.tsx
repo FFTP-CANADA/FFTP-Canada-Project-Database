@@ -356,24 +356,23 @@ const ProjectsTable = ({
                       <FileText className="w-3 h-3 mr-1" />
                       Notes
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-purple-300 text-purple-600 hover:bg-purple-50 text-xs px-2 py-1 h-7"
-                      onClick={() => {
-                        console.log('🚨 URGENT: Files button clicked!', { projectId: project.id, projectName: project.projectName });
-                        console.log('🚨 onOpenAttachments function:', onOpenAttachments);
+                    <button
+                      className="inline-flex items-center justify-center px-2 py-1 h-7 text-xs font-medium border border-purple-300 text-purple-600 bg-white hover:bg-purple-50 rounded-md transition-colors cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🚨 FIXED: Files button clicked!', { projectId: project.id, projectName: project.projectName });
                         if (onOpenAttachments) {
-                          console.log('🚨 Calling onOpenAttachments...');
                           onOpenAttachments(project.id, project.projectName);
                         } else {
-                          console.log('🚨 ERROR: onOpenAttachments is undefined!');
+                          alert('Files function not available');
                         }
                       }}
+                      type="button"
                     >
                       <Paperclip className="w-3 h-3 mr-1" />
                       Files
-                    </Button>
+                    </button>
                     <Button
                       size="sm"
                       variant="outline"

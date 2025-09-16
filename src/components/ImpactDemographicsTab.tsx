@@ -89,9 +89,23 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
     setFormData({ region: "", directParticipants: 0, indirectParticipants: 0 });
   };
 
-  // Filter impact data to only show items for existing projects
+  // Filter impact data to only show items for existing projects and group by country
   const existingProjectIds = projects.map(p => p.id);
   const validImpactData = impactData.filter(item => existingProjectIds.includes(item.projectId));
+
+  // Group by country with sorting
+  const impactDataByCountry = validImpactData.reduce((acc, item) => {
+    const project = projects.find(p => p.id === item.projectId);
+    const country = project?.country || "Unassigned";
+    if (!acc[country]) {
+      acc[country] = [];
+    }
+    acc[country].push(item);
+    return acc;
+  }, {} as Record<string, typeof validImpactData>);
+
+  // Sort countries and projects within each country
+  const sortedCountries = Object.keys(impactDataByCountry).sort();
 
   return (
     <div className="space-y-6">
@@ -100,8 +114,42 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
         <h2 className="text-2xl font-bold text-blue-900">Impact & Demographics</h2>
       </div>
 
-      <div className="grid gap-4">
-        {validImpactData.map((item) => (
+      <div className="space-y-8">
+        {sortedCountries.map(country => {
+          // Sort projects within country by governance number
+          const sortedProjects = impactDataByCountry[country].sort((a, b) => {
+            const projectA = projects.find(p => p.id === a.projectId);
+            const projectB = projects.find(p => p.id === b.projectId);
+            
+            if (projectA?.governanceNumber && projectB?.governanceNumber) {
+              const aNum = parseInt(projectA.governanceNumber.replace(/\D/g, '')) || 0;
+              const bNum = parseInt(projectB.governanceNumber.replace(/\D/g, '')) || 0;
+              
+              if (aNum === bNum) {
+                return projectA.governanceNumber.localeCompare(projectB.governanceNumber, undefined, { numeric: true });
+              }
+              return aNum - bNum;
+            }
+            
+            if (projectA?.governanceNumber && !projectB?.governanceNumber) return -1;
+            if (!projectA?.governanceNumber && projectB?.governanceNumber) return 1;
+            return (projectA?.projectName || "").localeCompare(projectB?.projectName || "");
+          });
+
+          return (
+            <div key={country} className="space-y-4">
+              <div className="flex items-center gap-3">
+                <h3 className="text-lg font-semibold text-blue-900 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+                  <MapPin className="w-5 h-5 inline mr-2" />
+                  {country}
+                </h3>
+                <div className="text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                  {sortedProjects.length} {sortedProjects.length === 1 ? 'project' : 'projects'}
+                </div>
+              </div>
+              
+              <div className="grid gap-4 ml-4">
+                {sortedProjects.map((item) => (
           <Card key={item.id} className="border-blue-200">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg text-blue-900 flex items-center gap-2">
@@ -202,7 +250,11 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
               )}
             </CardContent>
           </Card>
-        ))}
+                ))}
+              </div>
+            </div>
+          );
+        })}
         
         {validImpactData.length === 0 && (
           <Card className="border-blue-200">

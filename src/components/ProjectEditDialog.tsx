@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { Project, PROGRAM_OPTIONS } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
 import { useProjectData } from "@/hooks/useProjectData";
 import { calculateProjectDisbursedAmount } from "@/utils/disbursementCalculator";
+import { Plus } from "lucide-react";
 
 interface ProjectEditDialogProps {
   project: Project | null;
@@ -28,8 +29,25 @@ const ProjectEditDialog = ({
   validateGovernanceNumber
 }: ProjectEditDialogProps) => {
   const [formData, setFormData] = useState<Partial<Project>>({});
+  const [showNewPartnerDialog, setShowNewPartnerDialog] = useState(false);
+  const [newPartnerName, setNewPartnerName] = useState("");
+  const [savedPartners, setSavedPartners] = useState<string[]>(() => {
+    const saved = localStorage.getItem('partnerNames');
+    return saved ? JSON.parse(saved) : [];
+  });
   const { toast } = useToast();
   const { getMilestonesForProject } = useProjectData();
+
+  const addNewPartner = () => {
+    if (newPartnerName.trim()) {
+      const updatedPartners = [...savedPartners, newPartnerName.trim()];
+      setSavedPartners(updatedPartners);
+      localStorage.setItem('partnerNames', JSON.stringify(updatedPartners));
+      setFormData(prev => ({ ...prev, partnerName: newPartnerName.trim() }));
+      setNewPartnerName("");
+      setShowNewPartnerDialog(false);
+    }
+  };
 
   // Initialize form data when project changes
   useEffect(() => {
@@ -41,9 +59,11 @@ const ProjectEditDialog = ({
         projectName: project.projectName,
         partnerName: project.partnerName,
         country: project.country,
+        cityParish: project.cityParish,
         program: project.program,
         impactArea: project.impactArea,
         status: project.status,
+        activeStatus: project.activeStatus || "Active",
         currency: project.currency,
         totalCost: project.totalCost,
         amountDisbursed: calculatedDisbursedAmount, // Auto-calculated from milestones
@@ -100,53 +120,91 @@ const ProjectEditDialog = ({
   if (!project) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Project: {project.projectName}</DialogTitle>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="projectName">Project Name</Label>
-              <Input
-                id="projectName"
-                value={formData.projectName || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, projectName: e.target.value }))}
-                required
-              />
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Project: {project.projectName}</DialogTitle>
+          </DialogHeader>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="projectName">Project Name</Label>
+                <Input
+                  id="projectName"
+                  value={formData.projectName || ""}
+                  onChange={(e) => setFormData(prev => ({ ...prev, projectName: e.target.value }))}
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="partnerName">Partner Name (Optional)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="partnerName"
+                    value={formData.partnerName || ""}
+                    onChange={(e) => setFormData(prev => ({ ...prev, partnerName: e.target.value }))}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowNewPartnerDialog(true)}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {savedPartners.length > 0 && (
+                  <Select 
+                    value={formData.partnerName || ""}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, partnerName: value }))}
+                  >
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Or select from saved partners" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {savedPartners.map(partner => (
+                        <SelectItem key={partner} value={partner}>{partner}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
             </div>
-            
-            <div>
-              <Label htmlFor="partnerName">Partner Name (Optional)</Label>
-              <Input
-                id="partnerName"
-                value={formData.partnerName || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, partnerName: e.target.value }))}
-              />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="country">Country (Optional)</Label>
-              <Select
-                value={formData.country || "none"}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, country: value === "none" ? undefined : value as any }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No country</SelectItem>
-                  <SelectItem value="Canada">Canada</SelectItem>
-                  <SelectItem value="Jamaica">Jamaica</SelectItem>
-                  <SelectItem value="Guyana">Guyana</SelectItem>
-                  <SelectItem value="Haiti">Haiti</SelectItem>
-                  <SelectItem value="Honduras">Honduras</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="country">Country (Optional)</Label>
+                <Select
+                  value={formData.country || "none"}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, country: value === "none" ? undefined : value as any }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No country</SelectItem>
+                    <SelectItem value="Canada">Canada</SelectItem>
+                    <SelectItem value="Jamaica">Jamaica</SelectItem>
+                    <SelectItem value="Guyana">Guyana</SelectItem>
+                    <SelectItem value="Haiti">Haiti</SelectItem>
+                    <SelectItem value="Honduras">Honduras</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="cityParish">City/Parish (Optional)</Label>
+                <Input
+                  id="cityParish"
+                  value={formData.cityParish || ""}
+                  onChange={(e) => setFormData(prev => ({ ...prev, cityParish: e.target.value }))}
+                  placeholder="Enter city or parish"
+                />
+              </div>
             </div>
 
             <div>
@@ -166,169 +224,227 @@ const ProjectEditDialog = ({
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="impactArea">Impact Area</Label>
+                <Select
+                  value={formData.impactArea || "Food Security"}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, impactArea: value as any }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select impact area" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Food Security">Food Security</SelectItem>
+                    <SelectItem value="Education">Education</SelectItem>
+                    <SelectItem value="Housing & Community">Housing & Community</SelectItem>
+                    <SelectItem value="Health">Health</SelectItem>
+                    <SelectItem value="Economic Empowerment">Economic Empowerment</SelectItem>
+                    <SelectItem value="Emergency Response">Emergency Response</SelectItem>
+                    <SelectItem value="Greatest Needs">Greatest Needs</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status || "On-Track"}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as any }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="On-Track">On-Track</SelectItem>
+                    <SelectItem value="Delayed">Delayed</SelectItem>
+                    <SelectItem value="Pending Start">Pending Start</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div>
-              <Label htmlFor="impactArea">Impact Area</Label>
+              <Label htmlFor="activeStatus">Project Active Status</Label>
               <Select
-                value={formData.impactArea || "Food Security"}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, impactArea: value as any }))}
+                value={formData.activeStatus || "Active"}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, activeStatus: value as any }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select impact area" />
+                  <SelectValue placeholder="Select project active status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Food Security">Food Security</SelectItem>
-                  <SelectItem value="Education">Education</SelectItem>
-                  <SelectItem value="Housing & Community">Housing & Community</SelectItem>
-                  <SelectItem value="Health">Health</SelectItem>
-                  <SelectItem value="Economic Empowerment">Economic Empowerment</SelectItem>
-                  <SelectItem value="Emergency Response">Emergency Response</SelectItem>
-                  <SelectItem value="Greatest Needs">Greatest Needs</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Closed">Closed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={formData.status || "On-Track"}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as any }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="On-Track">On-Track</SelectItem>
-                  <SelectItem value="Delayed">Delayed</SelectItem>
-                  <SelectItem value="Pending Start">Pending Start</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="Cancelled">Cancelled</SelectItem>
-                  <SelectItem value="Needs Attention">Needs Attention</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="governanceType">Governance Type</Label>
+                <Select
+                  value={formData.governanceType || "none"}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, governanceType: value === "none" ? undefined : value as any }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select governance type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white z-50">
+                    <SelectItem value="none">No governance</SelectItem>
+                    <SelectItem value="AGENCY AGREEMENT">AGENCY AGREEMENT</SelectItem>
+                    <SelectItem value="LOD">LOD</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="governanceNumber">Governance Number</Label>
+                <Input
+                  id="governanceNumber"
+                  value={formData.governanceNumber || ""}
+                  onChange={(e) => setFormData(prev => ({ ...prev, governanceNumber: e.target.value }))}
+                  disabled={!formData.governanceType}
+                  placeholder="Enter governance number"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="currency">Currency</Label>
+                <Select
+                  value={formData.currency || "CAD"}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value as any }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CAD">CAD</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="totalCost">Total Cost (Optional)</Label>
+                <Input
+                  id="totalCost"
+                  type="number"
+                  value={formData.totalCost || ""}
+                  onChange={(e) => setFormData(prev => ({ ...prev, totalCost: e.target.value ? Number(e.target.value) : undefined }))}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="amountDisbursed">Amount Disbursed (Auto-calculated)</Label>
+                <Input
+                  id="amountDisbursed"
+                  type="number"
+                  value={formData.amountDisbursed || ""}
+                  disabled
+                  className="bg-muted cursor-not-allowed"
+                  placeholder="Calculated from completed disbursement milestones"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  This amount is automatically calculated from completed disbursement milestones
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="startDate">Start Date</Label>
+                <Input
+                  id="startDate"
+                  type="date"
+                  value={formData.startDate || ""}
+                  onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="endDate">End Date (Optional)</Label>
+                <Input
+                  id="endDate"
+                  type="date"
+                  value={formData.endDate || ""}
+                  onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={formData.followUpNeeded || false}
+                  onChange={(e) => setFormData(prev => ({ ...prev, followUpNeeded: e.target.checked }))}
+                />
+                <span>Follow-up needed</span>
+              </label>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Partner Dialog */}
+      <Dialog open={showNewPartnerDialog} onOpenChange={setShowNewPartnerDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Partner</DialogTitle>
+            <DialogDescription>
+              Enter the name of a new partner to add to your saved list.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="newPartnerName">Partner Name</Label>
+              <Input
+                id="newPartnerName"
+                value={newPartnerName}
+                onChange={(e) => setNewPartnerName(e.target.value)}
+                placeholder="Enter partner name"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    addNewPartner();
+                  }
+                }}
+              />
             </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="governanceType">Governance Type</Label>
-              <Select
-                value={formData.governanceType || "none"}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, governanceType: value === "none" ? undefined : value as any }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select governance type" />
-                </SelectTrigger>
-                <SelectContent className="bg-white z-50">
-                  <SelectItem value="none">No governance</SelectItem>
-                  <SelectItem value="AGENCY AGREEMENT">AGENCY AGREEMENT</SelectItem>
-                  <SelectItem value="LOD">LOD</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="governanceNumber">Governance Number</Label>
-              <Input
-                id="governanceNumber"
-                value={formData.governanceNumber || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, governanceNumber: e.target.value }))}
-                disabled={!formData.governanceType}
-                placeholder="Enter governance number"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="currency">Currency</Label>
-              <Select
-                value={formData.currency || "CAD"}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value as any }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CAD">CAD</SelectItem>
-                  <SelectItem value="USD">USD</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="totalCost">Total Cost (Optional)</Label>
-              <Input
-                id="totalCost"
-                type="number"
-                value={formData.totalCost || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, totalCost: e.target.value ? Number(e.target.value) : undefined }))}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="amountDisbursed">Amount Disbursed (Auto-calculated)</Label>
-              <Input
-                id="amountDisbursed"
-                type="number"
-                value={formData.amountDisbursed || ""}
-                disabled
-                className="bg-muted cursor-not-allowed"
-                placeholder="Calculated from completed disbursement milestones"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                This amount is automatically calculated from completed disbursement milestones
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="startDate">Start Date</Label>
-              <Input
-                id="startDate"
-                type="date"
-                value={formData.startDate || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="endDate">End Date (Optional)</Label>
-              <Input
-                id="endDate"
-                type="date"
-                value={formData.endDate || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={formData.followUpNeeded || false}
-                onChange={(e) => setFormData(prev => ({ ...prev, followUpNeeded: e.target.checked }))}
-              />
-              <span>Follow-up needed</span>
-            </label>
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setShowNewPartnerDialog(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit">
-              Save Changes
+            <Button 
+              onClick={addNewPartner}
+              disabled={!newPartnerName.trim()}
+            >
+              Add Partner
             </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

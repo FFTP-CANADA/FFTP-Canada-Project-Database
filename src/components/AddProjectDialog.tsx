@@ -516,13 +516,13 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="activeStatus" className="text-blue-900">Active Status *</Label>
+              <Label htmlFor="activeStatus" className="text-blue-900">Project Status *</Label>
               <Select 
                 value={formData.activeStatus} 
                 onValueChange={(value) => setFormData(prev => ({ ...prev, activeStatus: value }))}
               >
                 <SelectTrigger className="border-blue-200 focus:border-blue-400">
-                  <SelectValue placeholder="Select active status" />
+                  <SelectValue placeholder="Select project status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Active">Active</SelectItem>

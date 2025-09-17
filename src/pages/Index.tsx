@@ -156,6 +156,13 @@ const Index = () => {
     demoMode
   } = useProjectAlerts(projects);
 
+  // Debug: Log project data to see activeStatus values
+  console.log('Projects for debugging:', projects.map(p => ({ 
+    name: p.projectName, 
+    activeStatus: p.activeStatus, 
+    activeStatusType: typeof p.activeStatus 
+  })));
+  
   const stats = {
     totalProjects: projects.length,
     activeProjects: projects.filter(p => p.activeStatus === "Active").length,
@@ -289,6 +296,25 @@ const Index = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
+          {/* Debug Card - Temporary */}
+          <Card className="border-red-200 bg-red-50 shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-medium text-red-700">Debug Info</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xs text-red-700 space-y-1">
+                <div>Total: {stats.totalProjects}</div>
+                <div>Active: {stats.activeProjects}</div>
+                <div>Sample activeStatus:</div>
+                {projects.slice(0, 2).map(p => (
+                  <div key={p.id} className="truncate">
+                    "{p.activeStatus}"
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
           {/* Row 1 - Primary Metrics */}
           <Card className="border-blue-200 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

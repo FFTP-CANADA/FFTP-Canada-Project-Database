@@ -6,4 +6,5 @@ export interface ImpactDemographics {
   region: "Urban" | "Rural";
   directParticipants: number;
   indirectParticipants: number;
+  notes: string;
 }

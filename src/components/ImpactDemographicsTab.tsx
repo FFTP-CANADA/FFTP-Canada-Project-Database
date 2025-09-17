@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Users, MapPin, Plus, Save, Edit, Trash2 } from "lucide-react";
 import { Project } from "@/types/project";
 import { ImpactDemographics } from "@/types/impactDemographics";
@@ -20,6 +21,7 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
     region: "" as "Urban" | "Rural" | "",
     directParticipants: 0,
     indirectParticipants: 0,
+    notes: "",
   });
 
   // Load impact data from local storage
@@ -49,6 +51,7 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
           region: "Urban",
           directParticipants: 0,
           indirectParticipants: 0,
+          notes: "",
         });
       }
     });
@@ -65,6 +68,7 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
       region: item.region,
       directParticipants: item.directParticipants,
       indirectParticipants: item.indirectParticipants,
+      notes: item.notes,
     });
   };
 
@@ -75,18 +79,19 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
             ...item, 
             region: formData.region as "Urban" | "Rural",
             directParticipants: formData.directParticipants,
-            indirectParticipants: formData.indirectParticipants 
+            indirectParticipants: formData.indirectParticipants,
+            notes: formData.notes 
           }
         : item
     );
     saveImpactData(updatedData);
     setEditingId(null);
-    setFormData({ region: "", directParticipants: 0, indirectParticipants: 0 });
+    setFormData({ region: "", directParticipants: 0, indirectParticipants: 0, notes: "" });
   };
 
   const handleCancel = () => {
     setEditingId(null);
-    setFormData({ region: "", directParticipants: 0, indirectParticipants: 0 });
+    setFormData({ region: "", directParticipants: 0, indirectParticipants: 0, notes: "" });
   };
 
   // Filter impact data to only show items for existing projects and group by country
@@ -205,6 +210,17 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
                     </div>
                   </div>
                   
+                  <div>
+                    <Label htmlFor={`notes-${item.id}`}>Notes</Label>
+                    <Textarea
+                      id={`notes-${item.id}`}
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      placeholder="Add detailed notes about this project's impact and demographics..."
+                      className="min-h-[120px] resize-vertical"
+                    />
+                  </div>
+                  
                   <div className="flex gap-2">
                     <Button 
                       onClick={() => handleSave(item.id)}
@@ -237,6 +253,15 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
                       <span className="text-blue-900">{item.indirectParticipants.toLocaleString()}</span>
                     </div>
                   </div>
+                  
+                  {item.notes && (
+                    <div className="mt-4">
+                      <span className="font-medium text-blue-700 block mb-2">Notes:</span>
+                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <p className="text-blue-900 text-sm whitespace-pre-wrap">{item.notes}</p>
+                      </div>
+                    </div>
+                  )}
                   
                   <Button 
                     variant="outline"

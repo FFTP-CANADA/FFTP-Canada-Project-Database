@@ -158,7 +158,7 @@ const Index = () => {
 
   const stats = {
     totalProjects: projects.length,
-    activeProjects: projects.filter(p => p.status === "On-Track" || p.status === "Delayed").length,
+    activeProjects: projects.filter(p => p.activeStatus === "Active").length,
     totalDisbursed: projects.reduce((sum, p) => sum + p.amountDisbursed, 0),
     totalDisbursedCAD: projects.reduce((sum, p) => {
       if (p.currency === 'USD') {

@@ -83,6 +83,9 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
   };
 
   const handleSave = (itemId: string) => {
+    console.log('Save button clicked for itemId:', itemId);
+    console.log('Current formData:', formData);
+    
     const updatedData = impactData.map(item => 
       item.id === itemId 
         ? { 
@@ -90,11 +93,15 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
             region: formData.region as "Urban" | "Rural",
             directParticipants: formData.directParticipants,
             indirectParticipants: formData.indirectParticipants,
-            notes: formData.notes 
+            notes: formData.notes || ""
           }
         : item
     );
-    console.log('Saving impact data:', updatedData.find(item => item.id === itemId));
+    
+    const savedItem = updatedData.find(item => item.id === itemId);
+    console.log('Item being saved:', savedItem);
+    console.log('Notes value:', savedItem?.notes);
+    
     saveImpactData(updatedData);
     setEditingId(null);
     setFormData({ region: "", directParticipants: 0, indirectParticipants: 0, notes: "" });
@@ -265,12 +272,26 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
                     </div>
                   </div>
                   
+                  {/* Debug info */}
+                  <div className="text-xs text-gray-500 mb-2">
+                    Debug: Notes field exists: {item.notes !== undefined ? 'Yes' : 'No'}, 
+                    Value: "{item.notes}", 
+                    Length: {item.notes?.length || 0}
+                  </div>
+                  
                   {item.notes && item.notes.trim() !== "" && (
                     <div className="mt-4">
                       <span className="font-medium text-blue-700 block mb-2">Notes:</span>
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <p className="text-blue-900 text-sm whitespace-pre-wrap">{item.notes}</p>
                       </div>
+                    </div>
+                  )}
+                  
+                  {/* Show this always for debugging */}
+                  {(!item.notes || item.notes.trim() === "") && (
+                    <div className="mt-4 text-gray-500 text-sm">
+                      No notes saved yet.
                     </div>
                   )}
                   

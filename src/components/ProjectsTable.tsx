@@ -50,6 +50,7 @@ const ProjectsTable = ({
   const [statusFilter, setStatusFilter] = useState("all");
   const [impactAreaFilter, setImpactAreaFilter] = useState("all");
   const [programFilter, setProgramFilter] = useState("all");
+  const [activeStatusFilter, setActiveStatusFilter] = useState("all");
   const [deleteDialog, setDeleteDialog] = useState<{open: boolean; projectId: string; projectName: string}>({
     open: false,
     projectId: "",
@@ -96,8 +97,9 @@ const ProjectsTable = ({
     const matchesStatus = statusFilter === "all" || project.status === statusFilter;
     const matchesImpactArea = impactAreaFilter === "all" || project.impactArea === impactAreaFilter;
     const matchesProgram = programFilter === "all" || project.program === programFilter;
+    const matchesActiveStatus = activeStatusFilter === "all" || (project.activeStatus || "Active") === activeStatusFilter;
     
-    return matchesSearch && matchesCountry && matchesStatus && matchesImpactArea && matchesProgram;
+    return matchesSearch && matchesCountry && matchesStatus && matchesImpactArea && matchesProgram && matchesActiveStatus;
   });
 
   // Debug logging
@@ -203,6 +205,17 @@ const ProjectsTable = ({
             {availablePrograms.map(program => (
               <SelectItem key={program} value={program}>{program}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={activeStatusFilter} onValueChange={setActiveStatusFilter}>
+          <SelectTrigger className="w-[140px] border-blue-200 focus:border-blue-400">
+            <SelectValue placeholder="Active Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="Active">Active</SelectItem>
+            <SelectItem value="Closed">Closed</SelectItem>
           </SelectContent>
         </Select>
 

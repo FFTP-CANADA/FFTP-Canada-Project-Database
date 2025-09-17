@@ -48,6 +48,8 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
 
   // Create initial entries for projects that don't have impact data
   useEffect(() => {
+    if (projects.length === 0 || impactData.length === 0) return;
+    
     const existingProjectIds = impactData.map(item => item.projectId);
     const newEntries: ImpactDemographics[] = [];
 
@@ -70,7 +72,7 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
       const updatedData = [...impactData, ...newEntries];
       saveImpactData(updatedData);
     }
-  }, [projects, impactData]);
+  }, [projects.length]); // Only depend on projects length, not impactData
 
   const handleEdit = (item: ImpactDemographics) => {
     setEditingId(item.id);

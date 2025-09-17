@@ -24,10 +24,20 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
     notes: "",
   });
 
-  // Load impact data from local storage
+  // Load impact data from local storage and migrate existing data
   useEffect(() => {
     const savedData = LocalStorageManager.getItem('impactDemographics', []);
-    setImpactData(savedData);
+    // Migrate existing data to include notes field if it doesn't exist
+    const migratedData = savedData.map(item => ({
+      ...item,
+      notes: item.notes || ""
+    }));
+    setImpactData(migratedData);
+    
+    // Save migrated data back if we made changes
+    if (JSON.stringify(savedData) !== JSON.stringify(migratedData)) {
+      LocalStorageManager.setItem('impactDemographics', migratedData);
+    }
   }, []);
 
   // Save impact data to local storage
@@ -84,6 +94,7 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
           }
         : item
     );
+    console.log('Saving impact data:', updatedData.find(item => item.id === itemId));
     saveImpactData(updatedData);
     setEditingId(null);
     setFormData({ region: "", directParticipants: 0, indirectParticipants: 0, notes: "" });
@@ -254,7 +265,7 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
                     </div>
                   </div>
                   
-                  {item.notes && (
+                  {item.notes && item.notes.trim() !== "" && (
                     <div className="mt-4">
                       <span className="font-medium text-blue-700 block mb-2">Notes:</span>
                       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">

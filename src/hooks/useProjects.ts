@@ -21,8 +21,20 @@ export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>(() => {
     if (globalProjects.length > 0) return globalProjects;
     const saved = LocalStorageManager.getItem('projects', []);
-    globalProjects = saved;
-    return saved;
+    
+    // Migrate projects to ensure activeStatus field exists
+    const migratedProjects = saved.map(project => ({
+      ...project,
+      activeStatus: project.activeStatus || "Active"
+    }));
+    
+    // Save migrated projects if changes were made
+    if (JSON.stringify(saved) !== JSON.stringify(migratedProjects)) {
+      LocalStorageManager.setItem('projects', migratedProjects);
+    }
+    
+    globalProjects = migratedProjects;
+    return migratedProjects;
   });
 
   useEffect(() => {

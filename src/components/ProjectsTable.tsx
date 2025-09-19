@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt, Banknote, Calendar, Trash2, ArrowRightLeft } from "lucide-react";
+import { Mail, FileText, Filter, Paperclip, Camera, Edit, Settings, Milestone, ChartGantt, Banknote, Calendar, Trash2, ArrowRightLeft, UserCheck } from "lucide-react";
 import { Project } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
 import { formatWithExchange } from "@/utils/currencyUtils";
 import { ProjectDeleteDialog } from "@/components/ProjectDeleteDialog";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useProjectPermissionsLocal } from "@/hooks/useProjectPermissionsLocal";
+import { LocalAssignAdminDialog } from "@/components/LocalAssignAdminDialog";
 
 interface ProjectsTableProps {
   projects: Project[];
@@ -25,6 +27,7 @@ interface ProjectsTableProps {
   onDeleteProject?: (projectId: string) => void;
   onManagePrograms?: () => void;
   onOpenReallocation?: (project: Project) => void;
+  onUpdateProject?: (projectId: string, updates: Partial<Project>) => void;
   donorPledges?: Array<{id: string; projectId: string; pledgedAmount: number}>;
   donorReceipts?: Array<{id: string; projectId: string; amount: number}>;
 }
@@ -43,11 +46,17 @@ const ProjectsTable = ({
   onDeleteProject,
   onManagePrograms,
   onOpenReallocation,
+  onUpdateProject,
   donorPledges = [],
   donorReceipts = []
 }: ProjectsTableProps) => {
   const { isAdmin } = useUserRole();
+  const { canEditProject, canDeleteProject, getAssignedAdminInfo } = useProjectPermissionsLocal();
   const [searchTerm, setSearchTerm] = useState("");
+  const [assignAdminDialog, setAssignAdminDialog] = useState<{open: boolean; project: Project | null}>({
+    open: false,
+    project: null
+  });
   const [countryFilter, setCountryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [impactAreaFilter, setImpactAreaFilter] = useState("all");
@@ -59,6 +68,18 @@ const ProjectsTable = ({
     projectName: ""
   });
   const { toast } = useToast();
+
+  const handleAssignAdmin = (project: Project) => {
+    setAssignAdminDialog({ open: true, project });
+  };
+
+  const handleProjectUpdated = (projectId: string, assignedAdmin: string | null) => {
+    // Update the project with the new assigned admin
+    if (onUpdateProject) {
+      onUpdateProject(projectId, { assignedAdmin });
+    }
+    setAssignAdminDialog({ open: false, project: null });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -242,6 +263,7 @@ const ProjectsTable = ({
               <TableHead className="text-white px-4 text-center">Country</TableHead>
               <TableHead className="text-white px-4 text-center">Impact Area</TableHead>
               <TableHead className="text-white px-4 text-center">Status</TableHead>
+              <TableHead className="text-white px-4 text-center">Assigned Admin</TableHead>
               <TableHead className="text-white px-4 text-center">Project Cost</TableHead>
               <TableHead className="text-white px-4 text-center">Pledged</TableHead>
               <TableHead className="text-white px-4 text-center">Funds Received</TableHead>
@@ -284,9 +306,24 @@ const ProjectsTable = ({
                 <TableCell className="text-blue-700">{project.country || "N/A"}</TableCell>
                 <TableCell className="text-blue-700">{project.impactArea}</TableCell>
                 <TableCell>
-                  <Badge className={getStatusColor(project.status)}>
+                  <Badge 
+                    className={`${getStatusColor(project.status)} px-2 py-1 text-xs font-medium border`}
+                  >
                     {project.status}
                   </Badge>
+                </TableCell>
+                <TableCell className="text-blue-900 px-4">
+                  {(() => {
+                    const assignedAdmin = getAssignedAdminInfo(project);
+                    return assignedAdmin ? (
+                      <div className="text-xs">
+                        <div className="font-medium">{assignedAdmin.display_name}</div>
+                        <div className="text-gray-600">{assignedAdmin.email}</div>
+                      </div>
+                    ) : (
+                      <span className="text-gray-500">Any admin</span>
+                    );
+                  })()}
                 </TableCell>
                 <TableCell className="text-blue-900">
                   {project.totalCost ? formatWithExchange(project.totalCost, project.currency) : "N/A"}
@@ -351,7 +388,7 @@ const ProjectsTable = ({
                 <TableCell className="px-6 min-w-[400px]">
                   <div className="flex flex-wrap gap-1.5 max-w-none">
                     {/* Primary Actions - Admin Only */}
-                    {isAdmin && (
+                    {canEditProject(project) && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -360,6 +397,19 @@ const ProjectsTable = ({
                       >
                         <Edit className="w-3 h-3 mr-1" />
                         Edit
+                      </Button>
+                    )}
+
+                    {/* Admin Assignment - Any Admin */}
+                    {isAdmin && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-indigo-300 text-indigo-600 hover:bg-indigo-50 text-xs px-2 py-1 h-7"
+                        onClick={() => handleAssignAdmin(project)}
+                      >
+                        <UserCheck className="w-3 h-3 mr-1" />
+                        Assign
                       </Button>
                     )}
                     
@@ -459,7 +509,7 @@ const ProjectsTable = ({
                     )}
                     
                     {/* Delete Action - Admin Only */}
-                    {isAdmin && (
+                    {canDeleteProject(project) && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -490,6 +540,13 @@ const ProjectsTable = ({
         onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}
         projectName={deleteDialog.projectName}
         onConfirmDelete={handleConfirmDelete}
+      />
+
+      <LocalAssignAdminDialog
+        open={assignAdminDialog.open}
+        onOpenChange={(open) => setAssignAdminDialog(prev => ({ ...prev, open }))}
+        project={assignAdminDialog.project}
+        onProjectUpdated={handleProjectUpdated}
       />
     </div>
   );

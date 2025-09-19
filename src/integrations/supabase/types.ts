@@ -48,6 +48,7 @@ export type Database = {
         Row: {
           active_status: string | null
           amount_disbursed: number | null
+          assigned_admin: string | null
           created_at: string
           created_by: string | null
           currency: string | null
@@ -62,6 +63,7 @@ export type Database = {
         Insert: {
           active_status?: string | null
           amount_disbursed?: number | null
+          assigned_admin?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -76,6 +78,7 @@ export type Database = {
         Update: {
           active_status?: string | null
           amount_disbursed?: number | null
+          assigned_admin?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -88,6 +91,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_assigned_admin_fkey"
+            columns: ["assigned_admin"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "projects_created_by_fkey"
             columns: ["created_by"]
@@ -102,6 +112,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_admin_profile: {
+        Args: { admin_user_id: string }
+        Returns: {
+          display_name: string
+          email: string
+        }[]
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]

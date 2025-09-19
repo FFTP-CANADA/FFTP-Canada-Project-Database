@@ -22,6 +22,7 @@ export interface Project {
   program?: string;
   governanceType?: GovernanceType;
   governanceNumber?: string;
+  assignedAdmin?: string; // User ID of the admin who can edit this project
 }
 
 export type FFTPMilestoneType = 

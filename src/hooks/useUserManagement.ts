@@ -34,25 +34,31 @@ export const useUserManagement = () => {
         return;
       }
 
-      // Fetch email addresses for each user
-      const usersWithEmails = [];
-      for (const profile of profiles || []) {
-        try {
-          const { data: authUser } = await supabase.auth.admin.getUserById(profile.user_id);
-          usersWithEmails.push({
-            ...profile,
-            email: authUser.user?.email || 'Unknown'
-          });
-        } catch (error) {
-          console.error('Error fetching user email:', error);
-          usersWithEmails.push({
-            ...profile,
-            email: 'Unknown'
-          });
-        }
-      }
+      // Fetch users with emails via secure Edge Function
+      try {
+        const { data: result, error: functionError } = await supabase.functions.invoke('admin-operations', {
+          body: { operation: 'getAllUsers', data: {} }
+        });
 
-      setUsers(usersWithEmails);
+        if (functionError) {
+          console.error('Error calling admin function:', functionError);
+          toast({
+            title: "Error",
+            description: "Failed to fetch users. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setUsers(result.users || []);
+      } catch (error) {
+        console.error('Error fetching users via function:', error);
+        toast({
+          title: "Error", 
+          description: "Failed to fetch users. Please try again.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error('Error in fetchUsers:', error);
       toast({

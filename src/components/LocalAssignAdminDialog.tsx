@@ -41,25 +41,28 @@ export const LocalAssignAdminDialog = ({
           return;
         }
 
-        // Fetch email addresses for each admin
-        const adminData = [];
-        for (const profile of profiles || []) {
-          try {
-            // Note: This requires admin privileges in Supabase
-            const { data: authUser } = await supabase.auth.admin.getUserById(profile.user_id);
-            if (authUser.user) {
-              adminData.push({
-                userId: profile.user_id,
-                email: authUser.user.email || '',
-                displayName: profile.display_name || authUser.user.email || ''
-              });
-            }
-          } catch (error) {
-            console.error('Error fetching user data:', error);
+        // Fetch admin data via secure Edge Function
+        try {
+          const { data: result, error: functionError } = await supabase.functions.invoke('admin-operations', {
+            body: { operation: 'getAdminProfiles', data: {} }
+          });
+
+          if (functionError) {
+            console.error('Error calling admin function:', functionError);
+            return;
           }
+
+          const adminData = Object.entries(result.adminProfiles || {}).map(([userId, info]: [string, any]) => ({
+            userId,
+            email: info.email,
+            displayName: info.display_name
+          }));
+          
+          setAdminUsers(adminData);
+        } catch (error) {
+          console.error('Error fetching admin profiles via function:', error);
         }
 
-        setAdminUsers(adminData);
       } catch (error) {
         console.error('Error fetching admin users:', error);
       }

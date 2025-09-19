@@ -7,15 +7,41 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Shield, Check, X } from "lucide-react";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Password validation function
+  const validatePassword = (pwd: string) => {
+    const errors: string[] = [];
+    let strength = 0;
+
+    if (pwd.length < 8) errors.push("At least 8 characters");
+    else strength += 20;
+
+    if (!/[A-Z]/.test(pwd)) errors.push("One uppercase letter");
+    else strength += 20;
+
+    if (!/[a-z]/.test(pwd)) errors.push("One lowercase letter");
+    else strength += 20;
+
+    if (!/\d/.test(pwd)) errors.push("One number");
+    else strength += 20;
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) errors.push("One special character");
+    else strength += 20;
+
+    setPasswordErrors(errors);
+    setPasswordStrength(strength);
+  };
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -223,18 +249,57 @@ const Auth = () => {
                     <Input
                       id="signup-password"
                       type="password"
-                      placeholder="Create a password"
+                      placeholder="Create a strong password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        validatePassword(e.target.value);
+                      }}
                       required
                       disabled={loading}
-                      minLength={6}
+                      minLength={8}
                     />
+                    
+                    {/* Password Strength Indicator */}
+                    {password && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium">Password Strength</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              passwordStrength < 40 ? 'bg-red-500' :
+                              passwordStrength < 80 ? 'bg-yellow-500' :
+                              'bg-green-500'
+                            }`}
+                            style={{ width: `${passwordStrength}%` }}
+                          />
+                        </div>
+                        
+                        {/* Password Requirements */}
+                        <div className="space-y-1">
+                          {passwordErrors.map((error, index) => (
+                            <div key={index} className="flex items-center gap-2 text-xs">
+                              <X className="h-3 w-3 text-red-500" />
+                              <span className="text-red-600">{error}</span>
+                            </div>
+                          ))}
+                          {passwordErrors.length === 0 && (
+                            <div className="flex items-center gap-2 text-xs">
+                              <Check className="h-3 w-3 text-green-500" />
+                              <span className="text-green-600">Strong password!</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <Button 
                     type="submit" 
                     className="w-full bg-blue-600 hover:bg-blue-700"
-                    disabled={loading}
+                    disabled={loading || passwordErrors.length > 0}
                   >
                     {loading ? (
                       <>

@@ -24,20 +24,21 @@ export const useProjectPermissions = () => {
           return;
         }
 
-        // Get email addresses from auth.users for each admin
-        const adminData: Record<string, { email: string; display_name: string }> = {};
-        
-        for (const profile of profiles || []) {
-          const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(profile.user_id);
-          if (!authError && authUser.user) {
-            adminData[profile.user_id] = {
-              email: authUser.user.email || '',
-              display_name: profile.display_name || authUser.user.email || ''
-            };
-          }
-        }
+        // Get admin profiles via secure Edge Function
+        try {
+          const { data: result, error: functionError } = await supabase.functions.invoke('admin-operations', {
+            body: { operation: 'getAdminProfiles', data: {} }
+          });
 
-        setAdminProfiles(adminData);
+          if (functionError) {
+            console.error('Error calling admin function:', functionError);
+            return;
+          }
+
+          setAdminProfiles(result.adminProfiles || {});
+        } catch (error) {
+          console.error('Error fetching admin profiles via function:', error);
+        }
       } catch (error) {
         console.error('Error fetching admin profiles:', error);
       }

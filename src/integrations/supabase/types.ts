@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          role: Database["public"]["Enums"]["app_role"]
           updated_at: string
           user_id: string
         }
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           user_id: string
         }
@@ -36,20 +38,77 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      projects: {
+        Row: {
+          active_status: string | null
+          amount_disbursed: number | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          follow_up_needed: boolean | null
+          governance_number: string | null
+          id: string
+          project_name: string
+          status: string | null
+          total_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          active_status?: string | null
+          amount_disbursed?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          follow_up_needed?: boolean | null
+          governance_number?: string | null
+          id?: string
+          project_name: string
+          status?: string | null
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active_status?: string | null
+          amount_disbursed?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          follow_up_needed?: boolean | null
+          governance_number?: string | null
+          id?: string
+          project_name?: string
+          status?: string | null
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -176,6 +235,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "viewer"],
+    },
   },
 } as const

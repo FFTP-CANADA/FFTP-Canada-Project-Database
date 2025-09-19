@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus, BarChart3, Users, DollarSign, AlertCircle, Info, Target, TrendingUp, Calendar, CheckCircle, LogOut } from "lucide-react";
+import { Plus, BarChart3, Users, DollarSign, AlertCircle, Info, Target, TrendingUp, Calendar, CheckCircle, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import ImpactDemographicsTab from "@/components/ImpactDemographicsTab";
 import ProjectsTable from "@/components/ProjectsTable";
 import { BackupManagerComponent } from "@/components/BackupManager";
@@ -40,6 +41,7 @@ import { DebugProjectsPanel } from "@/components/DebugProjectsPanel";
 
 const Index = () => {
   const { user, signOut } = useAuth();
+  const { role, isAdmin } = useUserRole();
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
   const [editProject, setEditProject] = useState<{ open: boolean; project: any }>({
     open: false,
@@ -260,9 +262,15 @@ const Index = () => {
               <p className="text-blue-600 mt-1">Project Tracker & Analytics Dashboard</p>
             </div>
             <div className="flex gap-3 items-center">
-              <span className="text-sm text-blue-600">
-                Welcome, {user?.email}
-              </span>
+              <div className="flex items-center gap-2 text-sm text-blue-600">
+                <span>Welcome, {user?.email}</span>
+                {role && (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 rounded-full">
+                    <Shield className="w-3 h-3" />
+                    <span className="text-xs font-medium capitalize">{role}</span>
+                  </div>
+                )}
+              </div>
               <Button
                 variant="outline"
                 onClick={() => setShowProgramInfo(true)}
@@ -273,13 +281,15 @@ const Index = () => {
               </Button>
               <DataRecoveryDialog />
               <StatusReportDialog projects={projects} notes={notes} />
-              <Button 
-                onClick={() => setIsAddProjectOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Project
-              </Button>
+              {isAdmin && (
+                <Button 
+                  onClick={() => setIsAddProjectOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Project
+                </Button>
+              )}
               <Button
                 variant="outline"
                 onClick={signOut}

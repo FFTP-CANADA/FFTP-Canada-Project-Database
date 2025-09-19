@@ -9,6 +9,7 @@ import { Project } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
 import { formatWithExchange } from "@/utils/currencyUtils";
 import { ProjectDeleteDialog } from "@/components/ProjectDeleteDialog";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface ProjectsTableProps {
   projects: Project[];
@@ -45,6 +46,7 @@ const ProjectsTable = ({
   donorPledges = [],
   donorReceipts = []
 }: ProjectsTableProps) => {
+  const { isAdmin } = useUserRole();
   const [searchTerm, setSearchTerm] = useState("");
   const [countryFilter, setCountryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -348,16 +350,18 @@ const ProjectsTable = ({
                 </TableCell>
                 <TableCell className="px-6 min-w-[400px]">
                   <div className="flex flex-wrap gap-1.5 max-w-none">
-                    {/* Primary Actions */}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-blue-300 text-blue-600 hover:bg-blue-50 text-xs px-2 py-1 h-7"
-                      onClick={() => onEditProject?.(project)}
-                    >
-                      <Edit className="w-3 h-3 mr-1" />
-                      Edit
-                    </Button>
+                    {/* Primary Actions - Admin Only */}
+                    {isAdmin && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-blue-300 text-blue-600 hover:bg-blue-50 text-xs px-2 py-1 h-7"
+                        onClick={() => onEditProject?.(project)}
+                      >
+                        <Edit className="w-3 h-3 mr-1" />
+                        Edit
+                      </Button>
+                    )}
                     
                     {/* Documentation Group */}
                     <Button
@@ -454,16 +458,18 @@ const ProjectsTable = ({
                       </Button>
                     )}
                     
-                    {/* Delete Action */}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-red-300 text-red-600 hover:bg-red-50 text-xs px-2 py-1 h-7"
-                      onClick={() => handleDeleteClick(project)}
-                    >
-                      <Trash2 className="w-3 h-3 mr-1" />
-                      Delete
-                    </Button>
+                    {/* Delete Action - Admin Only */}
+                    {isAdmin && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-red-300 text-red-600 hover:bg-red-50 text-xs px-2 py-1 h-7"
+                        onClick={() => handleDeleteClick(project)}
+                      >
+                        <Trash2 className="w-3 h-3 mr-1" />
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>

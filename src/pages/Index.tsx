@@ -38,6 +38,7 @@ import { DataRecoveryDialog } from "@/components/DataRecoveryDialog";
 import { CurrentDataViewer } from "@/components/CurrentDataViewer";
 import { QuickDataRestore } from "@/components/QuickDataRestore";
 import { DebugProjectsPanel } from "@/components/DebugProjectsPanel";
+import { UserManagement } from "@/components/UserManagement";
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -436,7 +437,7 @@ const Index = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="projects" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-[1000px] bg-blue-50 border border-blue-200">
+          <TabsList className="grid w-full grid-cols-6 lg:w-[1200px] bg-blue-50 border border-blue-200">
             <TabsTrigger 
               value="projects" 
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
@@ -461,6 +462,14 @@ const Index = () => {
             >
               Fund Management
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger 
+                value="users" 
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              >
+                User Management
+              </TabsTrigger>
+            )}
             <TabsTrigger 
               value="backup" 
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
@@ -571,6 +580,12 @@ const Index = () => {
           <TabsContent value="funding" className="space-y-6">
             <UndesignatedFundsManager projects={projects} />
           </TabsContent>
+
+          {isAdmin && (
+            <TabsContent value="users" className="space-y-6">
+              <UserManagement />
+            </TabsContent>
+          )}
 
           <TabsContent value="backup" className="space-y-6">
             <DebugProjectsPanel />

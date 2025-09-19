@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus, BarChart3, Users, DollarSign, AlertCircle, Info, Target, TrendingUp, Calendar, CheckCircle } from "lucide-react";
+import { Plus, BarChart3, Users, DollarSign, AlertCircle, Info, Target, TrendingUp, Calendar, CheckCircle, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import ImpactDemographicsTab from "@/components/ImpactDemographicsTab";
 import ProjectsTable from "@/components/ProjectsTable";
 import { BackupManagerComponent } from "@/components/BackupManager";
@@ -38,6 +39,7 @@ import { QuickDataRestore } from "@/components/QuickDataRestore";
 import { DebugProjectsPanel } from "@/components/DebugProjectsPanel";
 
 const Index = () => {
+  const { user, signOut } = useAuth();
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
   const [editProject, setEditProject] = useState<{ open: boolean; project: any }>({
     open: false,
@@ -257,7 +259,10 @@ const Index = () => {
               />
               <p className="text-blue-600 mt-1">Project Tracker & Analytics Dashboard</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-center">
+              <span className="text-sm text-blue-600">
+                Welcome, {user?.email}
+              </span>
               <Button
                 variant="outline"
                 onClick={() => setShowProgramInfo(true)}
@@ -274,6 +279,14 @@ const Index = () => {
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Project
+              </Button>
+              <Button
+                variant="outline"
+                onClick={signOut}
+                className="border-red-300 text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
               </Button>
             </div>
           </div>

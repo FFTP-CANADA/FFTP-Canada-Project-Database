@@ -549,6 +549,7 @@ const Index = () => {
                           onOpenReallocation={handleOpenReallocation}
                           onEditProject={handleEditProject}
                           onDeleteProject={deleteProject}
+                          onUpdateProject={updateProject}
                           onManagePrograms={() => setProgramManagementOpen(true)}
                         />
                       </div>

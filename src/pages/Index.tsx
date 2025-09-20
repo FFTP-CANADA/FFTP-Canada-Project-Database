@@ -251,16 +251,21 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-blue-100">
-        <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-6 py-4">
+      <div className="bg-white shadow-lg border-b border-blue-200">
+        <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-6 py-6">
           <div className="flex justify-between items-center">
-            <div>
+            <div className="flex items-center gap-4">
               <img 
                 src="/lovable-uploads/af3d9a60-0267-4a1b-bf2d-e92b594a9ba7.png" 
                 alt="Food For The Poor Canada" 
-                className="h-16 w-auto"
+                className="h-20 w-auto"
               />
-              <p className="text-blue-600 mt-1">Project Tracker & Analytics Dashboard</p>
+              <div>
+                <h1 className="text-2xl font-bold text-blue-900 tracking-tight">
+                  Project Tracker & Analytics Dashboard
+                </h1>
+                <p className="text-blue-600 text-sm mt-1">Comprehensive project management and analytics platform</p>
+              </div>
             </div>
             <div className="flex gap-3 items-center">
               <div className="flex items-center gap-2 text-sm text-blue-600">

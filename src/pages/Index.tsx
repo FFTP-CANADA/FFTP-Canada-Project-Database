@@ -267,43 +267,58 @@ const Index = () => {
                 <p className="text-blue-600 text-sm mt-1">Comprehensive project management and analytics platform</p>
               </div>
             </div>
-            <div className="flex gap-3 items-center">
-              <div className="flex items-center gap-2 text-sm text-blue-600">
-                <span>Welcome, {user?.email}</span>
+            <div className="flex items-center gap-6">
+              {/* User Info Section */}
+              <div className="flex items-center gap-3 text-sm text-blue-600 border-r border-blue-200 pr-6">
+                <span className="hidden sm:inline">Welcome, {user?.email}</span>
                 {role && (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 rounded-full">
+                  <div className="flex items-center gap-1 px-3 py-1 bg-blue-100 rounded-full">
                     <Shield className="w-3 h-3" />
                     <span className="text-xs font-medium capitalize">{role}</span>
                   </div>
                 )}
               </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowProgramInfo(true)}
-                className="border-blue-300 text-blue-700 hover:bg-blue-50"
-              >
-                <Info className="w-4 h-4 mr-2" />
-                Program Info
-              </Button>
-              <DataRecoveryDialog />
-              <StatusReportDialog projects={projects} notes={notes} />
-              {isAdmin && (
-                <Button 
-                  onClick={() => setIsAddProjectOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Project
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                onClick={signOut}
-                className="border-red-300 text-red-700 hover:bg-red-50"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
+
+              {/* Action Buttons Section */}
+              <div className="flex items-center gap-2">
+                {/* Info & Tools Group */}
+                <div className="flex items-center gap-2 border-r border-blue-200 pr-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowProgramInfo(true)}
+                    className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                  >
+                    <Info className="w-4 h-4 mr-2" />
+                    Program Info
+                  </Button>
+                  <DataRecoveryDialog />
+                  <StatusReportDialog projects={projects} notes={notes} />
+                </div>
+
+                {/* Primary Actions Group */}
+                <div className="flex items-center gap-2">
+                  {isAdmin && (
+                    <Button 
+                      size="sm"
+                      onClick={() => setIsAddProjectOpen(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Project
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={signOut}
+                    className="border-red-300 text-red-700 hover:bg-red-50"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

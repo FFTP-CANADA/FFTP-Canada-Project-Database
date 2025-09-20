@@ -156,9 +156,9 @@ const Auth = () => {
           <img 
             src="/lovable-uploads/af3d9a60-0267-4a1b-bf2d-e92b594a9ba7.png" 
             alt="Food For The Poor Canada" 
-            className="h-20 w-auto mx-auto mb-4"
+            className="h-16 w-auto mx-auto mb-4"
           />
-          <h1 className="text-2xl font-bold text-blue-900 tracking-tight">Project Tracker & Analytics</h1>
+          <h1 className="text-2xl font-bold text-blue-900">Project Tracker</h1>
           <p className="text-blue-600">Sign in to access your dashboard</p>
         </div>
 

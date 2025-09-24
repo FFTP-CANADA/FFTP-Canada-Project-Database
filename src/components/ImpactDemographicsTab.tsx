@@ -49,7 +49,12 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
 
   // Create initial entries for projects that don't have impact data
   useEffect(() => {
-    if (projects.length === 0) return;
+    console.log(`💡 ImpactDemographicsTab: Projects loaded - ${projects.length} projects`);
+    if (projects.length === 0) {
+      console.log('⚠️ No projects found, skipping impact demographics sync');
+      return;
+    }
+    console.log('🔄 Starting impact demographics sync...');
     ImpactDemographicsManager.syncWithProjects(projects);
   }, [projects.length]);
 

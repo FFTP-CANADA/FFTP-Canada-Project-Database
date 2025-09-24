@@ -47,7 +47,9 @@ const Auth = () => {
     // Check if user is already authenticated
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('Auth check - current session:', session ? 'exists' : 'none');
       if (session) {
+        console.log('User is authenticated, redirecting to main dashboard');
         navigate("/");
       }
     };
@@ -56,8 +58,12 @@ const Auth = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state change:', event, session ? 'session exists' : 'no session');
       if (event === 'SIGNED_IN' && session) {
+        console.log('User signed in, redirecting to main dashboard');
         navigate("/");
+      } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out');
       }
     });
 

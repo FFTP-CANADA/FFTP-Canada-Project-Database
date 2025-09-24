@@ -48,12 +48,16 @@ export class ImpactDemographicsManager {
    * Bulk sync impact demographics for multiple projects
    */
   static syncWithProjects(projects: any[]): void {
+    console.log(`🔄 Syncing impact demographics with ${projects.length} projects`);
     const existingData = LocalStorageManager.getItem<ImpactDemographics[]>('impactDemographics', []);
+    console.log(`📊 Found ${existingData.length} existing impact demographic entries`);
+    
     const existingProjectIds = existingData.map(item => item.projectId);
     const newEntries: ImpactDemographics[] = [];
 
     projects.forEach(project => {
       if (!existingProjectIds.includes(project.id)) {
+        console.log(`➕ Creating impact demographics for project: ${project.projectName}`);
         newEntries.push({
           id: `impact-${project.id}`,
           projectId: project.id,
@@ -64,6 +68,8 @@ export class ImpactDemographicsManager {
           indirectParticipants: 0,
           notes: "",
         });
+      } else {
+        console.log(`✓ Impact demographics already exists for project: ${project.projectName}`);
       }
     });
 
@@ -77,6 +83,8 @@ export class ImpactDemographicsManager {
       }));
       
       console.log(`✅ Synced ${newEntries.length} new impact demographics entries`);
+    } else {
+      console.log(`✅ All projects already have impact demographics - no sync needed`);
     }
   }
 }

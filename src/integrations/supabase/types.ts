@@ -49,13 +49,24 @@ export type Database = {
           active_status: string | null
           amount_disbursed: number | null
           assigned_admin: string | null
+          city_parish: string | null
+          country: string | null
           created_at: string
           created_by: string | null
           currency: string | null
+          end_date: string | null
           follow_up_needed: boolean | null
+          fund_type: string | null
           governance_number: string | null
+          governance_type: string | null
           id: string
+          impact_area: string | null
+          is_designated: boolean | null
+          partner_name: string | null
+          program: string | null
           project_name: string
+          reported_spend: number | null
+          start_date: string | null
           status: string | null
           total_cost: number | null
           updated_at: string
@@ -64,13 +75,24 @@ export type Database = {
           active_status?: string | null
           amount_disbursed?: number | null
           assigned_admin?: string | null
+          city_parish?: string | null
+          country?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
+          end_date?: string | null
           follow_up_needed?: boolean | null
+          fund_type?: string | null
           governance_number?: string | null
+          governance_type?: string | null
           id?: string
+          impact_area?: string | null
+          is_designated?: boolean | null
+          partner_name?: string | null
+          program?: string | null
           project_name: string
+          reported_spend?: number | null
+          start_date?: string | null
           status?: string | null
           total_cost?: number | null
           updated_at?: string
@@ -79,13 +101,24 @@ export type Database = {
           active_status?: string | null
           amount_disbursed?: number | null
           assigned_admin?: string | null
+          city_parish?: string | null
+          country?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
+          end_date?: string | null
           follow_up_needed?: boolean | null
+          fund_type?: string | null
           governance_number?: string | null
+          governance_type?: string | null
           id?: string
+          impact_area?: string | null
+          is_designated?: boolean | null
+          partner_name?: string | null
+          program?: string | null
           project_name?: string
+          reported_spend?: number | null
+          start_date?: string | null
           status?: string | null
           total_cost?: number | null
           updated_at?: string

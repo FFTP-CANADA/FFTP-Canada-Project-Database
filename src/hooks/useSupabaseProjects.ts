@@ -37,25 +37,24 @@ export const useSupabaseProjects = () => {
           id: project.id,
           projectName: project.project_name,
           governanceNumber: project.governance_number || '',
-          governanceType: undefined, // Will need to add this field to Supabase if needed
+          governanceType: project.governance_type as Project['governanceType'],
           totalCost: project.total_cost || 0,
           currency: (project.currency || 'CAD') as 'CAD' | 'USD',
           amountDisbursed: project.amount_disbursed || 0,
-          status: (project.status || 'Planning') as Project['status'],
+          status: (project.status || 'Pending Start') as Project['status'],
           activeStatus: (project.active_status || 'Active') as 'Active' | 'Closed',
           followUpNeeded: project.follow_up_needed || false,
           assignedAdmin: project.assigned_admin,
-          // Set default values for fields not in Supabase yet
-          country: 'Jamaica' as Project['country'],
-          cityParish: '',
-          partnerName: '',
-          impactArea: 'Food Security' as Project['impactArea'],
-          fundType: 'Designated' as Project['fundType'],
-          isDesignated: false,
-          reportedSpend: 0,
-          startDate: new Date().toISOString(),
-          endDate: new Date().toISOString(),
-          program: '',
+          country: (project.country || 'Jamaica') as Project['country'],
+          cityParish: project.city_parish || '',
+          partnerName: project.partner_name || '',
+          impactArea: (project.impact_area || 'Food Security') as Project['impactArea'],
+          fundType: (project.fund_type || 'Designated') as Project['fundType'],
+          isDesignated: project.is_designated || false,
+          reportedSpend: project.reported_spend || 0,
+          startDate: project.start_date || new Date().toISOString(),
+          endDate: project.end_date || '',
+          program: project.program || '',
         }));
         setProjects(transformedProjects);
       }
@@ -95,6 +94,16 @@ export const useSupabaseProjects = () => {
           follow_up_needed: project.followUpNeeded || false,
           assigned_admin: user.id, // Assign creating user as admin
           created_by: user.id,
+          country: project.country,
+          city_parish: project.cityParish,
+          partner_name: project.partnerName,
+          impact_area: project.impactArea,
+          fund_type: project.fundType,
+          is_designated: project.isDesignated,
+          reported_spend: project.reportedSpend || 0,
+          start_date: project.startDate,
+          end_date: project.endDate || null,
+          program: project.program,
         })
         .select('id')
         .single();
@@ -130,6 +139,16 @@ export const useSupabaseProjects = () => {
           status: updates.status,
           active_status: updates.activeStatus,
           follow_up_needed: updates.followUpNeeded,
+          country: updates.country,
+          city_parish: updates.cityParish,
+          partner_name: updates.partnerName,
+          impact_area: updates.impactArea,
+          fund_type: updates.fundType,
+          is_designated: updates.isDesignated,
+          reported_spend: updates.reportedSpend,
+          start_date: updates.startDate,
+          end_date: updates.endDate,
+          program: updates.program,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);

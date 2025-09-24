@@ -1,5 +1,5 @@
 
-import { useProjects } from "./useProjects";
+import { useSupabaseProjects as useProjects } from "./useSupabaseProjects";
 import { BackupManager } from "@/utils/backupManager";
 import { useProjectNotes } from "./useProjectNotes";
 import { useProjectAttachments } from "./useProjectAttachments";

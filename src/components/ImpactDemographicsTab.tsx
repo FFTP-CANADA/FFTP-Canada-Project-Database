@@ -9,6 +9,7 @@ import { Users, MapPin, Plus, Save, Edit, Trash2 } from "lucide-react";
 import { Project } from "@/types/project";
 import { ImpactDemographics } from "@/types/impactDemographics";
 import { LocalStorageManager } from "@/utils/localStorageManager";
+import { ImpactDemographicsManager } from "@/utils/impactDemographicsManager";
 
 interface ImpactDemographicsTabProps {
   projects: Project[];
@@ -48,31 +49,23 @@ const ImpactDemographicsTab = ({ projects }: ImpactDemographicsTabProps) => {
 
   // Create initial entries for projects that don't have impact data
   useEffect(() => {
-    if (projects.length === 0 || impactData.length === 0) return;
+    if (projects.length === 0) return;
+    ImpactDemographicsManager.syncWithProjects(projects);
+  }, [projects.length]);
+
+  // Listen for impact demographics updates from other components
+  useEffect(() => {
+    const handleImpactUpdate = (event: CustomEvent) => {
+      const { data } = event.detail;
+      setImpactData(data);
+    };
+
+    window.addEventListener('impact-demographics-updated', handleImpactUpdate as EventListener);
     
-    const existingProjectIds = impactData.map(item => item.projectId);
-    const newEntries: ImpactDemographics[] = [];
-
-    projects.forEach(project => {
-      if (!existingProjectIds.includes(project.id)) {
-        newEntries.push({
-          id: `impact-${project.id}`,
-          projectId: project.id,
-          projectName: project.projectName,
-          governanceNumber: project.governanceNumber || "N/A",
-          region: "Urban",
-          directParticipants: 0,
-          indirectParticipants: 0,
-          notes: "",
-        });
-      }
-    });
-
-    if (newEntries.length > 0) {
-      const updatedData = [...impactData, ...newEntries];
-      saveImpactData(updatedData);
-    }
-  }, [projects.length]); // Only depend on projects length, not impactData
+    return () => {
+      window.removeEventListener('impact-demographics-updated', handleImpactUpdate as EventListener);
+    };
+  }, []);
 
   const handleEdit = (item: ImpactDemographics) => {
     setEditingId(item.id);

@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { Project, PROGRAM_OPTIONS } from "@/hooks/useProjectData";
 import { useToast } from "@/hooks/use-toast";
 import { ProjectFilePreview } from "@/components/ProjectFilePreview";
+import { ImpactDemographicsManager } from "@/utils/impactDemographicsManager";
 
 interface AddProjectDialogProps {
   open: boolean;
@@ -130,6 +131,13 @@ const AddProjectDialog = ({ open, onOpenChange, onAddProject, onAddAttachment, o
     try {
       // First create the project and get the actual project ID
       const projectId = await onAddProject(project);
+      
+      // Automatically create impact demographics entry for all users
+      ImpactDemographicsManager.createForProject(
+        projectId,
+        project.projectName,
+        project.governanceNumber
+      );
       
       console.log('🔧 Processing files for new project. Project ID:', projectId);
       console.log('🔧 Attachments to process:', attachments.length);
